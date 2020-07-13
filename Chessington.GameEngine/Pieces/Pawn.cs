@@ -15,7 +15,7 @@ namespace Chessington.GameEngine.Pieces
             if (Player == Player.White)
             {
                 Square targetMove = new Square(here.Row - 1, here.Col);
-                if (board.IsSquareEmpty(targetMove))
+                if (targetMove.isValid() && board.IsSquareEmpty(targetMove))
                 {
                     Square targetMove2 = new Square(here.Row - 2, here.Col);
                     if (here.Row != 0)
@@ -29,7 +29,7 @@ namespace Chessington.GameEngine.Pieces
                 }
             } else {
                 Square targetMove = new Square(here.Row +1, here.Col);
-                if (board.IsSquareEmpty(targetMove))
+                if (targetMove.isValid() && board.IsSquareEmpty(targetMove))
                 {
                     Square targetMove2 = new Square(here.Row +2, here.Col);   
                     if (here.Row != GameSettings.BoardSize - 1)

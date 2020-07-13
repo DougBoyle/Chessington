@@ -13,7 +13,7 @@ namespace Chessington.GameEngine.Pieces
                 if (!board.IsSquareEmpty(currentPosition)) break;
 
             }
-
+            
             return availableMoves;
         }
 

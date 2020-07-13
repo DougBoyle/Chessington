@@ -20,7 +20,6 @@ namespace Chessington.GameEngine.Pieces
                     }
                 }
             }
-
             return availableMoves.Where(square => square.IsValid() && board.IsEmptyOrOpponent(square, Player));;
         }
     }

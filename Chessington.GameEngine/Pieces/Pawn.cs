@@ -13,6 +13,12 @@ namespace Chessington.GameEngine.Pieces {
             
             var direction = Player == Player.White ? -1 : 1;
             var homeRow = Player == Player.White ? GameSettings.BoardSize - 2 : 1;
+            
+            List<Square> available = new List<Square>()
+            {
+                new Square(here.Row + direction, here.Col - 1), 
+                new Square(here.Row + direction, here.Col + 1)
+            }.Where(square => square.IsValid() && board.IsOpponent(square, Player)).ToList();
 
             var available = new List<Square>()
             {
@@ -21,12 +27,16 @@ namespace Chessington.GameEngine.Pieces {
                                                   square.Equals(board.EnPassantSquare)).ToList();
             
             Square targetMove = new Square(here.Row + direction, here.Col);
-            if (targetMove.IsValid() && board.IsSquareEmpty(targetMove)) {
-                available.Add(targetMove);
-                Square targetMove2 = new Square(here.Row + 2 * direction, here.Col);
-                if (here.Row == homeRow && board.IsSquareEmpty(targetMove2)) {
-                    available.Add(targetMove2);
-                }
+
+            if (!targetMove.IsValid() || !board.IsSquareEmpty(targetMove)) {
+                return available;
+            }
+            available.Add(targetMove);
+                
+            Square targetMove2 = new Square(here.Row + 2 * direction, here.Col);
+            if (here.Row == homeRow && board.IsSquareEmpty(targetMove2)) 
+            {
+                available.Add(targetMove2);
             }
 
             return available;

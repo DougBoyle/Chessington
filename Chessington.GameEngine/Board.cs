@@ -7,6 +7,7 @@ namespace Chessington.GameEngine
 {
     public class Board
     {
+        public Square? EnPassantSquare { get; set; }
         private readonly Piece[,] board;
         public Player CurrentPlayer { get; private set; }
         public IList<Piece> CapturedPieces { get; private set; } 
@@ -83,7 +84,7 @@ namespace Chessington.GameEngine
         
         public event PieceCapturedEventHandler PieceCaptured;
 
-        protected virtual void OnPieceCaptured(Piece piece)
+        public virtual void OnPieceCaptured(Piece piece)
         {
             var handler = PieceCaptured;
             if (handler != null) handler(piece);

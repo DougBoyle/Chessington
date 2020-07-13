@@ -18,7 +18,8 @@ namespace Chessington.GameEngine.Pieces
             {
                 new Square(here.Row + index, here.Col - 1), new Square(here.Row + index, here.Col + 1)
             };
-            available = available.Where(square => square.IsValid() && board.IsOpponent(square, Player)).ToList();
+            available = available.Where(square => square.IsValid() && board.IsOpponent(square, Player) || 
+                                                  square.Equals(board.EnPassantSquare)).ToList();
             if (Player == Player.White)
             {
                 Square targetMove = new Square(here.Row - 1, here.Col);
@@ -50,6 +51,23 @@ namespace Chessington.GameEngine.Pieces
                 }
             }
             return available;
+        }
+        
+        public override void MoveTo(Board board, Square newSquare)
+        {
+            var currentSquare = board.FindPiece(this);
+            base.MoveTo(board, newSquare);
+            if (newSquare.Equals(board.EnPassantSquare))
+            {
+                board.OnPieceCaptured(board.GetPiece(Square.At(currentSquare.Row, newSquare.Col)));
+                board.AddPiece(Square.At(currentSquare.Row, newSquare.Col),null);
+            }
+            if (currentSquare.Row - newSquare.Row == 2 || currentSquare.Row - newSquare.Row == -2)
+            {
+                board.EnPassantSquare = Square.At((currentSquare.Row + newSquare.Row) / 2, newSquare.Col);
+            }
+
+            
         }
     }
 }

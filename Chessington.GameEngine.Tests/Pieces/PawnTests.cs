@@ -200,5 +200,89 @@ namespace Chessington.GameEngine.Tests.Pieces
             moves.Should().NotContain(Square.At(6, 2));
             moves.Should().NotContain(Square.At(6, 4));
         }
+        
+        [Test]
+        public void WhitePawns_CanTakeEnPassant()
+        {
+            var board = new Board(Player.Black);
+            var whitePawn = new Pawn(Player.White);
+            board.AddPiece(Square.At(3, 4), whitePawn);
+            
+            var blackPawn =new Pawn(Player.Black);
+            board.AddPiece(Square.At(1,3), blackPawn);
+            
+            blackPawn.MoveTo(board, Square.At(3, 3));
+            var moves = whitePawn.GetAvailableMoves(board).ToList();
+
+            moves.Should().Contain(Square.At(2, 3));
+            
+            whitePawn.MoveTo(board, Square.At(2,3));
+            board.IsSquareEmpty(Square.At(3, 3)).Should().BeTrue();
+        }
+        
+        [Test]
+        public void BlackPawns_CanTakeEnPassant()
+        {
+            var board = new Board();
+            var whitePawn = new Pawn(Player.White);
+            board.AddPiece(Square.At(6, 6), whitePawn);
+            
+            var blackPawn =new Pawn(Player.Black);
+            board.AddPiece(Square.At(4,5), blackPawn);
+            
+            whitePawn.MoveTo(board, Square.At(4, 6));
+            var moves = blackPawn.GetAvailableMoves(board).ToList();
+
+            moves.Should().Contain(Square.At(5, 6));
+            
+            blackPawn.MoveTo(board, Square.At(5,6));
+            board.IsSquareEmpty(Square.At(4, 6)).Should().BeTrue();
+        }
+        
+         
+        [Test]
+        public void WhitePawns_CanNoLonger_TakeEnPassant()
+        {
+            var board = new Board(Player.Black);
+            var whitePawn = new Pawn(Player.White);
+            board.AddPiece(Square.At(3, 4), whitePawn);
+            var blackPawn =new Pawn(Player.Black);
+            board.AddPiece(Square.At(1,3), blackPawn);
+            
+            var whiteBishop = new Bishop(Player.White);
+            var blackBishop = new Bishop(Player.Black);
+            board.AddPiece(Square.At(7,7), whiteBishop);
+            board.AddPiece(Square.At(7,6),blackBishop);
+            
+            blackPawn.MoveTo(board, Square.At(3, 3));
+            whiteBishop.MoveTo(board,Square.At(6,6));
+            blackBishop.MoveTo(board,Square.At(6,7));
+            
+            var moves = whitePawn.GetAvailableMoves(board).ToList();
+            moves.Should().NotContain(Square.At(2, 3));
+        }
+        
+        [Test]
+        public void BlackPawns_CanNoLonger_TakeEnPassant()
+        {
+            var board = new Board();
+            var whitePawn = new Pawn(Player.White);
+            board.AddPiece(Square.At(6, 6), whitePawn);
+            var blackPawn =new Pawn(Player.Black);
+            board.AddPiece(Square.At(4,5), blackPawn);
+
+            var whiteBishop = new Bishop(Player.White);
+            var blackBishop = new Bishop(Player.Black);
+            board.AddPiece(Square.At(0,0), whiteBishop);
+            board.AddPiece(Square.At(1,0),blackBishop);
+            
+            whitePawn.MoveTo(board, Square.At(4, 6));
+            blackBishop.MoveTo(board,Square.At(2,1));
+            whiteBishop.MoveTo(board,Square.At(1,1));
+            
+            var moves = blackPawn.GetAvailableMoves(board).ToList();
+            moves.Should().NotContain(Square.At(5, 6));
+        }
+
     }
 }

@@ -40,12 +40,13 @@ namespace Chessington.GameEngine.Pieces {
         public override void MoveTo(Board board, Square newSquare)
         {
             var currentSquare = board.FindPiece(this);
-            base.MoveTo(board, newSquare);
+            
             if (newSquare.Equals(board.EnPassantSquare))
             {
                 board.OnPieceCaptured(board.GetPiece(Square.At(currentSquare.Row, newSquare.Col)));
                 board.AddPiece(Square.At(currentSquare.Row, newSquare.Col),null);
             }
+            base.MoveTo(board, newSquare);
             if (currentSquare.Row - newSquare.Row == 2 || currentSquare.Row - newSquare.Row == -2)
             {
                 board.EnPassantSquare = Square.At((currentSquare.Row + newSquare.Row) / 2, newSquare.Col);

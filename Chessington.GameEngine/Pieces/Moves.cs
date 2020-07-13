@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Chessington.GameEngine.Pieces
 {
@@ -12,12 +11,12 @@ namespace Chessington.GameEngine.Pieces
             while ((currentPosition = iterator.Invoke(currentPosition)).IsValid()) {
                 if (board.IsEmptyOrOpponent(currentPosition, currentPlayer)) availableMoves.Add(currentPosition);
                 if (!board.IsSquareEmpty(currentPosition)) break;
+
             }
 
             return availableMoves;
         }
-        
-        
+
         public static IEnumerable<Square> GetLateralMoves(Board board, Square currentPosition,Player currentPlayer)
         {
             var availableMoves = GetBeamMoves(board, currentPosition, currentPlayer, 

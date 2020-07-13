@@ -16,7 +16,7 @@
             return new Square(row, col);
         }
 
-        public bool isValid() {
+        public bool IsValid() {
             return Row >= 0 && Row < 8 && Col >= 0 && Col < 8;
         }
         

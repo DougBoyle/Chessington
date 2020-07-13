@@ -18,11 +18,11 @@ namespace Chessington.GameEngine.Pieces
             {
                 foreach (var oneStep in dir) {
                     var target = new Square(currentPosition.Row + 2*twoStep, currentPosition.Col + oneStep);
-                    if (target.isValid()) {
+                    if (target.IsValid()) {
                         availableMoves.Add(target);
                     }
                     target = new Square(currentPosition.Row + oneStep, currentPosition.Col + 2*twoStep);
-                    if (target.isValid()) {
+                    if (target.IsValid()) {
                         availableMoves.Add(target);
                     }
                 }

@@ -17,7 +17,7 @@ namespace Chessington.GameEngine.Pieces
                 for (int y = -1; y < 2; y++) {
                     if (x != 0 || y != 0) {
                         var moveTo = new Square(currentPosition.Row + x, currentPosition.Col + y);
-                        if (moveTo.isValid()) {
+                        if (moveTo.IsValid()) {
                             availableMoves.Add(moveTo);
                         }
                     }

@@ -10,8 +10,15 @@ namespace Chessington.GameEngine.Pieces
             : base(player) { }
 
         public override IEnumerable<Square> GetAvailableMoves(Board board) {
-            List<Square> available = new List<Square>();
+            
             Square here = board.FindPiece(this);
+
+            int index = Player==Player.White ? -1 : 1 ;
+            List<Square> available = new List<Square>()
+            {
+                new Square(here.Row + index, here.Col - 1), new Square(here.Row + index, here.Col + 1)
+            };
+            available = available.Where(square => square.IsValid() && board.IsOpponent(square, Player)).ToList();
             if (Player == Player.White)
             {
                 Square targetMove = new Square(here.Row - 1, here.Col);

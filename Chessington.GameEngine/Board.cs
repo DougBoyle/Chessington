@@ -36,6 +36,11 @@ namespace Chessington.GameEngine
             return GetPiece(square) == null;
         }
 
+        public bool IsOpponent(Square square, Player player)
+        {
+            return GetPiece(square) != null && GetPiece(square).Player != player;
+        }
+
         public bool IsEmptyOrOpponent(Square square, Player player) {
             return GetPiece(square) == null || GetPiece(square).Player != player;
         }

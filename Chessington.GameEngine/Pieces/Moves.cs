@@ -9,8 +9,13 @@ namespace Chessington.GameEngine.Pieces
             Player currentPlayer, Func<Square, Square> iterator) {
             List<Square> availableMoves = new List<Square>();
             while ((currentPosition = iterator.Invoke(currentPosition)).IsValid()) {
-                if (board.IsEmptyOrOpponent(currentPosition, currentPlayer)) availableMoves.Add(currentPosition);
-                if (!board.IsSquareEmpty(currentPosition)) break;
+                if (board.IsEmptyOrOpponent(currentPosition, currentPlayer)) {
+                    availableMoves.Add(currentPosition);
+                }
+
+                if (!board.IsSquareEmpty(currentPosition)) {
+                    break;
+                }
             }
             
             return availableMoves;

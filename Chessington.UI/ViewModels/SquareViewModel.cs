@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
 using Chessington.GameEngine;
+using Chessington.GameEngine.Pieces;
 using Chessington.UI.Caliburn.Micro;
 using Chessington.UI.Factories;
 using Chessington.UI.Notifications;
@@ -82,7 +83,12 @@ namespace Chessington.UI.ViewModels
                 return;
             }
 
-            Image = PieceImageFactory.GetImage(currentPiece);
+            if (notification.Board.CurrentPlayer == currentPiece.Player && currentPiece is King) {
+                Image = PieceImageFactory.GetImage(currentPiece);
+            }
+            else {
+                Image = PieceImageFactory.GetImage(currentPiece);
+            }
         }
 
         public void Handle(ValidMovesUpdated message)

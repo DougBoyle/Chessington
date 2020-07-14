@@ -83,8 +83,9 @@ namespace Chessington.UI.ViewModels
                 return;
             }
 
-            if (notification.Board.CurrentPlayer == currentPiece.Player && currentPiece is King) {
-                Image = PieceImageFactory.GetImage(currentPiece);
+            if (notification.Board.CurrentPlayer == currentPiece.Player && currentPiece is King
+                && notification.Board.InCheck(currentPiece.Player)) {
+                Image = PieceImageFactory.GetRedImage(currentPiece);
             }
             else {
                 Image = PieceImageFactory.GetImage(currentPiece);

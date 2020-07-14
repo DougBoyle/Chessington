@@ -1,49 +1,49 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 
-namespace Chessington.GameEngine.Pieces {
-    public class Moves {
-        public static IEnumerable<Square> GetLateralMoves(Board board, Square currentPosition) {
+namespace Chessington.GameEngine.Pieces
+{
+    public class Moves
+    {
+        public static List<Square> GetBeamMoves(Board board, Square currentPosition, 
+            Player currentPlayer, Func<Square, Square> iterator) {
             List<Square> availableMoves = new List<Square>();
-            foreach (var index in Enumerable.Range(0, GameSettings.BoardSize)) {
-                if (currentPosition.Col != index) {
-                    availableMoves.Add(new Square(currentPosition.Row, index));
+            while ((currentPosition = iterator.Invoke(currentPosition)).IsValid()) {
+                if (board.IsEmptyOrOpponent(currentPosition, currentPlayer)) {
+                    availableMoves.Add(currentPosition);
                 }
 
-                if (currentPosition.Row != index) {
-                    availableMoves.Add(new Square(index, currentPosition.Col));
+                if (!board.IsSquareEmpty(currentPosition)) {
+                    break;
                 }
             }
-
+            
             return availableMoves;
         }
 
-        public static IEnumerable<Square> GetDiagonalMoves(Board board, Square currentPosition) {
-            List<Square> availableMoves = new List<Square>();
+        public static IEnumerable<Square> GetLateralMoves(Board board, Square currentPosition,Player currentPlayer)
+        {
+            var availableMoves = GetBeamMoves(board, currentPosition, currentPlayer, 
+                square => new Square(square.Row + 1, square.Col));
+            availableMoves.AddRange(GetBeamMoves(board, currentPosition, currentPlayer, 
+                square => new Square(square.Row - 1, square.Col)));
+            availableMoves.AddRange(GetBeamMoves(board, currentPosition, currentPlayer, 
+                square => new Square(square.Row, square.Col + 1)));
+            availableMoves.AddRange(GetBeamMoves(board, currentPosition, currentPlayer, 
+                square => new Square(square.Row, square.Col - 1)));
+            return availableMoves;
+        }
 
-            for (var index = 1; index <= currentPosition.Col && index <= currentPosition.Row; index++) {
-                availableMoves.Add(new Square(currentPosition.Row - index, currentPosition.Col - index));
-            }
-
-            for (var index = 1;
-                index <= currentPosition.Col && index < GameSettings.BoardSize - currentPosition.Row;
-                index++) {
-                availableMoves.Add(new Square(currentPosition.Row + index, currentPosition.Col - index));
-            }
-
-            for (var index = 1;
-                index < GameSettings.BoardSize - currentPosition.Col &&
-                index < GameSettings.BoardSize - currentPosition.Row;
-                index++) {
-                availableMoves.Add(new Square(currentPosition.Row + index, currentPosition.Col + index));
-            }
-
-            for (var index = 1;
-                index < GameSettings.BoardSize - currentPosition.Col && index <= currentPosition.Row;
-                index++) {
-                availableMoves.Add(new Square(currentPosition.Row - index, currentPosition.Col + index));
-            }
-
+        public static IEnumerable<Square> GetDiagonalMoves(Board board, Square currentPosition, Player currentPlayer)
+        {
+            var availableMoves = GetBeamMoves(board, currentPosition, currentPlayer, 
+                square => new Square(square.Row + 1, square.Col + 1));
+            availableMoves.AddRange(GetBeamMoves(board, currentPosition, currentPlayer, 
+                square => new Square(square.Row + 1, square.Col - 1)));
+            availableMoves.AddRange(GetBeamMoves(board, currentPosition, currentPlayer, 
+                square => new Square(square.Row - 1, square.Col + 1)));
+            availableMoves.AddRange(GetBeamMoves(board, currentPosition, currentPlayer, 
+                square => new Square(square.Row - 1, square.Col - 1)));
             return availableMoves;
         }
     }

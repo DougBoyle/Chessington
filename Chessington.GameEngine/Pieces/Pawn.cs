@@ -2,31 +2,27 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Chessington.GameEngine.Pieces
-{
-    public class Pawn : Piece
-    {
-        public Pawn(Player player) 
+namespace Chessington.GameEngine.Pieces {
+    public class Pawn : Piece {
+        public Pawn(Player player)
             : base(player) { }
 
         public override IEnumerable<Square> GetAvailableMoves(Board board) {
             List<Square> available = new List<Square>();
             Square here = board.FindPiece(this);
-            if (Player == Player.White) {
-                if (here.Row != 0) {
-                    available.Add(new Square(here.Row - 1, here.Col ));
-                }
-                if (here.Row == 6) {
-                    available.Add(new Square(4, here.Col ));
-                }
-            } else {
-                if (here.Row != 7) {
-                    available.Add(new Square(here.Row + 1, here.Col));
-                }
-                if (here.Row == 1) {
-                    available.Add(new Square(3, here.Col ));
+
+            var direction = Player == Player.White ? -1 : 1;
+            var homeRow = Player == Player.White ? GameSettings.BoardSize - 2 : 1;
+
+            Square targetMove = new Square(here.Row + direction, here.Col);
+            if (targetMove.IsValid() && board.IsSquareEmpty(targetMove)) {
+                available.Add(targetMove);
+                Square targetMove2 = new Square(here.Row + 2 * direction, here.Col);
+                if (here.Row == homeRow && board.IsSquareEmpty(targetMove2)) {
+                    available.Add(targetMove2);
                 }
             }
+
             return available;
         }
     }

@@ -16,15 +16,11 @@ namespace Chessington.GameEngine.Pieces
             for (int x = -1; x < 2; x++) {
                 for (int y = -1; y < 2; y++) {
                     if (x != 0 || y != 0) {
-                        var moveTo = new Square(currentPosition.Row + x, currentPosition.Col + y);
-                        if (moveTo.IsValid()) {
-                            availableMoves.Add(moveTo);
-                        }
+                        availableMoves.Add(new Square(currentPosition.Row + x, currentPosition.Col + y));
                     }
                 }
             }
-
-            return availableMoves;
+            return availableMoves.Where(square => square.IsValid() && board.IsEmptyOrOpponent(square, Player));;
         }
     }
 }

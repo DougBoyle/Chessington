@@ -13,7 +13,7 @@ namespace Chessington.GameEngine.Pieces
 
         public Player Player { get; private set; }
 
-        public IEnumerable<Square> GetAvailableMoves(Board board) {
+        public virtual IEnumerable<Square> GetAvailableMoves(Board board) {
             IEnumerable<Square> possible = GetRelaxedAvailableMoves(board);
             List<Square> actual = new List<Square>();
             foreach (var square in possible) {
@@ -24,7 +24,6 @@ namespace Chessington.GameEngine.Pieces
                 }
             }
             return actual;
-        // return possible;
         }
         
         public abstract IEnumerable<Square> GetRelaxedAvailableMoves(Board board);

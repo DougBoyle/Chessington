@@ -10,7 +10,13 @@ namespace Chessington.GameEngine
         public Square? EnPassantSquare { get; set; }
         private readonly Piece[,] board;
         public Player CurrentPlayer { get; set; }
-        public IList<Piece> CapturedPieces { get; private set; } 
+        public IList<Piece> CapturedPieces { get; private set; }
+
+        public bool LeftWhiteCastling { get; set; } = true;
+        public bool RightWhiteCastling { get; set; } = true;
+        public bool LeftBlackCastling { get; set; } = true;
+        public bool RightBlackCastling { get; set; } = true;
+        
 
         public Board()
             : this(Player.White) { }
@@ -33,6 +39,10 @@ namespace Chessington.GameEngine
             CurrentPlayer = board.CurrentPlayer;
             EnPassantSquare = board.EnPassantSquare;
             CapturedPieces = new List<Piece>();
+            LeftBlackCastling = board.LeftBlackCastling;
+            RightBlackCastling = board.RightBlackCastling;
+            LeftWhiteCastling = board.LeftWhiteCastling;
+            RightWhiteCastling = board.RightWhiteCastling;
         }
 
         public void AddPiece(Square square, Piece pawn)
@@ -73,6 +83,23 @@ namespace Chessington.GameEngine
         {
             var movingPiece = board[from.Row, from.Col];
             if (movingPiece == null) { return; }
+            
+            if (to.Equals(Square.At(7,0)))
+            { 
+                LeftWhiteCastling = false;
+            }
+            else if (to.Equals(Square.At(7,7)))
+            {
+                RightWhiteCastling = false;
+            }
+            else if (to.Equals(Square.At(0,0)))
+            {
+                LeftBlackCastling = false;
+            }
+            else if (to.Equals(Square.At(0,7)))
+            {
+                RightBlackCastling = false;
+            }
 
             if (movingPiece.Player != CurrentPlayer)
             {

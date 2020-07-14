@@ -8,7 +8,7 @@ namespace Chessington.GameEngine.Pieces
         public Bishop(Player player)
             : base(player) { }
 
-        public override IEnumerable<Square> GetAvailableMoves(Board board) {
+        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board) {
             return Moves.GetDiagonalMoves(board, board.FindPiece(this), Player);
         }
     }

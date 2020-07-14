@@ -9,7 +9,7 @@ namespace Chessington.GameEngine
     {
         public Square? EnPassantSquare { get; set; }
         private readonly Piece[,] board;
-        public Player CurrentPlayer { get; private set; }
+        public Player CurrentPlayer { get; set; }
         public IList<Piece> CapturedPieces { get; private set; } 
 
         public Board()
@@ -19,6 +19,19 @@ namespace Chessington.GameEngine
         {
             board = boardState ?? new Piece[GameSettings.BoardSize, GameSettings.BoardSize]; 
             CurrentPlayer = currentPlayer;
+            CapturedPieces = new List<Piece>();
+        }
+
+        public Board(Board board) {
+            this.board = new Piece[GameSettings.BoardSize, GameSettings.BoardSize];
+            for (int i = 0; i < GameSettings.BoardSize; i++) {
+                for (int j = 0; j < GameSettings.BoardSize; j++) {
+                    this.board[i, j] = board.GetPiece( Square.At(i, j));
+                }
+            }
+
+            CurrentPlayer = board.CurrentPlayer;
+            EnPassantSquare = board.EnPassantSquare;
             CapturedPieces = new List<Piece>();
         }
 
@@ -78,6 +91,32 @@ namespace Chessington.GameEngine
 
             CurrentPlayer = movingPiece.Player == Player.White ? Player.Black : Player.White;
             OnCurrentPlayerChanged(CurrentPlayer);
+        }
+
+        public Square FindKing(Player player) {
+            for (int i = 0; i < GameSettings.BoardSize; i++) {
+                for (int j = 0; j < GameSettings.BoardSize; j++) {
+                    var piece = GetPiece(Square.At(i, j));
+                    if (piece != null && piece.Player == player && piece is King) {
+                        return Square.At(i, j);
+                    }
+                }
+            }
+            return Square.At(-1, -1); // allows tests without kings on the board to work
+        }
+
+        public bool InCheck(Player player) {
+            Square kingSquare = FindKing(player);
+            for (int i = 0; i < GameSettings.BoardSize; i++) {
+                for (int j = 0; j < GameSettings.BoardSize; j++) {
+                    var piece = GetPiece(Square.At(i, j));
+                    if (piece == null || piece.Player == player) continue;
+                    if (piece.GetRelaxedAvailableMoves(this).Contains(kingSquare)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
         
         public delegate void PieceCapturedEventHandler(Piece piece);

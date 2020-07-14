@@ -23,7 +23,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         [Test]
         public void BlackPawns_CanMoveOneSquareDown()
         {
-            var board = new Board();
+            var board = new Board(Player.Black);
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(1, 0), pawn);
 
@@ -46,7 +46,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         [Test]
         public void BlackPawns_WhichHaveNeverMoved_CanMoveTwoSquareUp()
         {
-            var board = new Board();
+            var board = new Board(Player.Black);
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(1, 3), pawn);
 
@@ -63,6 +63,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(6, 2), pawn);
 
             pawn.MoveTo(board, Square.At(5, 2));
+            board.CurrentPlayer = Player.White;
             var moves = pawn.GetAvailableMoves(board).ToList();
 
             moves.Should().HaveCount(1);
@@ -77,6 +78,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(5, 2), pawn);
 
             pawn.MoveTo(board, Square.At(6, 2));
+            board.CurrentPlayer = Player.Black;
             var moves = pawn.GetAvailableMoves(board).ToList();
 
             moves.Should().HaveCount(1);
@@ -86,7 +88,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         [Test]
         public void Pawns_CannotMove_IfThereIsAPieceInFront()
         {
-            var board = new Board();
+            var board = new Board(Player.Black);
             var pawn = new Pawn(Player.Black);
             var blockingPiece = new Rook(Player.White);
             board.AddPiece(Square.At(1, 3), pawn);
@@ -100,7 +102,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         [Test]
         public void Pawns_CannotMoveTwoSquares_IfThereIsAPieceTwoSquaresInFront()
         {
-            var board = new Board();
+            var board = new Board(Player.Black);
             var pawn = new Pawn(Player.Black);
             var blockingPiece = new Rook(Player.White);
             board.AddPiece(Square.At(1, 3), pawn);
@@ -138,7 +140,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         [Test]
         public void BlackPawns_CanMoveDiagonally_IfThereIsAPieceToTake()
         {
-            var board = new Board();
+            var board = new Board(Player.Black);
             var pawn = new Pawn(Player.Black);
             var firstTarget = new Pawn(Player.White);
             var secondTarget = new Pawn(Player.White);
@@ -172,7 +174,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         [Test]
         public void BlackPawns_CannotMoveDiagonally_IfThereIsNoPieceToTake()
         {
-            var board = new Board();
+            var board = new Board(Player.Black);
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(5, 3), pawn);
 

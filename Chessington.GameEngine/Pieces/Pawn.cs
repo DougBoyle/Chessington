@@ -16,10 +16,11 @@ namespace Chessington.GameEngine.Pieces {
             
             var available = new List<Square>()
             {
-                new Square(here.Row + direction, here.Col - 1), new Square(here.Row + direction, here.Col + 1)
-            }.Where(square => square.IsValid() && board.IsOpponent(square, Player) || 
-                                                  square.Equals(board.EnPassantSquare)).ToList();
-            
+
+                new Square(here.Row + direction, here.Col - 1), 
+                new Square(here.Row + direction, here.Col + 1)
+            }.Where(square => square.IsValid() && board.IsOpponent(square, Player)
+                              || square.Equals(board.EnPassantSquare)).ToList();
             Square targetMove = new Square(here.Row + direction, here.Col);
 
             if (!targetMove.IsValid() || !board.IsSquareEmpty(targetMove)) {
@@ -40,7 +41,6 @@ namespace Chessington.GameEngine.Pieces {
         public override void MoveTo(Board board, Square newSquare)
         {
             var currentSquare = board.FindPiece(this);
-            
             if (newSquare.Equals(board.EnPassantSquare))
             {
                 board.OnPieceCaptured(board.GetPiece(Square.At(currentSquare.Row, newSquare.Col)));

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -18,6 +19,7 @@ namespace Chessington.UI.ViewModels
             Board = new Board();
             Board.PieceCaptured += BoardOnPieceCaptured;
             Board.CurrentPlayerChanged += BoardOnCurrentPlayerChanged;
+            Board.CurrentPlayerChanged += BoardOnCurrentPlayerChangedComputer;
             ChessingtonServices.EventAggregator.Subscribe(this);
         }
         
@@ -73,6 +75,19 @@ namespace Chessington.UI.ViewModels
         private static void BoardOnCurrentPlayerChanged(Player player)
         {
             ChessingtonServices.EventAggregator.Publish(new CurrentPlayerChanged(player));
+        }
+
+        private Random r = new Random();
+        
+        private void BoardOnCurrentPlayerChangedComputer(Player player)
+        {
+            if (player == Player.Black)
+            {
+                var allAvailableMoves = Board.GetAllAvailableMoves().ToList();
+                var randomPiece= allAvailableMoves[r.Next(allAvailableMoves.Count)];
+                var moveTo = randomPiece.Value[r.Next(randomPiece.Value.Count)];
+                Board.GetPiece(randomPiece.Key).MoveTo(Board, moveTo);
+            }
         }
     }
 }

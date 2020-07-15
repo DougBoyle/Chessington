@@ -120,6 +120,24 @@ namespace Chessington.GameEngine
             OnCurrentPlayerChanged(CurrentPlayer);
         }
 
+        public Dictionary<Square, List<Square>> GetAllAvailableMoves()
+        {
+            Dictionary<Square, List<Square>> availableMoves = new Dictionary<Square, List<Square>>();
+            for (int i = 0; i < GameSettings.BoardSize; i++) {
+                for (int j = 0; j < GameSettings.BoardSize; j++) {
+                    var piece = GetPiece(Square.At(i, j));
+                    if (piece == null || piece.Player != CurrentPlayer) continue;
+                    var pieceMoves = piece.GetAvailableMoves(this).ToList();
+                    if (pieceMoves.Count != 0)
+                    {
+                        availableMoves[Square.At(i,j)] = pieceMoves;
+                    }
+                }
+            }
+
+            return availableMoves;
+        }
+
         public Square FindKing(Player player) {
             for (int i = 0; i < GameSettings.BoardSize; i++) {
                 for (int j = 0; j < GameSettings.BoardSize; j++) {

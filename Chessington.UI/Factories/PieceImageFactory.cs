@@ -24,5 +24,10 @@ namespace Chessington.UI.Factories
         {
             return new BitmapImage(new Uri(string.Format("{0}{1} {2}.ico", InterfaceSettings.IconRoot, piece.Player, PieceSuffixes[piece.GetType()])));
         }
+        
+        public static BitmapImage GetRedImage(Piece piece)
+        {
+            return new BitmapImage(new Uri(string.Format("{0}{1} K Red.ico", InterfaceSettings.IconRoot, piece.Player)));
+        }
     }
 }

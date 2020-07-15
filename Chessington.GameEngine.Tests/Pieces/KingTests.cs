@@ -31,5 +31,50 @@ namespace Chessington.GameEngine.Tests.Pieces
 
             moves.ShouldAllBeEquivalentTo(expectedMoves);
         }
+
+        [Test]
+        public void Kings_CannotLeaveTheBoard()
+        {
+            var board = new Board();
+            var king = new King(Player.White);
+            board.AddPiece(Square.At(0, 0), king);
+
+            var moves = king.GetAvailableMoves(board);
+
+            var expectedMoves = new List<Square>
+            {
+                Square.At(1, 0),
+                Square.At(1, 1),
+                Square.At(0, 1)
+            };
+
+            moves.ShouldAllBeEquivalentTo(expectedMoves);
+        }
+
+        [Test]
+        public void Kings_CanTakeOpposingPieces()
+        {
+            var board = new Board();
+            var king = new King(Player.White);
+            board.AddPiece(Square.At(4, 4), king);
+            var pawn = new Pawn(Player.Black);
+            board.AddPiece(Square.At(4, 5), pawn);
+
+            var moves = king.GetAvailableMoves(board);
+            moves.Should().Contain(Square.At(4, 5));
+        }
+
+        [Test]
+        public void Kings_CannotTakeFriendlyPieces()
+        {
+            var board = new Board();
+            var king = new King(Player.White);
+            board.AddPiece(Square.At(4, 4), king);
+            var pawn = new Pawn(Player.White);
+            board.AddPiece(Square.At(4, 5), pawn);
+
+            var moves = king.GetAvailableMoves(board);
+            moves.Should().NotContain(Square.At(4, 5));
+        }
     }
 }

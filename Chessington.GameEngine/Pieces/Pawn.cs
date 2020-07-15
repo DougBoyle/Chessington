@@ -51,6 +51,11 @@ namespace Chessington.GameEngine.Pieces {
             {
                 board.EnPassantSquare = Square.At((currentSquare.Row + newSquare.Row) / 2, newSquare.Col);
             }
+            if (newSquare.Row == 0 || newSquare.Row == 7)
+            {
+                board.AddPiece(newSquare, new Queen(board.CurrentPlayer));
+            }
+
         }
     }
 }

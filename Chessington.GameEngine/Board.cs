@@ -8,6 +8,7 @@ namespace Chessington.GameEngine
     public class Board
     {
         public Square? EnPassantSquare { get; set; }
+        // TODO: Would be more efficient to allow accessing directly?
         private readonly Piece[,] board;
         public Player CurrentPlayer { get; set; }
         public IList<Piece> CapturedPieces { get; private set; }
@@ -54,6 +55,11 @@ namespace Chessington.GameEngine
         {
             return board[square.Row, square.Col];
         }
+        // TODO: Creating Square objects is very heavyweight, add voerrides to pass ints directly
+        public Piece GetPiece(int row, int col)
+        {
+            return board[row, col];
+        }
 
         public bool IsSquareEmpty(Square square)
         {
@@ -79,6 +85,8 @@ namespace Chessington.GameEngine
             throw new ArgumentException("The supplied piece is not on the board.", "piece");
         }
 
+        // TODO: Need a quiet version of this that doesn't generate events? Or allows reversing?
+        //       Currently, create a copy of the board (which doesn't copy across handlers) to avoid anything being triggered
         public void MovePiece(Square from, Square to)
         {
             var movingPiece = board[from.Row, from.Col];

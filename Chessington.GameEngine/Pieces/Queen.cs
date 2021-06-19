@@ -4,7 +4,7 @@ using System.Linq;
 namespace Chessington.GameEngine.Pieces {
     public class Queen : Piece {
         public Queen(Player player)
-            : base(player) { }
+            : base(player) { PieceType = PieceType.Queen; }
 
         public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board) {
             return Moves.GetDiagonalMoves(board, board.FindPiece(this), Player)

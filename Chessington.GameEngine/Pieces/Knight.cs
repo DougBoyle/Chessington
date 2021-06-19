@@ -7,7 +7,7 @@ namespace Chessington.GameEngine.Pieces
     public class Knight : Piece
     {
         public Knight(Player player)
-            : base(player) { }
+            : base(player) { PieceType = PieceType.Knight; }
 
         public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board)
         {

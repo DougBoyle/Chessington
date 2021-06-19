@@ -5,7 +5,7 @@ using System.Linq;
 namespace Chessington.GameEngine.Pieces {
     public class Pawn : Piece {
         public Pawn(Player player)
-            : base(player) { }
+            : base(player) { PieceType = PieceType.Pawn; }
 
         public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board) {
             

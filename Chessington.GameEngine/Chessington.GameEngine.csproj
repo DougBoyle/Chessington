@@ -34,7 +34,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\ComputerPlayer.cs" />
     <Compile Include="AI\Evaluator.cs" />
+    <Compile Include="AI\Move.cs" />
     <Compile Include="Pieces\Bishop.cs" />
     <Compile Include="Board.cs" />
     <Compile Include="GameSettings.cs" />
@@ -48,6 +50,9 @@
     <Compile Include="Pieces\Queen.cs" />
     <Compile Include="Pieces\Rook.cs" />
     <Compile Include="Square.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Perft\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

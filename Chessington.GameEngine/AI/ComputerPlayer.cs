@@ -53,7 +53,7 @@ namespace Chessington.GameEngine.AI
                     var newBoard = new Board(Board);
                     actualPiece.MoveTo(newBoard, MoveTo);
                     //  int score = Evaluator.GetBoardValue(newBoard) * sign; // Have to take negative if playing as black
-                    int score = -MiniMax(newBoard, MAX_DEPTH - 1);
+                    int score = -AlphaBeta(newBoard, MAX_DEPTH - 1, -bestScore); // still initialise the upper bound of first recursive call
                     if (score > bestScore)
                     {
                         PieceToMove = actualPiece;
@@ -73,13 +73,28 @@ namespace Chessington.GameEngine.AI
         // TODO: Optimise to not pass board around, represent moves more efficiently, and do alpha-beta pruning
         // Top level calls this for each possible move. This method just returns the score of the best choice (for the current player).
         // As such, also no need for shuffling order
-        public static int MiniMax(Board Board, int depth)
+ 
+        // Doesn't matter that the top level only tracks one score (not both alpha/beta) as the other is fixed at infinity at the top level
+        // Alpha is the lower bound on guaranteed score i.e. best path found from this node.
+        // Beta is the upper bound on guaranteed score i.e. best path on current prediction of move opponent takes before. If an option is found
+        //      which exceeds beta, can stop searching this node as the opponent will never allow us to reach here.
+        // Alpha/Beta keep swapping, so technically NegaMax.
+
+        // score is for current player, so upperBound gets negated each recursive call
+
+        // From the alpha-beta pruning algorithm given here: https://en.wikipedia.org/wiki/Negamax
+        // only the upper bound (beta) is necessary, as alpha can effectively be initialised as the value of the first choice
+        // *** alpha/beta swap sides each recursive call, so is this still valid? ***
+        // if alpha > beta holds from initial value of alpha, recursive call shouldn't have happened anyway?
+        // TODO: Test exactly how many nodes explored by each method
+        public static int AlphaBeta(Board Board, int depth, int upperBound) 
         {
             int sign = Board.CurrentPlayer == Player.White ? 1 : -1;
             if (depth == 0)
             {
                 return Evaluator.GetBoardValue(Board) * sign;
-            } else
+            }
+            else
             {
                 var allAvailableMoves = Board.GetAllAvailableMoves().ToList();
                 int bestScore = -1000000;
@@ -92,7 +107,10 @@ namespace Chessington.GameEngine.AI
                         var newBoard = new Board(Board);
                         actualPiece.MoveTo(newBoard, MoveTo);
 
-                        bestScore = Math.Max(bestScore, -MiniMax(newBoard, depth - 1));
+                        // as soon as recursive call finds a path worse than bestScore for us, we know we won't go down that route
+                        // hence -bestScore is the new recursive upperBound
+                        bestScore = Math.Max(bestScore, -AlphaBeta(newBoard, depth - 1, -bestScore));
+                        if (bestScore > upperBound) return bestScore;
                     }
                 }
                 return bestScore;

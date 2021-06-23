@@ -31,7 +31,7 @@ namespace Chessington.GameEngine.AI
 
         public static void MakeMove(Board Board)
         {
-        //    int sign = Board.CurrentPlayer == Player.White ? 1 : -1;
+        //  TODO: Even with Undo-move possible, want to operate on copy of board so don't have to worry about events etc.
 
 
             var allAvailableMoves = Board.GetAllAvailableMoves().ToList();

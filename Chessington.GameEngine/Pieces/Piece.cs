@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Chessington.GameEngine.AI;
+
 namespace Chessington.GameEngine.Pieces
 {
     // ultimately, don't want to be dealing with class instances, use efficient ints etc. instead
@@ -40,5 +42,19 @@ namespace Chessington.GameEngine.Pieces
             board.MovePiece(currentSquare, newSquare);
             board.EnPassantSquare = null;
         }
+
+        // for computer evaluation
+        // GameExtraInfo restores all information about castling/en passant (and also current player) that can't be reversed otherwise
+        // TODO: Handle pawns (en-passant), kings (castling)
+        public virtual void UndoMove(Board board, Move move, GameExtraInfo info)
+        {
+            if (move.Promotion)
+            {
+                board.AddPiece(move.To, new Pawn(info.CurrentPlayer));
+            }
+            board.QuietMovePiece(move.To, move.From, move.Captured);
+            info.RestoreInfo(board);
+        }
+
     }
 }

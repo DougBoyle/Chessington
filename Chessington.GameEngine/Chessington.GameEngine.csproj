@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="AI\ComputerPlayer.cs" />
     <Compile Include="AI\Evaluator.cs" />
+    <Compile Include="AI\GameExtraInfo.cs" />
     <Compile Include="AI\Move.cs" />
     <Compile Include="Pieces\Bishop.cs" />
     <Compile Include="Board.cs" />

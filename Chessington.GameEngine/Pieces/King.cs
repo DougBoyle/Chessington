@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Chessington.GameEngine.AI;
+
 namespace Chessington.GameEngine.Pieces
 {
     public class King : Piece
@@ -122,6 +124,21 @@ namespace Chessington.GameEngine.Pieces
             
             
             base.MoveTo(board, newSquare);
+        }
+
+        public override void UndoMove(Board board, Move move, GameExtraInfo info)
+        {
+            // Undo moving the rook for castling
+            // Detected differently to above
+            if (move.From.Col == 4 && move.To.Col == 6)
+            {
+                board.QuietMovePiece(Square.At(move.From.Row, 5), Square.At(move.From.Row, 7), null);
+            } else if (move.From.Col == 4 && move.To.Col == 2)
+            {
+                board.QuietMovePiece(Square.At(move.From.Row, 3), Square.At(move.From.Row, 0), null);
+            }
+
+            base.UndoMove(board, move, info);
         }
     }
 }

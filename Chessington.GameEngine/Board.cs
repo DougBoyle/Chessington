@@ -11,12 +11,15 @@ namespace Chessington.GameEngine
         // TODO: Would be more efficient to allow accessing directly?
         private readonly Piece[,] board;
         public Player CurrentPlayer { get; set; }
+        // TODO: Where is this actually used? Logic on BoardViewModel that wraps around MakeMove?
         public IList<Piece> CapturedPieces { get; private set; }
 
         public bool LeftWhiteCastling { get; set; } = true;
         public bool RightWhiteCastling { get; set; } = true;
         public bool LeftBlackCastling { get; set; } = true;
         public bool RightBlackCastling { get; set; } = true;
+
+        // TODO: Count to 50 for stalemate
         
 
         public Board()
@@ -126,6 +129,13 @@ namespace Chessington.GameEngine
 
             CurrentPlayer = movingPiece.Player == Player.White ? Player.Black : Player.White;
             OnCurrentPlayerChanged(CurrentPlayer);
+        }
+
+        // MovePiece without all the side-effects, to allow undoing moves
+        public void QuietMovePiece(Square from, Square to, Piece captured)
+        {
+            board[to.Row, to.Col] = board[from.Row, from.Col];
+            board[from.Row, from.Col] = captured; // En-passant captures are handled specially
         }
 
         public Dictionary<Square, List<Square>> GetAllAvailableMoves()

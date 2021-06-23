@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Chessington.GameEngine.AI;
+
 namespace Chessington.GameEngine.Pieces {
     public class Pawn : Piece {
         public Pawn(Player player)
@@ -55,7 +57,18 @@ namespace Chessington.GameEngine.Pieces {
             {
                 board.AddPiece(newSquare, new Queen(board.CurrentPlayer));
             }
+        }
 
+        public override void UndoMove(Board board, Move move, GameExtraInfo info)
+        {
+            // handles en-passant capture, otherwise just fall back to base case
+            if (move.To.Col != move.From.Col && move.Captured == null)
+            {
+                // en-passant, restore piece
+                board.AddPiece(Square.At(move.From.Row, move.To.Col), new Pawn(board.CurrentPlayer));
+
+            }
+            base.UndoMove(board, move, info);
         }
     }
 }

@@ -85,6 +85,7 @@ namespace Chessington.GameEngine
                     if (board[row, col] == piece)
                         return Square.At(row, col);
 
+            // TODO: Debug print board to figure out what is happening?
             throw new ArgumentException("The supplied piece is not on the board.", "piece");
         }
 

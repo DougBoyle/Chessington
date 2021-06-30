@@ -13,7 +13,7 @@ namespace Chessington.GameEngine.AI
         private static Random r = new Random();
 
         // Currently 4 is too high. Move only displays after computer has moved too (need to change order/do async), and takes ~15s per move
-        private const int MAX_DEPTH = 2; // 2 ply, mine then yours
+        private const int MAX_DEPTH = 4; // 2 ply, mine then yours
 
         // TODO: Can put 'this' in type definition of list to make it an extension method i.e. lst.Shuffle()
         private static void Shuffle<T>(IList<T> list)
@@ -29,17 +29,26 @@ namespace Chessington.GameEngine.AI
             }
         }
 
+
+        // TODO: Test reversible board rather than copying, need to time it
         public static void MakeMove(Board Board)
         {
-        //  TODO: Even with Undo-move possible, want to operate on copy of board so don't have to worry about events etc.
-
+            //  TODO: Even with Undo-move possible, want to operate on copy of board so don't have to worry about events etc.
+            var tempBoard = new Board(Board);
+            var gameInfo = new GameExtraInfo(Board);
 
             var allAvailableMoves = Board.GetAllAvailableMoves().ToList();
             // Issue: Now doing deterministically, so need to randomise somehow
             Shuffle(allAvailableMoves);
 
             // choose the move with the best immediate score (stupidly aggressive for now, need to make recursive)
-            Piece PieceToMove = null;
+
+            // TODO: Getting "can't find piece" error. PieceToMove getting removed then replaced as "new Pawn(...)"?
+            // Instead remember just the square, and lookup actual Piece at very end
+            //      Piece PieceToMove = null;
+            Square PieceToMove = Square.At(-1, -1);
+
+
             Square BestMove = Square.At(-1, -1); // placeholder
             int bestScore = -1000000;
 
@@ -47,26 +56,43 @@ namespace Chessington.GameEngine.AI
             {
                 // also randomise each selection of moves
                 Shuffle(piece.Value);
-                Piece actualPiece = Board.GetPiece(piece.Key);
+             //   Piece actualPiece = Board.GetPiece(piece.Key);
                 foreach (Square MoveTo in piece.Value)
                 {
-                    var newBoard = new Board(Board);
-                    actualPiece.MoveTo(newBoard, MoveTo);
+                    // Note: Done inside loop in case piece removed then replaced during search (e.g. en-passant)
+                    Piece actualPiece = tempBoard.GetPiece(piece.Key);
+
+                    var move = new Move(piece.Key, MoveTo, tempBoard);
+
+                    // TODO: Test without making new board
+                    //  var newBoard = new Board(Board);
+                    //  actualPiece.MoveTo(newBoard, MoveTo);
+                    actualPiece.MoveTo(tempBoard, MoveTo);
+
                     //  int score = Evaluator.GetBoardValue(newBoard) * sign; // Have to take negative if playing as black
-                    int score = -AlphaBeta(newBoard, MAX_DEPTH - 1, -bestScore); // still initialise the upper bound of first recursive call
+                    //   int score = -AlphaBeta(newBoard, MAX_DEPTH - 1, -bestScore); // still initialise the upper bound of first recursive call
+                    int score = -AlphaBeta(tempBoard, MAX_DEPTH - 1, -bestScore);
                     if (score > bestScore)
                     {
-                        PieceToMove = actualPiece;
+                        //       PieceToMove = actualPiece;
+                        PieceToMove = piece.Key;
                         BestMove = MoveTo;
                         bestScore = score;
                     }
+
+                    actualPiece.UndoMove(tempBoard, move, gameInfo); // undo the move
                 }
             }
 
             // indicates stalemate/checkmate if no valid moves
-            if (PieceToMove != null)
+       /*     if (PieceToMove != null)
             {
                 PieceToMove.MoveTo(Board, BestMove);
+            }*/
+            // placeholder value for null
+            if (PieceToMove.Col != -1)
+            {
+                Board.GetPiece(PieceToMove).MoveTo(Board, BestMove);
             }
         }
 
@@ -98,18 +124,26 @@ namespace Chessington.GameEngine.AI
             {
                 var allAvailableMoves = Board.GetAllAvailableMoves().ToList();
                 int bestScore = -1000000;
+                var gameInfo = new GameExtraInfo(Board);
 
                 foreach (KeyValuePair<Square, List<Square>> piece in allAvailableMoves)
                 {
-                    Piece actualPiece = Board.GetPiece(piece.Key);
+                    
                     foreach (Square MoveTo in piece.Value)
                     {
-                        var newBoard = new Board(Board);
-                        actualPiece.MoveTo(newBoard, MoveTo);
+                        // Note: Done inside loop in case piece removed then replaced during search (e.g. en-passant)
+                        Piece actualPiece = Board.GetPiece(piece.Key);
+
+                        //   var newBoard = new Board(Board);
+                        //   actualPiece.MoveTo(newBoard, MoveTo);
+                        var move = new Move(piece.Key, MoveTo, Board);
+                        actualPiece.MoveTo(Board, MoveTo);
 
                         // as soon as recursive call finds a path worse than bestScore for us, we know we won't go down that route
                         // hence -bestScore is the new recursive upperBound
-                        bestScore = Math.Max(bestScore, -AlphaBeta(newBoard, depth - 1, -bestScore));
+                        //    bestScore = Math.Max(bestScore, -AlphaBeta(newBoard, depth - 1, -bestScore));
+                        bestScore = Math.Max(bestScore, -AlphaBeta(Board, depth - 1, -bestScore));
+                        actualPiece.UndoMove(Board, move, gameInfo); // undo the move
                         if (bestScore > upperBound) return bestScore;
                     }
                 }

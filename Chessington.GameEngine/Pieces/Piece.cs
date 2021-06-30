@@ -55,6 +55,5 @@ namespace Chessington.GameEngine.Pieces
             board.QuietMovePiece(move.To, move.From, move.Captured);
             info.RestoreInfo(board);
         }
-
     }
 }

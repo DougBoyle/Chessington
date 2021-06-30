@@ -30,5 +30,15 @@ namespace Chessington.GameEngine.AI
             Captured = captured;
             Promotion = promotion;
         }
+
+        // convert a pair of squares to a 'Move' - TODO: Produce Move instances directly
+        public Move(Square from, Square to, Board before)
+        {
+            From = from;
+            To = to;
+            Captured = before.GetPiece(to);
+            // detect promotions
+            Promotion = (before.GetPiece(from).PieceType == PieceType.Pawn) && (to.Row == 0 || to.Row == 7);
+        }
     }
 }

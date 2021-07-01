@@ -6,9 +6,9 @@ namespace Chessington.GameEngine.Pieces {
         public Queen(Player player)
             : base(player) { PieceType = PieceType.Queen; }
 
-        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board) {
-            return Moves.GetDiagonalMoves(board, board.FindPiece(this), Player)
-                .Concat(Moves.GetLateralMoves(board, board.FindPiece(this), Player));
+        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square currentPosition) {
+            return Moves.GetDiagonalMoves(board, currentPosition, Player)
+                .Concat(Moves.GetLateralMoves(board, currentPosition, Player));
         }
     }
 }

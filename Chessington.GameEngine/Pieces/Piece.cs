@@ -21,11 +21,10 @@ namespace Chessington.GameEngine.Pieces
         public Player Player { get; private set; }
 
         // TODO: Currently very inefficient copying the board every time. Need to make reversible
-        public virtual IEnumerable<Square> GetAvailableMoves(Board board) {
-            IEnumerable<Square> possible = GetRelaxedAvailableMoves(board);
+        public virtual IEnumerable<Square> GetAvailableMoves(Board board, Square position) {
+            IEnumerable<Square> possible = GetRelaxedAvailableMoves(board, position);
             List<Square> actual = new List<Square>();
 
-            var position = board.FindPiece(this);
             var tempBoard = new Board(board);
             var gameInfo = new GameExtraInfo(board);
 
@@ -42,7 +41,8 @@ namespace Chessington.GameEngine.Pieces
             return actual;
         }
         
-        public abstract IEnumerable<Square> GetRelaxedAvailableMoves(Board board);
+        // Takes the position of the piece as an input, rather than having to find it twice
+        public abstract IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square position);
 
         public virtual void MoveTo(Board board, Square newSquare)
         {

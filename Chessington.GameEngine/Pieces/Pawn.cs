@@ -9,9 +9,7 @@ namespace Chessington.GameEngine.Pieces {
         public Pawn(Player player)
             : base(player) { PieceType = PieceType.Pawn; }
 
-        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board) {
-            
-            Square here = board.FindPiece(this);
+        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square here) {
             
             var direction = Player == Player.White ? -1 : 1;
             var homeRow = Player == Player.White ? GameSettings.BoardSize - 2 : 1;

@@ -21,6 +21,7 @@ namespace Chessington.UI.ViewModels
         private System.Windows.Threading.Dispatcher Dispatcher { get; set; }
 
         private Piece currentPiece;
+        private Square currentSquare;
 
         public BoardViewModel()
         {
@@ -44,8 +45,9 @@ namespace Chessington.UI.ViewModels
         {
             currentPiece = Board.GetPiece(message.Square);
             if (currentPiece == null) return;
+            currentSquare = message.Square;
 
-            var moves = new ReadOnlyCollection<Square>(currentPiece.GetAvailableMoves(Board).ToList());
+            var moves = new ReadOnlyCollection<Square>(currentPiece.GetAvailableMoves(Board, currentSquare).ToList());
             ChessingtonServices.EventAggregator.Publish(new ValidMovesUpdated(moves));
         }
 
@@ -66,7 +68,7 @@ namespace Chessington.UI.ViewModels
             if (currentPiece == null)
                 return;
 
-            var moves = currentPiece.GetAvailableMoves(Board);
+            var moves = currentPiece.GetAvailableMoves(Board, currentSquare);
 
             if (moves.Contains(message.Square))
             {

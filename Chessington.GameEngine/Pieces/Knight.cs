@@ -9,10 +9,9 @@ namespace Chessington.GameEngine.Pieces
         public Knight(Player player)
             : base(player) { PieceType = PieceType.Knight; }
 
-        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board)
+        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
             List<Square> availableMoves = new List<Square>();
-            var currentPosition = board.FindPiece(this);
             var dir = new int[] {-1, 1};
             foreach (var twoStep in dir)
             {

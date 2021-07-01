@@ -15,7 +15,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var bishop = new Bishop(Player.White);
             board.AddPiece(Square.At(4, 4), bishop);
 
-            var moves = bishop.GetAvailableMoves(board);
+            var moves = bishop.GetAvailableMoves(board, Square.At(4, 4));
 
             var expectedMoves = new List<Square>();
 
@@ -42,7 +42,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pieceToTake = new Pawn(Player.Black);
             board.AddPiece(Square.At(6, 6), pieceToTake);
 
-            var moves = bishop.GetAvailableMoves(board);
+            var moves = bishop.GetAvailableMoves(board, Square.At(4, 4));
             moves.Should().NotContain(Square.At(7, 7));
         }
 
@@ -55,7 +55,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var friendlyPiece = new Pawn(Player.White);
             board.AddPiece(Square.At(6, 6), friendlyPiece);
 
-            var moves = bishop.GetAvailableMoves(board);
+            var moves = bishop.GetAvailableMoves(board, Square.At(4, 4));
             moves.Should().NotContain(Square.At(7, 7));
         }
 
@@ -68,7 +68,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pieceToTake = new Pawn(Player.Black);
             board.AddPiece(Square.At(6, 6), pieceToTake);
 
-            var moves = bishop.GetAvailableMoves(board);
+            var moves = bishop.GetAvailableMoves(board, Square.At(4, 4));
             moves.Should().Contain(Square.At(6, 6));
         }
 
@@ -81,7 +81,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var friendlyPiece = new Pawn(Player.White);
             board.AddPiece(Square.At(6, 6), friendlyPiece);
 
-            var moves = bishop.GetAvailableMoves(board);
+            var moves = bishop.GetAvailableMoves(board, Square.At(4, 4));
             moves.Should().NotContain(Square.At(6, 6));
         }
     }

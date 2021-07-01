@@ -13,10 +13,9 @@ namespace Chessington.GameEngine.Pieces
             PieceType = PieceType.King;
         }
 
-        public override IEnumerable<Square> GetAvailableMoves(Board board)
+        public override IEnumerable<Square> GetAvailableMoves(Board board, Square currentPosition)
         {
-            List<Square> availableMoves = base.GetAvailableMoves(board).ToList();
-            var currentPosition = board.FindPiece(this);
+            List<Square> availableMoves = base.GetAvailableMoves(board, currentPosition).ToList();
             
             if (!board.InCheck(Player))
             {
@@ -61,10 +60,9 @@ namespace Chessington.GameEngine.Pieces
             return availableMoves;
         }
 
-        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board)
+        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
             List<Square> availableMoves = new List<Square>();
-            var currentPosition = board.FindPiece(this);
 
             for (int x = -1; x < 2; x++)
             {

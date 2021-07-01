@@ -8,9 +8,9 @@ namespace Chessington.GameEngine.Pieces
         public Rook(Player player)
             : base(player) { PieceType = PieceType.Rook; }
 
-        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board)
+        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
-            return Moves.GetLateralMoves(board, board.FindPiece(this), Player);
+            return Moves.GetLateralMoves(board, currentPosition, Player);
         }
         
         public override void MoveTo(Board board, Square newSquare)

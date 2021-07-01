@@ -144,9 +144,10 @@ namespace Chessington.GameEngine
             Dictionary<Square, List<Square>> availableMoves = new Dictionary<Square, List<Square>>();
             for (int i = 0; i < GameSettings.BoardSize; i++) {
                 for (int j = 0; j < GameSettings.BoardSize; j++) {
-                    var piece = GetPiece(Square.At(i, j));
+                    var square = Square.At(i, j);
+                    var piece = GetPiece(square);
                     if (piece == null || piece.Player != CurrentPlayer) continue;
-                    var pieceMoves = piece.GetAvailableMoves(this).ToList();
+                    var pieceMoves = piece.GetAvailableMoves(this, square).ToList();
                     if (pieceMoves.Count != 0)
                     {
                         availableMoves[Square.At(i,j)] = pieceMoves;
@@ -165,9 +166,10 @@ namespace Chessington.GameEngine
             {
                 for (int j = 0; j < GameSettings.BoardSize; j++)
                 {
-                    var piece = GetPiece(Square.At(i, j));
+                    var square = Square.At(i, j);
+                    var piece = GetPiece(square);
                     if (piece == null || piece.Player != CurrentPlayer) continue;
-                    var pieceMoves = piece.GetRelaxedAvailableMoves(this).ToList();
+                    var pieceMoves = piece.GetRelaxedAvailableMoves(this, square).ToList();
                     if (pieceMoves.Count != 0)
                     {
                         availableMoves[Square.At(i, j)] = pieceMoves;
@@ -194,9 +196,10 @@ namespace Chessington.GameEngine
             Square kingSquare = FindKing(player);
             for (int i = 0; i < GameSettings.BoardSize; i++) {
                 for (int j = 0; j < GameSettings.BoardSize; j++) {
-                    var piece = GetPiece(Square.At(i, j));
+                    var square = Square.At(i, j);
+                    var piece = GetPiece(square);
                     if (piece == null || piece.Player == player) continue;
-                    if (piece.GetRelaxedAvailableMoves(this).Contains(kingSquare)) {
+                    if (piece.GetRelaxedAvailableMoves(this, square).Contains(kingSquare)) {
                         return true;
                     }
                 }

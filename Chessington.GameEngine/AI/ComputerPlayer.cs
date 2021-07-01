@@ -13,7 +13,7 @@ namespace Chessington.GameEngine.AI
         private static Random r = new Random();
 
         // Currently 4 is too high. Move only displays after computer has moved too (need to change order/do async), and takes ~15s per move
-        private const int MAX_DEPTH = 4; // 2 ply, mine then yours
+        private const int MAX_DEPTH = 2; // 2 ply, mine then yours
 
         // TODO: Can put 'this' in type definition of list to make it an extension method i.e. lst.Shuffle()
         private static void Shuffle<T>(IList<T> list)
@@ -29,9 +29,8 @@ namespace Chessington.GameEngine.AI
             }
         }
 
-
         // TODO: Test reversible board rather than copying, need to time it
-        public static void MakeMove(Board Board)
+        public static Move MakeMove(Board Board)
         {
             //  TODO: Even with Undo-move possible, want to operate on copy of board so don't have to worry about events etc.
             var tempBoard = new Board(Board);
@@ -51,6 +50,8 @@ namespace Chessington.GameEngine.AI
 
             Square BestMove = Square.At(-1, -1); // placeholder
             int bestScore = -1000000;
+
+            Move TheBestMove = null;
 
             foreach (KeyValuePair<Square, List<Square>> piece in allAvailableMoves)
             {
@@ -78,6 +79,8 @@ namespace Chessington.GameEngine.AI
                         PieceToMove = piece.Key;
                         BestMove = MoveTo;
                         bestScore = score;
+
+                        TheBestMove = move;
                     }
 
                     actualPiece.UndoMove(tempBoard, move, gameInfo); // undo the move
@@ -85,15 +88,16 @@ namespace Chessington.GameEngine.AI
             }
 
             // indicates stalemate/checkmate if no valid moves
-       /*     if (PieceToMove != null)
-            {
-                PieceToMove.MoveTo(Board, BestMove);
-            }*/
+            /*     if (PieceToMove != null)
+                 {
+                     PieceToMove.MoveTo(Board, BestMove);
+                 }*/
             // placeholder value for null
-            if (PieceToMove.Col != -1)
-            {
-                Board.GetPiece(PieceToMove).MoveTo(Board, BestMove);
-            }
+            //   if (PieceToMove.Col != -1)
+            //    {
+            //        Board.GetPiece(PieceToMove).MoveTo(Board, BestMove);
+            //    }
+            return TheBestMove;
         }
 
         // TODO: Optimise to not pass board around, represent moves more efficiently, and do alpha-beta pruning

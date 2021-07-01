@@ -48,14 +48,15 @@ namespace Chessington.GameEngine.Pieces {
                 board.OnPieceCaptured(board.GetPiece(Square.At(currentSquare.Row, newSquare.Col)));
                 board.AddPiece(Square.At(currentSquare.Row, newSquare.Col),null);
             }
-            base.MoveTo(board, newSquare);
+            base.MoveTo(board, newSquare); // changes the current player
             if (currentSquare.Row - newSquare.Row == 2 || currentSquare.Row - newSquare.Row == -2)
             {
                 board.EnPassantSquare = Square.At((currentSquare.Row + newSquare.Row) / 2, newSquare.Col);
             }
-            if (newSquare.Row == 0 || newSquare.Row == 7)
+            if (newSquare.Row == 0 || newSquare.Row == 7) // TODO: Allow choosing how to promote
             {
-                board.AddPiece(newSquare, new Queen(board.CurrentPlayer));
+                board.OnPieceCaptured(this);
+                board.AddPiece(newSquare, new Queen(Player));
             }
         }
 

@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using Chessington.GameEngine;
 using Chessington.GameEngine.Pieces;
 using Chessington.UI.Caliburn.Micro;
 using Chessington.UI.Notifications;
+
+using Chessington.GameEngine.AI;
 
 namespace Chessington.UI.ViewModels
 {
@@ -14,14 +17,19 @@ namespace Chessington.UI.ViewModels
     // GameViewModel is the slightly higher elements such as displaying the pieces that have been captured
     public class BoardViewModel : IHandle<PieceSelected>, IHandle<SquareSelected>, IHandle<SelectionCleared>
     {
+        // Allows calling back to UI thread to make updates after a computer move
+        private System.Windows.Threading.Dispatcher Dispatcher { get; set; }
+
         private Piece currentPiece;
 
         public BoardViewModel()
         {
+            Dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
             Board = new Board();
             Board.PieceCaptured += BoardOnPieceCaptured;
             Board.CurrentPlayerChanged += BoardOnCurrentPlayerChanged;
-            Board.CurrentPlayerChanged += BoardOnCurrentPlayerChangedComputer;
+            // TODO: Only do this after other UI updates made e.g. PieceMoved
+        //    Board.CurrentPlayerChanged += BoardOnCurrentPlayerChangedComputer;
             ChessingtonServices.EventAggregator.Subscribe(this);
         }
         
@@ -74,16 +82,32 @@ namespace Chessington.UI.ViewModels
             ChessingtonServices.EventAggregator.Publish(new PieceTaken(piece));
         }
 
-        private static void BoardOnCurrentPlayerChanged(Player player)
+        private void BoardOnCurrentPlayerChanged(Player player)
         {
             ChessingtonServices.EventAggregator.Publish(new CurrentPlayerChanged(player));
-        }
-
-        private void BoardOnCurrentPlayerChangedComputer(Player player)
-        {
             if (player == Player.White && GameSettings.WhiteAsComputer || player == Player.Black && GameSettings.BlackAsComputer)
             {
-                GameEngine.AI.ComputerPlayer.MakeMove(Board);
+                
+                BackgroundWork worker = new BackgroundWork(ComputerTask);
+                worker.BeginInvoke(null, null);
+            }
+        }
+
+        public delegate void BackgroundWork();
+        public delegate void UpdateUI(Move move);
+
+        private void ComputerTask()
+        {
+            var move = ComputerPlayer.MakeMove(Board);
+            Dispatcher.BeginInvoke(new UpdateUI(CompleteComputerMove), move);
+        }
+
+        private void CompleteComputerMove(Move move)
+        {
+            if (move != null)
+            {
+                Board.GetPiece(move.From).MoveTo(Board, move.To);
+                ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
             }
         }
     }

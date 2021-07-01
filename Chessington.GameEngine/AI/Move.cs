@@ -40,5 +40,13 @@ namespace Chessington.GameEngine.AI
             // detect promotions
             Promotion = (before.GetPiece(from).PieceType == PieceType.Pawn) && (to.Row == 0 || to.Row == 7);
         }
+
+        public static char[] columns = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
+        
+        // 0 is top of the board, 7 is bottom (white)
+        public override string ToString()
+        {
+            return columns[From.Col] + (8 - From.Row).ToString() + "-" + columns[To.Col] + (8 - To.Row).ToString();
+        }
     }
 }

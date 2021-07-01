@@ -106,6 +106,7 @@ namespace Chessington.UI.ViewModels
         {
             if (move != null)
             {
+                Console.WriteLine("Move played: {0}", move);
                 Board.GetPiece(move.From).MoveTo(Board, move.To);
                 ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
             }

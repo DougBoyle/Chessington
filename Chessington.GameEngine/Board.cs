@@ -157,6 +157,27 @@ namespace Chessington.GameEngine
             return availableMoves;
         }
 
+        // avoid repeating effort for computer search - can just use relaxed moves, very negative score will indicate check
+        public Dictionary<Square, List<Square>> GetAllRelaxedMoves()
+        {
+            Dictionary<Square, List<Square>> availableMoves = new Dictionary<Square, List<Square>>();
+            for (int i = 0; i < GameSettings.BoardSize; i++)
+            {
+                for (int j = 0; j < GameSettings.BoardSize; j++)
+                {
+                    var piece = GetPiece(Square.At(i, j));
+                    if (piece == null || piece.Player != CurrentPlayer) continue;
+                    var pieceMoves = piece.GetRelaxedAvailableMoves(this).ToList();
+                    if (pieceMoves.Count != 0)
+                    {
+                        availableMoves[Square.At(i, j)] = pieceMoves;
+                    }
+                }
+            }
+
+            return availableMoves;
+        }
+
         public Square FindKing(Player player) {
             for (int i = 0; i < GameSettings.BoardSize; i++) {
                 for (int j = 0; j < GameSettings.BoardSize; j++) {

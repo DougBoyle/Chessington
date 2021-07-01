@@ -12,8 +12,7 @@ namespace Chessington.GameEngine.AI
     {
         private static Random r = new Random();
 
-        // Currently 4 is too high. Move only displays after computer has moved too (need to change order/do async), and takes ~15s per move
-        private const int MAX_DEPTH = 2; // 2 ply, mine then yours
+        private const int MAX_DEPTH = 5; // 2 ply, mine then yours
 
         // TODO: Can put 'this' in type definition of list to make it an extension method i.e. lst.Shuffle()
         private static void Shuffle<T>(IList<T> list)
@@ -36,6 +35,7 @@ namespace Chessington.GameEngine.AI
             var tempBoard = new Board(Board);
             var gameInfo = new GameExtraInfo(Board);
 
+            // require an actually valid move at top level, not relaxed moves
             var allAvailableMoves = Board.GetAllAvailableMoves().ToList();
             // Issue: Now doing deterministically, so need to randomise somehow
             Shuffle(allAvailableMoves);
@@ -49,10 +49,14 @@ namespace Chessington.GameEngine.AI
 
 
             Square BestMove = Square.At(-1, -1); // placeholder
-            int bestScore = -1000000;
+
+            // Note: This has to be worse than the worst possible evaluation, so that the computer
+            // still moves even if it knows it is being checkmated
+            int bestScore = -10000000;
 
             Move TheBestMove = null;
 
+            // TODO: Also order these moves
             foreach (KeyValuePair<Square, List<Square>> piece in allAvailableMoves)
             {
                 // also randomise each selection of moves
@@ -87,16 +91,7 @@ namespace Chessington.GameEngine.AI
                 }
             }
 
-            // indicates stalemate/checkmate if no valid moves
-            /*     if (PieceToMove != null)
-                 {
-                     PieceToMove.MoveTo(Board, BestMove);
-                 }*/
-            // placeholder value for null
-            //   if (PieceToMove.Col != -1)
-            //    {
-            //        Board.GetPiece(PieceToMove).MoveTo(Board, BestMove);
-            //    }
+            Console.WriteLine("Best score found: {0}", bestScore);
             return TheBestMove;
         }
 
@@ -126,11 +121,31 @@ namespace Chessington.GameEngine.AI
             }
             else
             {
-                var allAvailableMoves = Board.GetAllAvailableMoves().ToList();
-                int bestScore = -1000000;
+                // use relaxed moves to avoid searching all moves at next level for check, just to evaluate them all again
+                // when that level is actually searched (TODO: Can't detect stalemate, looks like losing)
+                var allAvailableMoves = SquarePairsToMoves(Board, Board.GetAllRelaxedMoves());
+
+                int bestScore = -1000000 - 1000*depth; // the sooner in the search a checkmate is, the worse it is valued
                 var gameInfo = new GameExtraInfo(Board);
 
-                foreach (KeyValuePair<Square, List<Square>> piece in allAvailableMoves)
+
+                foreach (Move move in allAvailableMoves)
+                {
+                    Piece piece = Board.GetPiece(move.From);
+
+                    if (move.Captured != null && move.Captured.PieceType == PieceType.King) return 1000000 + 1000 * depth;
+
+                    piece.MoveTo(Board, move.To);
+
+                    // as soon as recursive call finds a path worse than bestScore for us, we know we won't go down that route
+                    // hence -bestScore is the new recursive upperBound
+                    //    bestScore = Math.Max(bestScore, -AlphaBeta(newBoard, depth - 1, -bestScore));
+                    bestScore = Math.Max(bestScore, -AlphaBeta(Board, depth - 1, -bestScore));
+                    piece.UndoMove(Board, move, gameInfo); // undo the move
+                    if (bestScore > upperBound) return bestScore;
+                }
+
+            /*    foreach (KeyValuePair<Square, List<Square>> piece in allAvailableMoves)
                 {
                     
                     foreach (Square MoveTo in piece.Value)
@@ -141,6 +156,10 @@ namespace Chessington.GameEngine.AI
                         //   var newBoard = new Board(Board);
                         //   actualPiece.MoveTo(newBoard, MoveTo);
                         var move = new Move(piece.Key, MoveTo, Board);
+
+                        // early exit if previous move was not actually valid (now able to capture king)
+                        if (move.Captured != null && move.Captured.PieceType == PieceType.King) return 1000000 + 1000 * depth;
+
                         actualPiece.MoveTo(Board, MoveTo);
 
                         // as soon as recursive call finds a path worse than bestScore for us, we know we won't go down that route
@@ -150,9 +169,17 @@ namespace Chessington.GameEngine.AI
                         actualPiece.UndoMove(Board, move, gameInfo); // undo the move
                         if (bestScore > upperBound) return bestScore;
                     }
-                }
+                }*/
+
+
                 return bestScore;
             }
+        }
+
+        private static List<Move> SquarePairsToMoves(Board board, Dictionary<Square, List<Square>> moves)
+        {
+            return moves.SelectMany(piece => piece.Value.Select(to => new Move(piece.Key, to, board)))
+                .OrderByDescending(move => move.Captured == null ? -1 : (int)move.Captured.PieceType).ToList();
         }
     }
 }

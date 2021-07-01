@@ -24,12 +24,20 @@ namespace Chessington.GameEngine.Pieces
         public virtual IEnumerable<Square> GetAvailableMoves(Board board) {
             IEnumerable<Square> possible = GetRelaxedAvailableMoves(board);
             List<Square> actual = new List<Square>();
+
+            var position = board.FindPiece(this);
+            var tempBoard = new Board(board);
+            var gameInfo = new GameExtraInfo(board);
+
             foreach (var square in possible) {
-                var newBoard = new Board(board);
-                MoveTo(newBoard, square);
-                if (!newBoard.InCheck(Player)) {
+                //   var newBoard = new Board(board);
+                var move = new Move(position, square, board);
+
+                MoveTo(tempBoard, square);
+                if (!tempBoard.InCheck(Player)) {
                     actual.Add(square);
                 }
+                UndoMove(tempBoard, move, gameInfo);
             }
             return actual;
         }

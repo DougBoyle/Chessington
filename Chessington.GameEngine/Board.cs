@@ -7,6 +7,7 @@ namespace Chessington.GameEngine
 {
     public class Board
     {
+        // TODO: This can just be a single column
         public Square? EnPassantSquare { get; set; }
         // TODO: Would be more efficient to allow accessing directly?
         private readonly Piece[,] board;

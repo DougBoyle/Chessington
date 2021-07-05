@@ -12,6 +12,10 @@ namespace Chessington.GameEngine.Tests.Pieces
         public void KingsCanMoveToAdjacentSquares()
         {
             var board = new Board();
+            // need to indicate that king cannot castle (due to how castling checked for)
+            board.LeftWhiteCastling = false;
+            board.RightWhiteCastling = false;
+
             var king = new King(Player.White);
             board.AddPiece(Square.At(4, 4), king);
 
@@ -36,6 +40,10 @@ namespace Chessington.GameEngine.Tests.Pieces
         public void Kings_CannotLeaveTheBoard()
         {
             var board = new Board();
+            // need to indicate that king cannot castle (due to how castling checked for)
+            board.LeftWhiteCastling = false;
+            board.RightWhiteCastling = false;
+
             var king = new King(Player.White);
             board.AddPiece(Square.At(0, 0), king);
 

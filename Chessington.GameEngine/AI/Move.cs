@@ -41,6 +41,33 @@ namespace Chessington.GameEngine.AI
             Promotion = (before.GetPiece(from).PieceType == PieceType.Pawn) && (to.Row == 0 || to.Row == 7);
         }
 
+        // for converting polyglot entries to move objects. See: http://hgm.nubati.net/book_format.html
+        // only done for opening move choices, so need not be efficient
+        public Move(ushort move, Board board)
+        {
+            From = Square.At(7 - ((move & 0b111000_000000) >> 9), (move & 0b111_000000) >> 6);
+            To = Square.At(7 - ((move & 0b111000) >> 3), move & 0b111);
+
+            // Polyglot treats castling as moving from file 4 (e) to file 0/7 so need to correct for this
+            if (board.GetPiece(From).PieceType == PieceType.King && From.Col == 4 && To.Col == 0)
+            {
+                To = Square.At(From.Row, 2);
+                Captured = null;
+                Promotion = false;
+            }
+            else if (board.GetPiece(From).PieceType == PieceType.King && From.Col == 4 && To.Col == 7)
+            {
+                To = Square.At(From.Row, 6);
+                Captured = null;
+                Promotion = false;
+            }
+            else
+            {
+                Captured = board.GetPiece(To);
+                Promotion = (move & 0xF000) > 0;
+            }
+        }
+
         public static char[] columns = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
         
         // 0 is top of the board, 7 is bottom (white)

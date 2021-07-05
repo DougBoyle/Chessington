@@ -13,6 +13,7 @@ namespace Chessington.GameEngine.AI
 
     struct Entry
     {
+        // 16 bytes in total
         public ulong Key;
         public ushort Move;
         public ushort Weight;
@@ -26,6 +27,93 @@ namespace Chessington.GameEngine.AI
 
     public class Polyglot
     {
+        // Just for testing
+        public static int CountEntries()
+        {
+            // TODO: May want to access more efficiently
+            return Properties.Resources.codekiddy.Length/16;
+        }
+
+        const int BOOK_SIZE = 1030253; // just array length/16, helpful for binary search
+
+        private static readonly byte[] book = Properties.Resources.codekiddy;
+
+        private static Entry GetEntry(int index)
+        {
+            index *= 16;
+            return new Entry(GetU64(index),
+                GetU16(index + 8),
+                GetU16(index + 10),
+                GetU32(index + 12));
+        }
+        
+        // Guarantees Big-endian, whereas BitConverter uses system (Little) endian
+        private static ulong GetU64(int index)
+        {
+            ulong result = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                result = (result << 8) + book[index + i];
+            }
+            return result;
+        }
+        private static uint GetU32(int index)
+        {
+            uint result = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                result = (result << 4) + book[index + i];
+            }
+            return result;
+        }
+
+        private static ushort GetU16(int index)
+        {
+            return (ushort)((book[index] << 8) + book[index + 1]);
+        }
+
+        public static int CountMoves(Board board)
+        {
+            ulong hash = HashBoard(board);
+            // binary search for start/end entry
+            int low = 0; // guarenteed to be no entries with matching hash below here
+            int high = BOOK_SIZE - 1;
+            while (high > low)
+            {
+                int search = (low + high) / 2;
+                ulong entryHash = GetEntry(search).Key;
+                if (entryHash < hash)
+                {
+                    low = search + 1;
+                } else
+                {
+                    high = search;
+                }
+            }
+            if (GetEntry(low).Key != hash) return 0;
+
+            // now find last entry with matching hash
+            int med = low;
+            high = BOOK_SIZE - 1;
+            while (high > med + 1) // can only get within 1 of top
+            {
+                int search = (med + high) / 2;
+                ulong entryHash = GetEntry(search).Key;
+                if (entryHash > hash)
+                {
+                    high = search - 1;
+                }
+                else
+                {
+                    med = search;
+                }
+            }
+            if (GetEntry(high).Key == hash) med = high;
+
+            // med = last index with matching hash
+            return med - low;
+        }
+
         const int RandomCastle = 768;
         const int RandomEP = 772;
         const int RandomTurn = 780;

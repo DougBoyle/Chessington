@@ -25,5 +25,22 @@ namespace Chessington.GameEngine.Tests
 
             hash.Should().Be(0x463b96181691fc9c);
         }
+
+        [Test]
+        public void OpeningBookHasCorrectNumberOfEntries()
+        {
+            // total number of entries
+            Polyglot.CountEntries().Should().Be(1030253);
+        }
+
+        [Test]
+        public void OpeningBookHasCorrectNumberOfEntriesForStartPosition()
+        {
+            var board = new Board();
+            StartingPositionFactory.Setup(board);
+
+            // 9 initial moves are considered for white
+            Polyglot.CountMoves(board).Should().Be(9);
+        }
     }
 }

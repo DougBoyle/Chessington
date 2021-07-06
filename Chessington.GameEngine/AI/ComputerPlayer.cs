@@ -181,7 +181,7 @@ namespace Chessington.GameEngine.AI
             }
         }
 
-        private static List<Move> SquarePairsToMoves(Board board, Dictionary<Square, List<Square>> moves)
+        public static List<Move> SquarePairsToMoves(Board board, Dictionary<Square, List<Square>> moves)
         {
             return moves.SelectMany(piece => piece.Value.Select(to => new Move(piece.Key, to, board)))
                 .OrderByDescending(move => move.Captured == null ? -1 : (int)move.Captured.PieceType).ToList();

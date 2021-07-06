@@ -16,9 +16,14 @@ namespace Analysis
     // only 10 squares rather than 64, so reduces table size by about 6x
 
     // assumes castling not possible
-    // TODO: Possibility of en-passant if one pawn on either side
+    // TODO: Possibility of en-passant if one pawn on either side (can't have as much symmetry if pawns present)
     public class NormalForm
     {
+        // key feature of this normal form
+        public static Square[] KingSquares = {Square.At(7, 0), Square.At(7, 1), Square.At(7, 2), Square.At(7, 3),
+            Square.At(6, 1), Square.At(6, 2), Square.At(6, 3), Square.At(5, 2), Square.At(5, 3), Square.At(4, 3)};
+
+
         // flips along / diagonal as (0,0) is top left
         private static void TransposeBoard(Board b)
         {
@@ -59,29 +64,46 @@ namespace Analysis
             }
         }
 
-        public static void NormaliseBoard(Board b)
+        public delegate Square SquareMapper(Square square);
+
+        // returns a function that allows mapping any resulting move back to the actual board coordinates
+        public static SquareMapper NormaliseBoard(Board b)
         {
             Square king = b.FindKing(Player.White);
+            List<SquareMapper> transforms = new List<SquareMapper>();
 
             // remember row 0 = top of board
             if (king.Col >= GameSettings.BoardSize / 2)
             {
                 ReverseRows(b);
                 king = Square.At(king.Row, GameSettings.BoardSize - 1 - king.Col);
+                // TODO: Make part of return value of ReverseRows itself?
+                transforms.Add(square => new Square(square.Row, GameSettings.BoardSize - 1 - square.Col));
             }
             if (king.Row < GameSettings.BoardSize / 2)
             {
                 ReverseCols(b);
                 king = Square.At(GameSettings.BoardSize - 1 - king.Row, king.Col);
+                transforms.Add(square => new Square(GameSettings.BoardSize - 1 - square.Row, square.Col));
             }
 
             if (king.Col + king.Row + 1 < GameSettings.BoardSize)
             {
                 TransposeBoard(b);
+                transforms.Add(square => new Square(GameSettings.BoardSize - 1 - square.Col, GameSettings.BoardSize - 1 - square.Row));
             }
 
+            transforms.Reverse(); // need to return the reverse operation
 
+            // compose each of the transformations in reverse order
+            return square =>
+            {
+                foreach (SquareMapper mapper in transforms)
+                {
+                    square = mapper(square);
+                }
+                return square;
+            };
         }
-
     }
 }

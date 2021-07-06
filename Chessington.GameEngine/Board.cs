@@ -10,7 +10,7 @@ namespace Chessington.GameEngine
         // TODO: This can just be a single column
         public Square? EnPassantSquare { get; set; }
         // TODO: Would be more efficient to allow accessing directly?
-        private readonly Piece[,] board;
+        public readonly Piece[,] board;
         public Player CurrentPlayer { get; set; }
         // TODO: Where is this actually used? Logic on BoardViewModel that wraps around MakeMove?
         public IList<Piece> CapturedPieces { get; private set; }

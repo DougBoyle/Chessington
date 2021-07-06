@@ -36,9 +36,16 @@ namespace Chessington.UI.ViewModels
         
         public Board Board { get; private set; }
 
+        // must call this rather than publishing event directly, so computer can play move
         public void PiecesMoved()
         {
             ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
+            if (Board.CurrentPlayer == Player.White && GameSettings.WhiteAsComputer || Board.CurrentPlayer == Player.Black && GameSettings.BlackAsComputer)
+            {
+
+                BackgroundWork worker = new BackgroundWork(ComputerTask);
+                worker.BeginInvoke(null, null);
+            }
         }
 
         public void Handle(PieceSelected message)
@@ -73,8 +80,9 @@ namespace Chessington.UI.ViewModels
             if (moves.Contains(message.Square))
             {
                 currentPiece.MoveTo(Board, message.Square);
-                
-                ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
+
+                PiecesMoved();
+              //  ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
                 ChessingtonServices.EventAggregator.Publish(new SelectionCleared());
             }
         }
@@ -87,12 +95,7 @@ namespace Chessington.UI.ViewModels
         private void BoardOnCurrentPlayerChanged(Player player)
         {
             ChessingtonServices.EventAggregator.Publish(new CurrentPlayerChanged(player));
-            if (player == Player.White && GameSettings.WhiteAsComputer || player == Player.Black && GameSettings.BlackAsComputer)
-            {
-                
-                BackgroundWork worker = new BackgroundWork(ComputerTask);
-                worker.BeginInvoke(null, null);
-            }
+           
         }
 
         public delegate void BackgroundWork();
@@ -110,7 +113,8 @@ namespace Chessington.UI.ViewModels
             {
                 Console.WriteLine("Move played: {0}", move);
                 Board.GetPiece(move.From).MoveTo(Board, move.To);
-                ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
+                PiecesMoved();
+            //    ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
             }
         }
     }

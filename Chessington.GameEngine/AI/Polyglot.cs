@@ -72,10 +72,13 @@ namespace Chessington.GameEngine.AI
             return (ushort)((book[index] << 8) + book[index + 1]);
         }
 
-        public static int CountMoves(Board board)
+        private static Random r = new Random();
+
+        public static Move GetMove(Board board)
         {
             ulong hash = HashBoard(board);
-            // binary search for start/end entry
+
+            // binary search for first entry
             int low = 0; // guarenteed to be no entries with matching hash below here
             int high = BOOK_SIZE - 1;
             while (high > low)
@@ -90,28 +93,29 @@ namespace Chessington.GameEngine.AI
                     high = search;
                 }
             }
-            if (GetEntry(low).Key != hash) return 0;
 
-            // now find last entry with matching hash
-            int med = low;
-            high = BOOK_SIZE - 1;
-            while (high > med + 1) // can only get within 1 of top
+            List<Entry> choices = new List<Entry>();
+            int totalWeights = 0;
+
+            for (Entry entry = GetEntry(low); entry.Key == hash; entry = GetEntry(++low))
             {
-                int search = (med + high) / 2;
-                ulong entryHash = GetEntry(search).Key;
-                if (entryHash > hash)
-                {
-                    high = search - 1;
-                }
-                else
-                {
-                    med = search;
-                }
+                choices.Add(entry);
+                totalWeights += entry.Weight;
             }
-            if (GetEntry(high).Key == hash) med = high;
 
-            // med = last index with matching hash
-            return med - low;
+            if (totalWeights == 0) return null;
+
+            Console.WriteLine("Opening move played");
+
+            int n = r.Next(totalWeights);
+            foreach (Entry entry in choices)
+            {
+                if (entry.Weight > n) return new Move(entry.Move, board);
+                else n -= entry.Weight;
+            }
+
+            // should never be reached
+            return null;
         }
 
         const int RandomCastle = 768;
@@ -149,7 +153,16 @@ namespace Chessington.GameEngine.AI
             if (board.LeftBlackCastling) result ^= Rand64[RandomCastle + 3];
 
             // en passant
-            if (board.EnPassantSquare is Square square) result ^= Rand64[RandomEP + square.Col];
+            // Note: Only applies if also an adjacent pawn to make the en-passant move
+            //       (but no check if legal or not i.e. could put self in check)
+            if (board.EnPassantSquare is Square square) {
+                int pawnRow = square.Row + (board.CurrentPlayer == Player.White ? 1 : -1);
+                if (square.Col != 0 && board.GetPiece(pawnRow, square.Col - 1) is Pawn ||
+                    square.Col != 7 && board.GetPiece(pawnRow, square.Col + 1) is Pawn)
+                {
+                    result ^= Rand64[RandomEP + square.Col];
+                }
+            }
 
             // turn
             if (board.CurrentPlayer == Player.White) result ^= Rand64[RandomTurn];

@@ -40,7 +40,7 @@ namespace Chessington.GameEngine.Tests
             StartingPositionFactory.Setup(board);
 
             // 9 initial moves are considered for white
-            Polyglot.CountMoves(board).Should().Be(9);
+            Polyglot.GetMove(board).Should().NotBeNull();
         }
     }
 }

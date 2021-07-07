@@ -1,6 +1,7 @@
 ### Created by https://www.gitignore.io
 
 Books/
+Tablebase/
 
 ### Rider ###
 .idea/

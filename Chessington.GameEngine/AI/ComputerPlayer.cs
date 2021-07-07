@@ -31,10 +31,18 @@ namespace Chessington.GameEngine.AI
         // TODO: Test reversible board rather than copying, need to time it
         public static Move MakeMove(Board Board)
         {
+            /*********************************************************************************/
+            // TODO: Should probably double-check the validity of these moves
+
             // use opening book if possible
             var openingMove = Polyglot.GetMove(Board);
             if (openingMove != null) return openingMove;
 
+            // use endgame table if possible
+            var endgameMove = Endgame.Endgame.MakeMove(Board);
+            if (endgameMove != null) return endgameMove;
+
+            /*********************************************************************************/
 
             //  TODO: Even with Undo-move possible, want to operate on copy of board so don't have to worry about events etc.
             var tempBoard = new Board(Board);

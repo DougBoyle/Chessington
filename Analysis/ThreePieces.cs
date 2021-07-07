@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using Chessington.GameEngine;
 using Chessington.GameEngine.Pieces;
 using Chessington.GameEngine.AI;
-using static Analysis.NormalForm;
+using static Chessington.GameEngine.AI.Endgame.NormalForm;
 using System.IO;
+
+using static Chessington.GameEngine.AI.Endgame.ComputeIndices;
 
 namespace Analysis
 {
@@ -24,41 +26,6 @@ namespace Analysis
         public TableEntry[] whiteTable = new TableEntry[10 * 64 * 64];
         public TableEntry[] blackTable = new TableEntry[10 * 64 * 64];
 
-        public static int BoardToIndex(Board b)
-        {
-            int numPieces = 0;
-            int index = 0;
-            for (int row = 0; row < 8; row++)
-            {
-                for (int col = 0; col < 8; col++)
-                {
-                    Piece piece = b.GetPiece(row, col);
-                    if (piece == null) continue;
-                    numPieces++;
-                    if (piece.PieceType == PieceType.King)
-                    {
-                        if (piece.Player == Player.White) // more complex as only 10 positions
-                        {
-                            switch (row)
-                            {
-                                case 7: index += 64 * 64 * col; break;
-                                case 6: index += 64 * 64 * (3 + col); break;
-                                case 5: index += 64 * 64 * (5 + col); break;
-                                case 4: index += 64 * 64 * 9; break;
-                            }
-                        } else
-                        {
-                            index += (8 * row + col) * 64;
-                        }
-                    } else
-                    {
-                        index += 8 * row + col;
-                    }
-                }
-            }
-            if (numPieces != 3) throw new ArgumentException("Board does not contain 3 pieces");
-            return index;
-        }
 
         // another invariance is to always assume white has more material, can just flip colours if not the case
         public void SolveForQueen()
@@ -156,7 +123,7 @@ namespace Analysis
                             var boardCopy = new Board(board);
                             boardCopy.GetPiece(move.From).MoveTo(boardCopy, move.To);
                             NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
-                            return new Tuple<Move, TableEntry>(move, whiteTable[BoardToIndex(boardCopy)]);
+                            return new Tuple<Move, TableEntry>(move, whiteTable[SimpleThreePieceBoardToIndex(boardCopy)]);
                         });
 
                         // no need to check for a win for black, insufficient material.
@@ -220,7 +187,7 @@ namespace Analysis
                             var boardCopy = new Board(board);
                             boardCopy.GetPiece(move.From).MoveTo(boardCopy, move.To);
                             NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
-                            return new Tuple<Move, TableEntry>(move, blackTable[BoardToIndex(boardCopy)]);
+                            return new Tuple<Move, TableEntry>(move, blackTable[SimpleThreePieceBoardToIndex(boardCopy)]);
                         });
 
                         Tuple<Move, TableEntry> choice;
@@ -276,7 +243,7 @@ namespace Analysis
                     var boardCopy = new Board(board);
                     boardCopy.GetPiece(move.From).MoveTo(boardCopy, move.To);
                     NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
-                        TableEntry result = whiteTable[BoardToIndex(boardCopy)];
+                        TableEntry result = whiteTable[SimpleThreePieceBoardToIndex(boardCopy)];
                     return result.Outcome == Outcome.Draw || result.Outcome == Outcome.Unknown; // unknown = draw now
                     }).First();
 
@@ -301,7 +268,7 @@ namespace Analysis
                     var boardCopy = new Board(board);
                     boardCopy.GetPiece(move.From).MoveTo(boardCopy, move.To);
                     NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
-                    TableEntry result = blackTable[BoardToIndex(boardCopy)];
+                    TableEntry result = blackTable[SimpleThreePieceBoardToIndex(boardCopy)];
                     return result.Outcome == Outcome.Draw || result.Outcome == Outcome.Unknown; // unknown = draw now
                 }).First();
 

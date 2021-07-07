@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 using Chessington.GameEngine;
 using Chessington.GameEngine.Pieces;
-using Chessington.GameEngine.AI;
 
-namespace Analysis
+namespace Chessington.GameEngine.AI.Endgame
 {
     // only positions with white king on the 10 squares at angle 180 to 225 degrees from center considered
     // i.e a1, b1-2, c1-3, d1-4
@@ -104,6 +103,55 @@ namespace Analysis
                 }
                 return square;
             };
+        }
+
+        // Also flips board vertically to respect direction pawns move
+        public static Board FlipColour(Board b)
+        {
+            // take a copy rather than modifying directly
+            // used for endgames so can assume no castling
+            Board board = new Board(b);
+            if (b.EnPassantSquare is Square square) board.EnPassantSquare = Square.At(7 - square.Row, square.Col);
+            board.CurrentPlayer = b.CurrentPlayer == Player.White ? Player.Black : Player.White;
+
+            // can't easily copy pieces, so create new ones with flipped colours
+            for (int row = 0; row < 8; row++)
+            {
+                for (int col = 0; col < 8; col++)
+                {
+                    Piece original = b.GetPiece(row, col);
+                    Piece newPiece;
+                    
+                    if (original == null) newPiece = null;
+                    else
+                    {
+                        Player otherPlayer = original.Player == Player.White ? Player.Black : Player.White;
+                        switch (original.PieceType) // TODO: Just add a method to produce copy, or use cloneable?
+                        {
+                            case PieceType.Pawn:
+                                newPiece = new Pawn(otherPlayer);
+                                break;
+                            case PieceType.Knight:
+                                newPiece = new Knight(otherPlayer);
+                                break;
+                            case PieceType.Bishop:
+                                newPiece = new Bishop(otherPlayer);
+                                break;
+                            case PieceType.Rook:
+                                newPiece = new Rook(otherPlayer);
+                                break;
+                            case PieceType.Queen:
+                                newPiece = new Queen(otherPlayer);
+                                break;
+                            default:
+                                newPiece = new King(otherPlayer);
+                                break;
+                        }
+                    }
+                    board.AddPiece(Square.At(7 - row, col), newPiece);
+                }
+            }
+            return board;
         }
     }
 }

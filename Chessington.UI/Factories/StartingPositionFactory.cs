@@ -33,6 +33,19 @@ namespace Chessington.UI.Factories
             board.AddPiece(Square.At(7, 5), new Bishop(Player.White));
             board.AddPiece(Square.At(7, 6), new Knight(Player.White));
             board.AddPiece(Square.At(7, 7), new Rook(Player.White));
+            
+
+            /* Endgame test - very long rook checkmate
+
+            board.AddPiece(Square.At(4, 5), new King(Player.Black));
+            board.AddPiece(Square.At(0, 7), new King(Player.White));
+            board.AddPiece(Square.At(5, 1), new Rook(Player.White));
+            board.LeftWhiteCastling = false;
+            board.RightBlackCastling = false;
+            board.LeftBlackCastling = false;
+            board.RightWhiteCastling = false;
+
+            */
         }
     }
 }

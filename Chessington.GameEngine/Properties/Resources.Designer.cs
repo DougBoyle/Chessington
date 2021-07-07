@@ -79,5 +79,15 @@ namespace Chessington.GameEngine.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] KRK {
+            get {
+                object obj = ResourceManager.GetObject("KRK", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

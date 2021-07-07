@@ -49,6 +49,9 @@ namespace Chessington.GameEngine.AI.Endgame
                 if (whitePieces.First().PieceType == PieceType.Queen)
                 {
                     return KQK(boardCopy, board);
+                } else if (whitePieces.First().PieceType == PieceType.Rook)
+                {
+                    return KRK(boardCopy, board);
                 }
             }
 
@@ -60,9 +63,11 @@ namespace Chessington.GameEngine.AI.Endgame
         public static Move KQK(Board board, Board original) // original used if a move is found, undo invariances
         {
             var transform = NormalForm.NormaliseBoard(board);
-            // each table entry is 4 bytes
+
+             // each table entry is 4 bytes
             int index = ComputeIndices.SimpleThreePieceBoardToIndex(board) * 4;
             if (board.CurrentPlayer == Player.Black) index += 2;
+
             int result = Properties.Resources.KQK[index];
             result = (result << 8) + Properties.Resources.KQK[index + 1];
             // result = [ 32 0's, FromRow, FromCol, ToRow, ToCol, 4 bit outcome ]
@@ -72,7 +77,34 @@ namespace Chessington.GameEngine.AI.Endgame
             
             // compute move in terms of original board
             Square from = transform(Square.At((result >> 13) & 0x7, (result >> 10) & 0x7));
-            Square to = transform(Square.At((result >> 13) & 0x7, (result >> 10) & 0x7));
+            Square to = transform(Square.At((result >> 7) & 0x7, (result >> 4) & 0x7));
+
+            Console.WriteLine("Played endgame move");
+
+            return new Move(from, to, original);
+        }
+
+        // TODO: Remove repetition
+        public static Move KRK(Board board, Board original) // original used if a move is found, undo invariances
+        {
+            var transform = NormalForm.NormaliseBoard(board);
+
+            // each table entry is 4 bytes
+            int index = ComputeIndices.SimpleThreePieceBoardToIndex(board) * 4;
+            if (board.CurrentPlayer == Player.Black) index += 2;
+
+            int result = Properties.Resources.KRK[index];
+            result = (result << 8) + Properties.Resources.KRK[index + 1];
+            // result = [ 32 0's, FromRow, FromCol, ToRow, ToCol, 4 bit outcome ]
+
+            // check some move found (could be 0 if no move possible i.e. in checkmate/stalemate)
+            if ((result & 0xFFF0) == 0) return null;
+
+            // compute move in terms of original board
+            Square from = transform(Square.At((result >> 13) & 0x7, (result >> 10) & 0x7));
+            Square to = transform(Square.At((result >> 7) & 0x7, (result >> 4) & 0x7));
+
+            Console.WriteLine("Played endgame move");
 
             return new Move(from, to, original);
         }

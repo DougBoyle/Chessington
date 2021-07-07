@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\ComputerPlayer.cs" />
+    <Compile Include="AI\Endgame\ComputeIndices.cs" />
     <Compile Include="AI\Endgame\Endgame.cs" />
     <Compile Include="AI\Endgame\NormalForm.cs" />
     <Compile Include="AI\Evaluator.cs" />
@@ -71,7 +72,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\codekiddy.bin" />
-    <None Include="Resources\KQK.tbl" />
+    <None Include="Resources\KQK.tbs" />
+    <None Include="Resources\KRK.tbs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

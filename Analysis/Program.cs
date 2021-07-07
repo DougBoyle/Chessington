@@ -26,12 +26,13 @@ namespace Analysis
             Console.WriteLine(k);
             Console.WriteLine(mapper(k));*/
             ThreePieces threePieces = new ThreePieces();
-            threePieces.SolveForQueen();
+           //  threePieces.SolveForQueen();
+            threePieces.SolveForRook();
 
             Console.WriteLine("Longest chain: {0}", threePieces.whiteTable.Select(entry => entry == null ? 0 : entry.DTM).Max());
 
-            Console.WriteLine("Writing to: {0}", Path.Combine(Directory.GetCurrentDirectory(), "KQK.tbs"));
-            threePieces.WriteTables(Path.Combine(Directory.GetCurrentDirectory(), "KQK.tbl"));
+            Console.WriteLine("Writing to: {0}", Path.Combine(Directory.GetCurrentDirectory(), "KRK.tbs"));
+            threePieces.WriteTables(Path.Combine(Directory.GetCurrentDirectory(), "KRK.tbs"));
 
             Console.WriteLine("Done! Press enter to close");
             Console.ReadLine();

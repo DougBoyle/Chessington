@@ -63,8 +63,15 @@ namespace Chessington.UI.ViewModels
             currentPiece = null;
         }
 
+        // TODO: Modify to handle promotion, display something to player
         public void Handle(SquareSelected message)
         {
+            if (promoting)
+            {
+                promoting = false; // clicking anywhere else undos choice
+                NotifyPromotionChanged(null);
+            }
+
             var piece = Board.GetPiece(message.Square);
             if (piece != null && piece.Player == Board.CurrentPlayer)
             {
@@ -79,12 +86,51 @@ namespace Chessington.UI.ViewModels
 
             if (moves.Contains(message.Square))
             {
+                if (currentPiece.PieceType == PieceType.Pawn && (message.Square.Row == 0 || message.Square.Row == 7))
+                {
+                    // prompt about promotion
+                    promoting = true;
+                    promotionSquare = message.Square;
+                    NotifyPromotionChanged(currentPiece.Player);
+                    return;
+                }
+
                 currentPiece.MoveTo(Board, message.Square);
 
                 PiecesMoved();
               //  ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
                 ChessingtonServices.EventAggregator.Publish(new SelectionCleared());
             }
+        }
+
+        private bool promoting;
+        private Square promotionSquare; // remember for when move made
+
+        public EventHandler<Player?> PromotionChanged; // promotion has become selected/deselected
+
+        private void NotifyPromotionChanged(Player? player)
+        {
+            // TODO: Why are events raised in this way?
+            var handler = PromotionChanged;
+            handler?.Invoke(this, player);
+        }
+
+        // handler for button press for promotion
+        public void PromotionChoiceMade(PieceType pieceType)
+        {
+            if (!promoting) return;
+
+            
+            promoting = false; // clicking anywhere else undos choice
+            NotifyPromotionChanged(null);
+
+            // TODO: Allow choice of how to promote
+            // Same as completing a regular move
+            currentPiece.MoveTo(Board, promotionSquare);
+
+            PiecesMoved();
+            //  ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
+            ChessingtonServices.EventAggregator.Publish(new SelectionCleared());
         }
 
         private static void BoardOnPieceCaptured(Piece piece)

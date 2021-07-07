@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Media.Imaging;
 using Chessington.GameEngine.Pieces;
+using Chessington.GameEngine;
 
 namespace Chessington.UI.Factories
 {
@@ -19,6 +20,23 @@ namespace Chessington.UI.Factories
             { typeof(King), "K" },
             { typeof(Queen), "Q" },
         };
+
+        // these two used for promotion 'popup'
+        private static readonly Dictionary<PieceType, string> PieceTypeSuffixes = new Dictionary<PieceType, string>
+        {
+            { PieceType.Pawn, "P" },
+            { PieceType.Rook, "R" },
+            { PieceType.Knight, "N" },
+            { PieceType.Bishop, "B" },
+            { PieceType.King, "K" },
+            { PieceType.Queen, "Q" },
+        };
+
+        public static BitmapImage GetImage(PieceType piece, Player player)
+        {
+            return new BitmapImage(new Uri(string.Format("{0}{1} {2}.ico", InterfaceSettings.IconRoot, player, PieceTypeSuffixes[piece])));
+        }
+
 
         public static BitmapImage GetImage(Piece piece)
         {

@@ -64,6 +64,7 @@
     <Compile Include="Notifications\PieceSelected.cs" />
     <Compile Include="Converters\SquareToBorderBrushConverter.cs" />
     <Compile Include="ViewModels\GameViewModel.cs" />
+    <Compile Include="ViewModels\PromotionSquareViewModel.cs" />
     <Compile Include="ViewModels\SquareViewModel.cs" />
     <Compile Include="Notifications\ValidMovesUpdated.cs" />
     <Page Include="MainWindow.xaml">

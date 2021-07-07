@@ -10,6 +10,8 @@ namespace Chessington.UI.Factories
     {
         public static void Setup(Board board)
         {
+
+            /*
             for (var i = 0; i < GameSettings.BoardSize; i++)
             {
                 board.AddPiece(Square.At(1, i), new Pawn(Player.Black));
@@ -33,7 +35,11 @@ namespace Chessington.UI.Factories
             board.AddPiece(Square.At(7, 5), new Bishop(Player.White));
             board.AddPiece(Square.At(7, 6), new Knight(Player.White));
             board.AddPiece(Square.At(7, 7), new Rook(Player.White));
-            
+            */
+
+            board.AddPiece(Square.At(7, 4), new King(Player.White));
+            board.AddPiece(Square.At(0, 4), new King(Player.Black));
+            board.AddPiece(Square.At(1, 2), new Pawn(Player.White));
 
             /* Endgame test - very long rook checkmate
 

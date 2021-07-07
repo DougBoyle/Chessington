@@ -2,6 +2,8 @@
 using Chessington.UI.Factories;
 using Chessington.UI.ViewModels;
 
+using System.Windows.Controls;
+
 namespace Chessington.UI
 {
     /// <summary>
@@ -17,7 +19,7 @@ namespace Chessington.UI
             var boardViewModel = new BoardViewModel();
             StartingPositionFactory.Setup(boardViewModel.Board);
             BoardViewFactory.CreateBoardView(boardViewModel, GridContainer);
-            
+
             boardViewModel.PiecesMoved();
         }
     }

@@ -13,20 +13,21 @@ namespace Chessington.GameEngine.Pieces
             PieceType = PieceType.King;
         }
 
-        public override IEnumerable<Square> GetAvailableMoves(Board board, Square currentPosition)
+
+        public override IEnumerable<Move> GetAvailableMoves(Board board, Square currentPosition)
         {
-            List<Square> availableMoves = base.GetAvailableMoves(board, currentPosition).ToList();
-            
+            List<Move> availableMoves = base.GetAvailableMoves(board, currentPosition).ToList();
+
             if (!board.InCheck(Player))
             {
-                foreach (var direction in new int[] {-1, 1} )
+                foreach (var direction in new int[] { -1, 1 })
                 {
                     var blackBool = direction == -1 ? board.LeftBlackCastling : board.RightBlackCastling;
                     var whiteBool = direction == -1 ? board.LeftWhiteCastling : board.RightWhiteCastling;
                     if (Player == Player.White && whiteBool ||
                         Player == Player.Black && blackBool)
                     {
-                        if (direction ==-1 && !board.IsSquareEmpty(Square.At(currentPosition.Row, currentPosition.Col - 3)))
+                        if (direction == -1 && !board.IsSquareEmpty(Square.At(currentPosition.Row, currentPosition.Col - 3)))
                         {
                             continue;
                         }
@@ -36,21 +37,21 @@ namespace Chessington.GameEngine.Pieces
                         if (board.IsSquareEmpty(firstSquare) &&
                             board.IsSquareEmpty(secondSquare))
                         {
-                            board.AddPiece(firstSquare,this);
+                            board.AddPiece(firstSquare, this);
                             board.AddPiece(currentPosition, null);
                             if (board.InCheck(Player))
                             {
-                                board.AddPiece(firstSquare,null);
+                                board.AddPiece(firstSquare, null);
                                 board.AddPiece(currentPosition, this);
                                 continue;
                             }
-                            board.AddPiece(secondSquare,this);
+                            board.AddPiece(secondSquare, this);
                             board.AddPiece(firstSquare, null);
                             if (!board.InCheck(Player))
                             {
-                                availableMoves.Add(secondSquare);
+                                availableMoves.Add(new Move(currentPosition, secondSquare, board));
                             }
-                            board.AddPiece(secondSquare,null);
+                            board.AddPiece(secondSquare, null);
                             board.AddPiece(currentPosition, this);
                         }
                     }
@@ -60,12 +61,7 @@ namespace Chessington.GameEngine.Pieces
             return availableMoves;
         }
 
-        public override IEnumerable<Move> GetAvailableMoves2(Board board, Square here)
-        {
-            return GetAvailableMoves(board, here).Select(to => new Move(here, to, board));
-        }
-
-        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square currentPosition)
+        public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
             List<Square> availableMoves = new List<Square>();
 
@@ -80,58 +76,8 @@ namespace Chessington.GameEngine.Pieces
                 }
             }
 
-            return availableMoves.Where(square => square.IsValid() && board.IsEmptyOrOpponent(square, Player));
-        }
-
-        public override IEnumerable<Move> GetRelaxedAvailableMoves2(Board board, Square here)
-        {
-            return GetRelaxedAvailableMoves(board, here).Select(to => new Move(here, to, board));
-        }
-
-
-        public override void MoveTo(Board board, Square newSquare)
-        {
-            var currentPosition = board.FindPiece(this);
-            if (Player == Player.White)
-            {
-                if (currentPosition.Equals(Square.At(7,4)))
-                {
-                    if (newSquare.Col == 6)
-                    {
-                        board.AddPiece(Square.At(7,5), board.GetPiece(Square.At(7,7)));
-                        board.AddPiece(Square.At(7,7), null);
-                    }
-                    else if (newSquare.Col == 2)
-                    {
-                        board.AddPiece(Square.At(7,3), board.GetPiece(Square.At(7,0)));
-                        board.AddPiece(Square.At(7,0), null);
-                    }
-                }
-                board.RightWhiteCastling = false;
-                board.LeftWhiteCastling = false;
-
-            }
-            else
-            {
-                if (currentPosition.Equals(Square.At(0,4)))
-                {
-                    if (newSquare.Col == 6)
-                    {
-                        board.AddPiece(Square.At(0,5), board.GetPiece(Square.At(0,7)));
-                        board.AddPiece(Square.At(0,7), null);
-                    }
-                    else if (newSquare.Col == 2)
-                    {
-                        board.AddPiece(Square.At(0,3), board.GetPiece(Square.At(0,0)));
-                        board.AddPiece(Square.At(0,0), null);
-                    }
-                }
-                board.RightBlackCastling = false;
-                board.LeftBlackCastling = false;
-            }
-            
-            
-            base.MoveTo(board, newSquare);
+            return availableMoves.Where(square => square.IsValid() && board.IsEmptyOrOpponent(square, Player))
+                .Select(square => new Move(currentPosition, square, board));
         }
 
         public override void MoveTo(Board board, Move move)

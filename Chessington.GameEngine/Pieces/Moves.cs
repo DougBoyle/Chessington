@@ -1,16 +1,18 @@
-﻿using System;
+﻿using Chessington.GameEngine.AI;
+using System;
 using System.Collections.Generic;
 
 namespace Chessington.GameEngine.Pieces
 {
     public class Moves
     {
-        public static List<Square> GetBeamMoves(Board board, Square currentPosition, 
+        public static List<Move> GetBeamMoves(Board board, Square startPosition, 
             Player currentPlayer, Func<Square, Square> iterator) {
-            List<Square> availableMoves = new List<Square>();
+            Square currentPosition = startPosition;
+            List<Move> availableMoves = new List<Move>();
             while ((currentPosition = iterator.Invoke(currentPosition)).IsValid()) {
                 if (board.IsEmptyOrOpponent(currentPosition, currentPlayer)) {
-                    availableMoves.Add(currentPosition);
+                    availableMoves.Add(new Move(startPosition, currentPosition, board));
                 }
 
                 if (!board.IsSquareEmpty(currentPosition)) {
@@ -21,7 +23,7 @@ namespace Chessington.GameEngine.Pieces
             return availableMoves;
         }
 
-        public static IEnumerable<Square> GetLateralMoves(Board board, Square currentPosition,Player currentPlayer)
+        public static IEnumerable<Move> GetLateralMoves(Board board, Square currentPosition, Player currentPlayer)
         {
             var availableMoves = GetBeamMoves(board, currentPosition, currentPlayer, 
                 square => new Square(square.Row + 1, square.Col));
@@ -34,7 +36,7 @@ namespace Chessington.GameEngine.Pieces
             return availableMoves;
         }
 
-        public static IEnumerable<Square> GetDiagonalMoves(Board board, Square currentPosition, Player currentPlayer)
+        public static IEnumerable<Move> GetDiagonalMoves(Board board, Square currentPosition, Player currentPlayer)
         {
             var availableMoves = GetBeamMoves(board, currentPosition, currentPlayer, 
                 square => new Square(square.Row + 1, square.Col + 1));

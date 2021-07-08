@@ -143,7 +143,7 @@ namespace Chessington.GameEngine
 
 
         // TODO: May be worth just doing GetRelaxedAvailableMoves and checking them all at top level?
-        public List<Move> GetAllAvailableMoves2()
+        public List<Move> GetAllAvailableMoves()
         {
             List<Move> availableMoves = new List<Move>();
             for (int i = 0; i < GameSettings.BoardSize; i++)
@@ -153,7 +153,7 @@ namespace Chessington.GameEngine
                     var square = Square.At(i, j);
                     var piece = GetPiece(square);
                     if (piece == null || piece.Player != CurrentPlayer) continue;
-                    availableMoves.AddRange(piece.GetAvailableMoves2(this, square));
+                    availableMoves.AddRange(piece.GetAvailableMoves(this, square));
                 }
             }
 
@@ -161,7 +161,7 @@ namespace Chessington.GameEngine
         }
 
         // avoid repeating effort for computer search - can just use relaxed moves, very negative score will indicate check
-        public List<Move> GetAllRelaxedMoves2()
+        public List<Move> GetAllRelaxedMoves()
         {
             List<Move> availableMoves = new List<Move>();
             for (int i = 0; i < GameSettings.BoardSize; i++)
@@ -171,7 +171,7 @@ namespace Chessington.GameEngine
                     var square = Square.At(i, j);
                     var piece = GetPiece(square);
                     if (piece == null || piece.Player != CurrentPlayer) continue;
-                    availableMoves.AddRange(piece.GetRelaxedAvailableMoves2(this, square));
+                    availableMoves.AddRange(piece.GetRelaxedAvailableMoves(this, square));
                 }
             }
 
@@ -197,7 +197,7 @@ namespace Chessington.GameEngine
                     var square = Square.At(i, j);
                     var piece = GetPiece(square);
                     if (piece == null || piece.Player == player) continue;
-                    if (piece.GetRelaxedAvailableMoves2(this, square).Select(move => move.To).Contains(kingSquare)) {
+                    if (piece.GetRelaxedAvailableMoves(this, square).Select(move => move.To).Contains(kingSquare)) {
                         return true;
                     }
                 }

@@ -49,7 +49,7 @@ namespace Chessington.GameEngine.AI
             var gameInfo = new GameExtraInfo(Board);
 
             // require an actually valid move at top level, not relaxed moves
-            var allAvailableMoves = Board.GetAllAvailableMoves2().ToList();
+            var allAvailableMoves = Board.GetAllAvailableMoves().ToList();
             // Issue: Now doing deterministically, so need to randomise somehow
             Shuffle(allAvailableMoves);
 
@@ -64,7 +64,7 @@ namespace Chessington.GameEngine.AI
             {
                 Piece piece = Board.GetPiece(move.From);
 
-                piece.MoveTo(tempBoard, move.To);
+                piece.MoveTo(tempBoard, move);
 
                 int score = -AlphaBeta(tempBoard, MAX_DEPTH - 1, -bestScore);
                 if (score > bestScore)
@@ -108,7 +108,7 @@ namespace Chessington.GameEngine.AI
             {
                 // use relaxed moves to avoid searching all moves at next level for check, just to evaluate them all again
                 // when that level is actually searched (TODO: Can't detect stalemate, looks like losing)
-                var allAvailableMoves = Board.GetAllRelaxedMoves2();
+                var allAvailableMoves = Board.GetAllRelaxedMoves();
 
                 int bestScore = -1000000 - 1000*depth; // the sooner in the search a checkmate is, the worse it is valued
                 var gameInfo = new GameExtraInfo(Board);
@@ -120,7 +120,7 @@ namespace Chessington.GameEngine.AI
 
                     if (move.Captured != null && move.Captured.PieceType == PieceType.King) return 1000000 + 1000 * depth;
 
-                    piece.MoveTo(Board, move.To);
+                    piece.MoveTo(Board, move);
 
                     // as soon as recursive call finds a path worse than bestScore for us, we know we won't go down that route
                     // hence -bestScore is the new recursive upperBound

@@ -54,7 +54,7 @@ namespace Chessington.UI.ViewModels
             if (currentPiece == null) return;
             currentSquare = message.Square;
 
-            var moves = new ReadOnlyCollection<Square>(currentPiece.GetAvailableMoves2(Board, currentSquare).Select(move => move.To).ToList());
+            var moves = new ReadOnlyCollection<Square>(currentPiece.GetAvailableMoves(Board, currentSquare).Select(move => move.To).ToList());
             ChessingtonServices.EventAggregator.Publish(new ValidMovesUpdated(moves));
         }
 
@@ -82,7 +82,7 @@ namespace Chessington.UI.ViewModels
             if (currentPiece == null)
                 return;
 
-            var moves = currentPiece.GetAvailableMoves2(Board, currentSquare).Where(move => move.To == message.Square);
+            var moves = currentPiece.GetAvailableMoves(Board, currentSquare).Where(move => move.To == message.Square);
 
             if (moves.Any())
             {
@@ -126,7 +126,7 @@ namespace Chessington.UI.ViewModels
 
             // Allow choice of how to promote
             // Same as completing a regular move
-            var move = currentPiece.GetAvailableMoves2(Board, currentSquare)
+            var move = currentPiece.GetAvailableMoves(Board, currentSquare)
                 .First(m => m.Promotion.PieceType == pieceType && m.To == promotionSquare);
 
             currentPiece.MoveTo(Board, move);
@@ -161,7 +161,7 @@ namespace Chessington.UI.ViewModels
             if (move != null)
             {
                 Console.WriteLine("Move played: {0}", move);
-                Board.GetPiece(move.From).MoveTo(Board, move.To);
+                Board.GetPiece(move.From).MoveTo(Board, move);
                 PiecesMoved();
             //    ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
             }

@@ -20,29 +20,9 @@ namespace Chessington.GameEngine.Pieces
 
         public Player Player { get; private set; }
 
-        public virtual IEnumerable<Square> GetAvailableMoves(Board board, Square position) {
-            IEnumerable<Square> possible = GetRelaxedAvailableMoves(board, position);
-            List<Square> actual = new List<Square>();
-
-            var tempBoard = new Board(board);
-            var gameInfo = new GameExtraInfo(board);
-
-            foreach (var square in possible) {
-                //   var newBoard = new Board(board);
-                var move = new Move(position, square, board);
-
-                MoveTo(tempBoard, square);
-                if (!tempBoard.InCheck(Player)) {
-                    actual.Add(square);
-                }
-                UndoMove(tempBoard, move, gameInfo);
-            }
-            return actual;
-        }
-
-        public virtual IEnumerable<Move> GetAvailableMoves2(Board board, Square position)
+        public virtual IEnumerable<Move> GetAvailableMoves(Board board, Square position)
         {
-            IEnumerable<Move> possible = GetRelaxedAvailableMoves2(board, position);
+            IEnumerable<Move> possible = GetRelaxedAvailableMoves(board, position);
             List<Move> actual = new List<Move>();
 
             // could also just be done at the whole board level
@@ -62,16 +42,8 @@ namespace Chessington.GameEngine.Pieces
         }
 
         // Takes the position of the piece as an input, rather than having to find it twice
-        public abstract IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square position);
-        public abstract IEnumerable<Move> GetRelaxedAvailableMoves2(Board board, Square position);
+        public abstract IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square position);
 
-        // TODO: use Move object to allow handling promotions
-        public virtual void MoveTo(Board board, Square newSquare)
-        {
-            var currentSquare = board.FindPiece(this);
-            board.MovePiece(currentSquare, newSquare);
-            board.EnPassantSquare = null;
-        }
 
         public virtual void MoveTo(Board board, Move move)
         {

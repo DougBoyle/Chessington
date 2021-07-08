@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Chessington.GameEngine.AI;
 using Chessington.GameEngine.Pieces;
 using FluentAssertions;
 using NUnit.Framework;
@@ -16,7 +17,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(6, 0), pawn);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(6, 0)).Select(move => move.To);
+            var moves = pawn.GetAvailableMoves(board, Square.At(6, 0)).Select(move => move.To);
 
             moves.Should().Contain(Square.At(5, 0));
         }
@@ -28,7 +29,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(1, 0), pawn);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(1, 0)).Select(move => move.To);
+            var moves = pawn.GetAvailableMoves(board, Square.At(1, 0)).Select(move => move.To);
 
             moves.Should().Contain(Square.At(2, 0));
         }
@@ -39,7 +40,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(6, 5), pawn);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(6, 5)).Select(move => move.To);
+            var moves = pawn.GetAvailableMoves(board, Square.At(6, 5)).Select(move => move.To);
 
             moves.Should().Contain(Square.At(4, 5));
         }
@@ -51,7 +52,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(1, 3), pawn);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(1, 3)).Select(move => move.To);
+            var moves = pawn.GetAvailableMoves(board, Square.At(1, 3)).Select(move => move.To);
 
             moves.Should().Contain(Square.At(3, 3));
         }
@@ -63,9 +64,9 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(6, 2), pawn);
 
-            pawn.MoveTo(board, Square.At(5, 2));
+            pawn.MoveTo(board, new Move(Square.At(6, 2), Square.At(5, 2), board));
             board.CurrentPlayer = Player.White;
-            var moves = pawn.GetAvailableMoves2(board, Square.At(5, 2)).Select(move => move.To).ToList();
+            var moves = pawn.GetAvailableMoves(board, Square.At(5, 2)).Select(move => move.To).ToList();
 
             moves.Should().HaveCount(1);
             moves.Should().Contain(square => square.Equals(Square.At(4, 2)));
@@ -78,9 +79,9 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(5, 2), pawn);
 
-            pawn.MoveTo(board, Square.At(6, 2));
+            pawn.MoveTo(board, new Move(Square.At(5, 2), Square.At(6, 2), board)); 
             board.CurrentPlayer = Player.Black;
-            var moves = pawn.GetAvailableMoves2(board, Square.At(6, 2)).Select(move => move.To).ToList();
+            var moves = pawn.GetAvailableMoves(board, Square.At(6, 2)).Select(move => move.To).ToList();
 
             moves.Should().HaveCount(1);
             moves.Should().Contain(square => square.Equals(Square.At(7, 2)));
@@ -95,7 +96,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(1, 3), pawn);
             board.AddPiece(Square.At(2, 3), blockingPiece);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(1, 3));
+            var moves = pawn.GetAvailableMoves(board, Square.At(1, 3));
 
             moves.Should().BeEmpty();
         }
@@ -109,7 +110,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(1, 3), pawn);
             board.AddPiece(Square.At(3, 3), blockingPiece);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(1, 3)).Select(move => move.To);
+            var moves = pawn.GetAvailableMoves(board, Square.At(1, 3)).Select(move => move.To);
 
             moves.Should().NotContain(Square.At(3, 3));
         }
@@ -121,7 +122,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(0, 3), pawn);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(0, 3));
+            var moves = pawn.GetAvailableMoves(board, Square.At(0, 3));
 
             moves.Should().BeEmpty();
         }
@@ -133,7 +134,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(7, 3), pawn);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(7, 3));
+            var moves = pawn.GetAvailableMoves(board, Square.At(7, 3));
 
             moves.Should().BeEmpty();
         }
@@ -149,7 +150,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(6, 4), firstTarget);
             board.AddPiece(Square.At(6, 2), secondTarget);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(5, 3)).Select(move => move.To).ToList();
+            var moves = pawn.GetAvailableMoves(board, Square.At(5, 3)).Select(move => move.To).ToList();
 
             moves.Should().Contain(Square.At(6, 2));
             moves.Should().Contain(Square.At(6, 4));
@@ -166,7 +167,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(6, 4), firstTarget);
             board.AddPiece(Square.At(6, 2), secondTarget);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(7, 3)).Select(move => move.To).ToList();
+            var moves = pawn.GetAvailableMoves(board, Square.At(7, 3)).Select(move => move.To).ToList();
 
             moves.Should().Contain(Square.At(6, 2));
             moves.Should().Contain(Square.At(6, 4));
@@ -182,7 +183,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var friendlyPiece = new Pawn(Player.Black);
             board.AddPiece(Square.At(6, 2), friendlyPiece);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(5, 3)).Select(move => move.To).ToList();
+            var moves = pawn.GetAvailableMoves(board, Square.At(5, 3)).Select(move => move.To).ToList();
 
             moves.Should().NotContain(Square.At(6, 2));
             moves.Should().NotContain(Square.At(6, 4));
@@ -198,7 +199,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var friendlyPiece = new Pawn(Player.White);
             board.AddPiece(Square.At(6, 2), friendlyPiece);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(7, 3)).Select(move => move.To).ToList();
+            var moves = pawn.GetAvailableMoves(board, Square.At(7, 3)).Select(move => move.To).ToList();
 
             moves.Should().NotContain(Square.At(6, 2));
             moves.Should().NotContain(Square.At(6, 4));
@@ -214,12 +215,12 @@ namespace Chessington.GameEngine.Tests.Pieces
             var blackPawn =new Pawn(Player.Black);
             board.AddPiece(Square.At(1,3), blackPawn);
             
-            blackPawn.MoveTo(board, Square.At(3, 3));
-            var moves = whitePawn.GetAvailableMoves2(board, Square.At(3, 4)).Select(move => move.To).ToList();
+            blackPawn.MoveTo(board, new Move(Square.At(1, 3), Square.At(3, 3), board));
+            var moves = whitePawn.GetAvailableMoves(board, Square.At(3, 4)).Select(move => move.To).ToList();
 
             moves.Should().Contain(Square.At(2, 3));
             
-            whitePawn.MoveTo(board, Square.At(2,3));
+            whitePawn.MoveTo(board, new Move(Square.At(3, 4), Square.At(2, 3), board));
             board.IsSquareEmpty(Square.At(3, 3)).Should().BeTrue();
         }
         
@@ -233,12 +234,12 @@ namespace Chessington.GameEngine.Tests.Pieces
             var blackPawn =new Pawn(Player.Black);
             board.AddPiece(Square.At(4,5), blackPawn);
             
-            whitePawn.MoveTo(board, Square.At(4, 6));
-            var moves = blackPawn.GetAvailableMoves2(board, Square.At(4, 5)).Select(move => move.To).ToList();
+            whitePawn.MoveTo(board, new Move(Square.At(6, 6), Square.At(4, 6), board));
+            var moves = blackPawn.GetAvailableMoves(board, Square.At(4, 5)).Select(move => move.To).ToList();
 
             moves.Should().Contain(Square.At(5, 6));
             
-            blackPawn.MoveTo(board, Square.At(5,6));
+            blackPawn.MoveTo(board, new Move(Square.At(4, 5), Square.At(5, 6), board));
             board.IsSquareEmpty(Square.At(4, 6)).Should().BeTrue();
         }
         
@@ -257,11 +258,11 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(7,7), whiteBishop);
             board.AddPiece(Square.At(7,6),blackBishop);
             
-            blackPawn.MoveTo(board, Square.At(3, 3));
-            whiteBishop.MoveTo(board,Square.At(6,6));
-            blackBishop.MoveTo(board,Square.At(6,7));
+            blackPawn.MoveTo(board, new Move(Square.At(1, 3), Square.At(3, 3), board));
+            whiteBishop.MoveTo(board, new Move(Square.At(7, 7), Square.At(6, 6), board));
+            blackBishop.MoveTo(board, new Move(Square.At(7, 6), Square.At(6, 7), board));
             
-            var moves = whitePawn.GetAvailableMoves2(board, Square.At(3, 4)).Select(move => move.To).ToList();
+            var moves = whitePawn.GetAvailableMoves(board, Square.At(3, 4)).Select(move => move.To).ToList();
             moves.Should().NotContain(Square.At(2, 3));
         }
         
@@ -279,11 +280,11 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(0,0), whiteBishop);
             board.AddPiece(Square.At(1,0),blackBishop);
             
-            whitePawn.MoveTo(board, Square.At(4, 6));
-            blackBishop.MoveTo(board,Square.At(2,1));
-            whiteBishop.MoveTo(board,Square.At(1,1));
-            
-            var moves = blackPawn.GetAvailableMoves2(board, Square.At(4, 5)).Select(move => move.To).ToList();
+            whitePawn.MoveTo(board, new Move(Square.At(6, 6), Square.At(4, 6), board));
+            blackBishop.MoveTo(board, new Move(Square.At(1, 0), Square.At(2, 1), board));
+            whiteBishop.MoveTo(board, new Move(Square.At(0, 0), Square.At(1, 1), board));
+
+            var moves = blackPawn.GetAvailableMoves(board, Square.At(4, 5)).Select(move => move.To).ToList();
             moves.Should().NotContain(Square.At(5, 6));
         }
 
@@ -294,7 +295,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(1, 0), pawn);
 
-            var moves = pawn.GetAvailableMoves2(board, Square.At(1, 0));
+            var moves = pawn.GetAvailableMoves(board, Square.At(1, 0));
 
             moves.All(move => move.To == Square.At(0, 0)).Should().BeTrue();
             moves.All(move => move.Promotion.Player == Player.White).Should().BeTrue();
@@ -313,7 +314,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var board = new Board(Player.Black);
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(6, 0), pawn);
-            var moves = pawn.GetAvailableMoves2(board, Square.At(6, 0));
+            var moves = pawn.GetAvailableMoves(board, Square.At(6, 0));
 
 
             moves.All(move => move.To == Square.At(7, 0)).Should().BeTrue();

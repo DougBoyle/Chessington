@@ -8,14 +8,10 @@ namespace Chessington.GameEngine.Pieces {
         public Queen(Player player)
             : base(player) { PieceType = PieceType.Queen; }
 
-        public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square currentPosition) {
+        public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition)
+        {
             return Moves.GetDiagonalMoves(board, currentPosition, Player)
                 .Concat(Moves.GetLateralMoves(board, currentPosition, Player));
-        }
-
-        public override IEnumerable<Move> GetRelaxedAvailableMoves2(Board board, Square here)
-        {
-            return GetRelaxedAvailableMoves(board, here).Select(to => new Move(here, to, board));
         }
     }
 }

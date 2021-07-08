@@ -19,11 +19,12 @@ namespace Chessington.GameEngine.AI
         public readonly Square To;
 
         public Piece Captured; // is null for en-passant
-        public bool Promotion; // if true, replace piece with a pawn rather than whatever promoted piece it is now
+        // Promotion = null if not promoting, else is the piece to replace with
+        public Piece Promotion; 
 
         // information about 50-move counter/castling status/en-passant can be remembered once from the board, not stored per move
 
-        public Move(Square from, Square to, Piece captured, bool promotion)
+        public Move(Square from, Square to, Piece captured, Piece promotion)
         {
             From = from;
             To = to;
@@ -32,13 +33,17 @@ namespace Chessington.GameEngine.AI
         }
 
         // convert a pair of squares to a 'Move' - TODO: Produce Move instances directly
+        // Note: Can't be used for pawn promotions, don't know what to promote to
         public Move(Square from, Square to, Board before)
         {
             From = from;
             To = to;
             Captured = before.GetPiece(to);
-            // detect promotions
-            Promotion = (before.GetPiece(from).PieceType == PieceType.Pawn) && (to.Row == 0 || to.Row == 7);
+
+            // doesn't detect promotions
+            // System.Diagnostics.Debug.Assert(before.GetPiece(from).PieceType != PieceType.Pawn || !(to.Row == 0 || to.Row == 7));
+           
+            Promotion = null; // (before.GetPiece(from).PieceType == PieceType.Pawn) && (to.Row == 0 || to.Row == 7);
         }
 
         // for converting polyglot entries to move objects. See: http://hgm.nubati.net/book_format.html
@@ -53,18 +58,26 @@ namespace Chessington.GameEngine.AI
             {
                 To = Square.At(From.Row, 2);
                 Captured = null;
-                Promotion = false;
+                Promotion = null;
             }
             else if (board.GetPiece(From).PieceType == PieceType.King && From.Col == 4 && To.Col == 7)
             {
                 To = Square.At(From.Row, 6);
                 Captured = null;
-                Promotion = false;
+                Promotion = null;
             }
             else
             {
                 Captured = board.GetPiece(To);
-                Promotion = (move & 0xF000) > 0;
+                int promote = (move & 0xF000) >> 12;
+                switch (promote)
+                {
+                    case 1: Promotion = new Knight(board.CurrentPlayer); break;
+                    case 2: Promotion = new Bishop(board.CurrentPlayer); break;
+                    case 3: Promotion = new Rook(board.CurrentPlayer); break;
+                    case 4: Promotion = new Queen(board.CurrentPlayer); break;
+                    default: Promotion = null; break;
+                }
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using Chessington.GameEngine.Pieces;
 using FluentAssertions;
 using NUnit.Framework;
+using System.Linq;
 
 namespace Chessington.GameEngine.Tests.Pieces
 {
@@ -28,7 +29,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(1,0), queen);
             board.AddPiece(Square.At(0,7), king);
 
-            var moves = king.GetAvailableMoves(board, Square.At(0, 7));
+            var moves = king.GetAvailableMoves2(board, Square.At(0, 7)).Select(move => move.To);
             moves.Should().Contain(Square.At(0,6)).And.NotContain(new Square(1, 7));
         }
     }

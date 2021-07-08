@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Chessington.GameEngine.AI;
+
 namespace Chessington.GameEngine.Pieces
 {
     public class Knight : Piece
@@ -24,6 +26,11 @@ namespace Chessington.GameEngine.Pieces
                 }
             }
             return availableMoves.Where(square => square.IsValid() && board.IsEmptyOrOpponent(square, Player));
+        }
+
+        public override IEnumerable<Move> GetRelaxedAvailableMoves2(Board board, Square here)
+        {
+            return GetRelaxedAvailableMoves(board, here).Select(to => new Move(here, to, board));
         }
     }
 }

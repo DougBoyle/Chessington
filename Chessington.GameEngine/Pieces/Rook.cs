@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using Chessington.GameEngine.AI;
+
 namespace Chessington.GameEngine.Pieces
 {
     public class Rook : Piece
@@ -12,7 +14,12 @@ namespace Chessington.GameEngine.Pieces
         {
             return Moves.GetLateralMoves(board, currentPosition, Player);
         }
-        
+
+        public override IEnumerable<Move> GetRelaxedAvailableMoves2(Board board, Square here)
+        {
+            return GetRelaxedAvailableMoves(board, here).Select(to => new Move(here, to, board));
+        }
+
         public override void MoveTo(Board board, Square newSquare)
         {
             var currentSquare = board.FindPiece(this);

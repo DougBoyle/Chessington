@@ -37,7 +37,32 @@ namespace Chessington.GameEngine.Pieces {
 
             return available;
         }
-        
+
+        private IEnumerable<Move> SquaresToMoves(Board board, Square here, IEnumerable<Square> squares)
+        {
+            List<Move> result = new List<Move>();
+            foreach (Square to in squares)
+            {
+                if (to.Col == 7 || to.Col == 0)
+                {
+                    result.Add(new Move(here, to, board.GetPiece(to), new Knight(Player)));
+                    result.Add(new Move(here, to, board.GetPiece(to), new Rook(Player)));
+                    result.Add(new Move(here, to, board.GetPiece(to), new Bishop(Player)));
+                    result.Add(new Move(here, to, board.GetPiece(to), new Queen(Player)));
+                } else
+                {
+                    result.Add(new Move(here, to, board.GetPiece(to), null));
+                }
+            }
+            return result;
+        }
+
+        // creates list of possible squares, then generates promotions where needed
+        public override IEnumerable<Move> GetRelaxedAvailableMoves2(Board board, Square here)
+        {
+            return SquaresToMoves(board, here, GetRelaxedAvailableMoves(board, here));
+        }
+
         public override void MoveTo(Board board, Square newSquare)
         {
             var currentSquare = board.FindPiece(this);
@@ -56,6 +81,34 @@ namespace Chessington.GameEngine.Pieces {
                 board.OnPieceCaptured(this);
                 board.AddPiece(newSquare, new Queen(Player));
             }
+        }
+
+        public override void MoveTo(Board board, Move move)
+        {
+            var currentSquare = move.From;
+            var newSquare = move.To;
+            if (newSquare.Equals(board.EnPassantSquare))
+            {
+                board.OnPieceCaptured(board.GetPiece(Square.At(currentSquare.Row, newSquare.Col)));
+                board.AddPiece(Square.At(currentSquare.Row, newSquare.Col), null);
+            }
+            base.MoveTo(board, move); // changes the current player
+            if (currentSquare.Row - newSquare.Row == 2 || currentSquare.Row - newSquare.Row == -2)
+            {
+                board.EnPassantSquare = Square.At((currentSquare.Row + newSquare.Row) / 2, newSquare.Col);
+            }
+            if (move.Promotion != null)
+            {
+                board.OnPieceCaptured(this);
+                board.AddPiece(newSquare, move.Promotion);
+
+            }
+            /*
+            if (newSquare.Row == 0 || newSquare.Row == 7) // TODO: Allow choosing how to promote
+            {
+                board.OnPieceCaptured(this);
+                board.AddPiece(newSquare, new Queen(Player));
+            }*/
         }
 
         public override void UndoMove(Board board, Move move, GameExtraInfo info)

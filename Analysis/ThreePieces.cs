@@ -95,7 +95,7 @@ namespace Analysis
 
                     var board = entry.Board;
 
-                    var allAvailableMoves = ComputerPlayer.SquarePairsToMoves(board, board.GetAllAvailableMoves());
+                    var allAvailableMoves = board.GetAllAvailableMoves2();
 
                     if (allAvailableMoves.Count == 0) // either checkmate or stalemate
                     {
@@ -163,7 +163,7 @@ namespace Analysis
 
                     var board = entry.Board;
 
-                    var allAvailableMoves = ComputerPlayer.SquarePairsToMoves(board, board.GetAllAvailableMoves());
+                    var allAvailableMoves = board.GetAllAvailableMoves2();
 
                     if (allAvailableMoves.Count == 0) // either checkmate or stalemate
                     {
@@ -233,7 +233,7 @@ namespace Analysis
 
                 var board = entry.Board;
 
-                var allAvailableMoves = ComputerPlayer.SquarePairsToMoves(board, board.GetAllAvailableMoves());
+                var allAvailableMoves = board.GetAllAvailableMoves2();
 
                 // Can be a drawn position with some moves resulting in losing, so still need to filter
                 // Know position ends in a draw, so can ignore DTM/DTZ
@@ -258,7 +258,7 @@ namespace Analysis
 
                 var board = entry.Board;
 
-                var allAvailableMoves = ComputerPlayer.SquarePairsToMoves(board, board.GetAllAvailableMoves());
+                var allAvailableMoves = board.GetAllAvailableMoves2();
 
                 // Can be a drawn position with some moves resulting in losing, so still need to filter
                 // Know position ends in a draw, so can ignore DTM/DTZ
@@ -347,7 +347,7 @@ namespace Analysis
 
                     var board = entry.Board;
 
-                    var allAvailableMoves = ComputerPlayer.SquarePairsToMoves(board, board.GetAllAvailableMoves());
+                    var allAvailableMoves = board.GetAllAvailableMoves2();
 
                     if (allAvailableMoves.Count == 0) // either checkmate or stalemate
                     {
@@ -417,7 +417,7 @@ namespace Analysis
 
                     var board = entry.Board;
 
-                    var allAvailableMoves = ComputerPlayer.SquarePairsToMoves(board, board.GetAllAvailableMoves());
+                    var allAvailableMoves = board.GetAllAvailableMoves2();
 
                     if (allAvailableMoves.Count == 0) // either checkmate or stalemate
                     {
@@ -487,7 +487,7 @@ namespace Analysis
 
                 var board = entry.Board;
 
-                var allAvailableMoves = ComputerPlayer.SquarePairsToMoves(board, board.GetAllAvailableMoves());
+                var allAvailableMoves = board.GetAllAvailableMoves2();
 
                 // Can be a drawn position with some moves resulting in losing, so still need to filter
                 // Know position ends in a draw, so can ignore DTM/DTZ
@@ -512,7 +512,7 @@ namespace Analysis
 
                 var board = entry.Board;
 
-                var allAvailableMoves = ComputerPlayer.SquarePairsToMoves(board, board.GetAllAvailableMoves());
+                var allAvailableMoves = board.GetAllAvailableMoves2();
 
                 // Can be a drawn position with some moves resulting in losing, so still need to filter
                 // Know position ends in a draw, so can ignore DTM/DTZ

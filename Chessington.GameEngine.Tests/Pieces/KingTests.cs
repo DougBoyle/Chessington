@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Chessington.GameEngine.Pieces;
 using FluentAssertions;
 using NUnit.Framework;
@@ -19,7 +20,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var king = new King(Player.White);
             board.AddPiece(Square.At(4, 4), king);
 
-            var moves = king.GetAvailableMoves(board, Square.At(4, 4));
+            var moves = king.GetAvailableMoves2(board, Square.At(4, 4)).Select(move => move.To);
 
             var expectedMoves = new List<Square>
             {
@@ -47,7 +48,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var king = new King(Player.White);
             board.AddPiece(Square.At(0, 0), king);
 
-            var moves = king.GetAvailableMoves(board, Square.At(0, 0));
+            var moves = king.GetAvailableMoves2(board, Square.At(0, 0)).Select(move => move.To);
 
             var expectedMoves = new List<Square>
             {
@@ -68,7 +69,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(4, 5), pawn);
 
-            var moves = king.GetAvailableMoves(board, Square.At(4, 4));
+            var moves = king.GetAvailableMoves2(board, Square.At(4, 4)).Select(move => move.To);
             moves.Should().Contain(Square.At(4, 5));
         }
 
@@ -81,7 +82,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(4, 5), pawn);
 
-            var moves = king.GetAvailableMoves(board, Square.At(4, 4));
+            var moves = king.GetAvailableMoves2(board, Square.At(4, 4)).Select(move => move.To);
             moves.Should().NotContain(Square.At(4, 5));
         }
     }

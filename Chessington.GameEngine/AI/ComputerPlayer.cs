@@ -49,63 +49,35 @@ namespace Chessington.GameEngine.AI
             var gameInfo = new GameExtraInfo(Board);
 
             // require an actually valid move at top level, not relaxed moves
-            var allAvailableMoves = Board.GetAllAvailableMoves().ToList();
+            var allAvailableMoves = Board.GetAllAvailableMoves2().ToList();
             // Issue: Now doing deterministically, so need to randomise somehow
             Shuffle(allAvailableMoves);
 
-            // choose the move with the best immediate score (stupidly aggressive for now, need to make recursive)
-
-            // TODO: Getting "can't find piece" error. PieceToMove getting removed then replaced as "new Pawn(...)"?
-            // Instead remember just the square, and lookup actual Piece at very end
-            //      Piece PieceToMove = null;
-            Square PieceToMove = Square.At(-1, -1);
-
-
-            Square BestMove = Square.At(-1, -1); // placeholder
 
             // Note: This has to be worse than the worst possible evaluation, so that the computer
             // still moves even if it knows it is being checkmated
             int bestScore = -10000000;
 
-            Move TheBestMove = null;
+            Move bestMove = null;
 
-            // TODO: Also order these moves
-            foreach (KeyValuePair<Square, List<Square>> piece in allAvailableMoves)
+            foreach (Move move in allAvailableMoves)
             {
-                // also randomise each selection of moves
-                Shuffle(piece.Value);
-             //   Piece actualPiece = Board.GetPiece(piece.Key);
-                foreach (Square MoveTo in piece.Value)
+                Piece piece = Board.GetPiece(move.From);
+
+                piece.MoveTo(tempBoard, move.To);
+
+                int score = -AlphaBeta(tempBoard, MAX_DEPTH - 1, -bestScore);
+                if (score > bestScore)
                 {
-                    // Note: Done inside loop in case piece removed then replaced during search (e.g. en-passant)
-                    Piece actualPiece = tempBoard.GetPiece(piece.Key);
-
-                    var move = new Move(piece.Key, MoveTo, tempBoard);
-
-                    // TODO: Test without making new board
-                    //  var newBoard = new Board(Board);
-                    //  actualPiece.MoveTo(newBoard, MoveTo);
-                    actualPiece.MoveTo(tempBoard, MoveTo);
-
-                    //  int score = Evaluator.GetBoardValue(newBoard) * sign; // Have to take negative if playing as black
-                    //   int score = -AlphaBeta(newBoard, MAX_DEPTH - 1, -bestScore); // still initialise the upper bound of first recursive call
-                    int score = -AlphaBeta(tempBoard, MAX_DEPTH - 1, -bestScore);
-                    if (score > bestScore)
-                    {
-                        //       PieceToMove = actualPiece;
-                        PieceToMove = piece.Key;
-                        BestMove = MoveTo;
-                        bestScore = score;
-
-                        TheBestMove = move;
-                    }
-
-                    actualPiece.UndoMove(tempBoard, move, gameInfo); // undo the move
+                    bestScore = score;
+                    bestMove = move;
                 }
+
+                piece.UndoMove(tempBoard, move, gameInfo); // undo the move
             }
 
             Console.WriteLine("Best score found: {0}", bestScore);
-            return TheBestMove;
+            return bestMove;
         }
 
         // TODO: Optimise to not pass board around, represent moves more efficiently, and do alpha-beta pruning
@@ -136,7 +108,7 @@ namespace Chessington.GameEngine.AI
             {
                 // use relaxed moves to avoid searching all moves at next level for check, just to evaluate them all again
                 // when that level is actually searched (TODO: Can't detect stalemate, looks like losing)
-                var allAvailableMoves = SquarePairsToMoves(Board, Board.GetAllRelaxedMoves());
+                var allAvailableMoves = Board.GetAllRelaxedMoves2();
 
                 int bestScore = -1000000 - 1000*depth; // the sooner in the search a checkmate is, the worse it is valued
                 var gameInfo = new GameExtraInfo(Board);
@@ -187,12 +159,6 @@ namespace Chessington.GameEngine.AI
 
                 return bestScore;
             }
-        }
-
-        public static List<Move> SquarePairsToMoves(Board board, Dictionary<Square, List<Square>> moves)
-        {
-            return moves.SelectMany(piece => piece.Value.Select(to => new Move(piece.Key, to, board)))
-                .OrderByDescending(move => move.Captured == null ? -1 : (int)move.Captured.PieceType).ToList();
         }
     }
 }

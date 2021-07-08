@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chessington.GameEngine.AI;
 using Chessington.GameEngine.Pieces;
 
 namespace Chessington.GameEngine
@@ -140,29 +141,11 @@ namespace Chessington.GameEngine
             board[from.Row, from.Col] = captured; // En-passant captures are handled specially
         }
 
-        public Dictionary<Square, List<Square>> GetAllAvailableMoves()
-        {
-            Dictionary<Square, List<Square>> availableMoves = new Dictionary<Square, List<Square>>();
-            for (int i = 0; i < GameSettings.BoardSize; i++) {
-                for (int j = 0; j < GameSettings.BoardSize; j++) {
-                    var square = Square.At(i, j);
-                    var piece = GetPiece(square);
-                    if (piece == null || piece.Player != CurrentPlayer) continue;
-                    var pieceMoves = piece.GetAvailableMoves(this, square).ToList();
-                    if (pieceMoves.Count != 0)
-                    {
-                        availableMoves[Square.At(i,j)] = pieceMoves;
-                    }
-                }
-            }
 
-            return availableMoves;
-        }
-
-        // avoid repeating effort for computer search - can just use relaxed moves, very negative score will indicate check
-        public Dictionary<Square, List<Square>> GetAllRelaxedMoves()
+        // TODO: May be worth just doing GetRelaxedAvailableMoves and checking them all at top level?
+        public List<Move> GetAllAvailableMoves2()
         {
-            Dictionary<Square, List<Square>> availableMoves = new Dictionary<Square, List<Square>>();
+            List<Move> availableMoves = new List<Move>();
             for (int i = 0; i < GameSettings.BoardSize; i++)
             {
                 for (int j = 0; j < GameSettings.BoardSize; j++)
@@ -170,11 +153,25 @@ namespace Chessington.GameEngine
                     var square = Square.At(i, j);
                     var piece = GetPiece(square);
                     if (piece == null || piece.Player != CurrentPlayer) continue;
-                    var pieceMoves = piece.GetRelaxedAvailableMoves(this, square).ToList();
-                    if (pieceMoves.Count != 0)
-                    {
-                        availableMoves[Square.At(i, j)] = pieceMoves;
-                    }
+                    availableMoves.AddRange(piece.GetAvailableMoves2(this, square));
+                }
+            }
+
+            return availableMoves;
+        }
+
+        // avoid repeating effort for computer search - can just use relaxed moves, very negative score will indicate check
+        public List<Move> GetAllRelaxedMoves2()
+        {
+            List<Move> availableMoves = new List<Move>();
+            for (int i = 0; i < GameSettings.BoardSize; i++)
+            {
+                for (int j = 0; j < GameSettings.BoardSize; j++)
+                {
+                    var square = Square.At(i, j);
+                    var piece = GetPiece(square);
+                    if (piece == null || piece.Player != CurrentPlayer) continue;
+                    availableMoves.AddRange(piece.GetRelaxedAvailableMoves2(this, square));
                 }
             }
 
@@ -200,7 +197,7 @@ namespace Chessington.GameEngine
                     var square = Square.At(i, j);
                     var piece = GetPiece(square);
                     if (piece == null || piece.Player == player) continue;
-                    if (piece.GetRelaxedAvailableMoves(this, square).Contains(kingSquare)) {
+                    if (piece.GetRelaxedAvailableMoves2(this, square).Select(move => move.To).Contains(kingSquare)) {
                         return true;
                     }
                 }

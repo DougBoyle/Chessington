@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Chessington.GameEngine.Pieces;
 using FluentAssertions;
 using NUnit.Framework;
@@ -15,7 +16,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var knight = new Knight(Player.White);
             board.AddPiece(Square.At(4, 4), knight);
 
-            var moves = knight.GetAvailableMoves(board, Square.At(4, 4));
+            var moves = knight.GetAvailableMoves2(board, Square.At(4, 4)).Select(move => move.To);
 
             var expectedMoves = new List<Square>
             {
@@ -44,7 +45,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             board.AddPiece(Square.At(3, 4), firstPawn);
             board.AddPiece(Square.At(3, 5), secondPawn);
 
-            var moves = knight.GetAvailableMoves(board, Square.At(4, 4));
+            var moves = knight.GetAvailableMoves2(board, Square.At(4, 4)).Select(move => move.To);
 
             moves.Should().Contain(Square.At(2, 5));
         }
@@ -56,7 +57,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var knight = new Knight(Player.White);
             board.AddPiece(Square.At(0, 0), knight);
 
-            var moves = knight.GetAvailableMoves(board, Square.At(0, 0));
+            var moves = knight.GetAvailableMoves2(board, Square.At(0, 0)).Select(move => move.To);
 
             var expectedMoves = new List<Square> {Square.At(1, 2), Square.At(2, 1)};
             moves.ShouldAllBeEquivalentTo(expectedMoves);
@@ -72,7 +73,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(2, 5), pawn);
 
-            var moves = knight.GetAvailableMoves(board, Square.At(4, 4));
+            var moves = knight.GetAvailableMoves2(board, Square.At(4, 4)).Select(move => move.To);
 
             moves.Should().Contain(Square.At(2, 5));
         }
@@ -86,7 +87,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(2, 5), pawn);
 
-            var moves = knight.GetAvailableMoves(board, Square.At(4, 4));
+            var moves = knight.GetAvailableMoves2(board, Square.At(4, 4)).Select(move => move.To);
 
             moves.Should().NotContain(Square.At(2, 5));
         }

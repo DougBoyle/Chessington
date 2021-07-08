@@ -54,7 +54,7 @@ namespace Chessington.UI.ViewModels
             if (currentPiece == null) return;
             currentSquare = message.Square;
 
-            var moves = new ReadOnlyCollection<Square>(currentPiece.GetAvailableMoves(Board, currentSquare).ToList());
+            var moves = new ReadOnlyCollection<Square>(currentPiece.GetAvailableMoves2(Board, currentSquare).Select(move => move.To).ToList());
             ChessingtonServices.EventAggregator.Publish(new ValidMovesUpdated(moves));
         }
 
@@ -82,9 +82,9 @@ namespace Chessington.UI.ViewModels
             if (currentPiece == null)
                 return;
 
-            var moves = currentPiece.GetAvailableMoves(Board, currentSquare);
+            var moves = currentPiece.GetAvailableMoves2(Board, currentSquare).Where(move => move.To == message.Square);
 
-            if (moves.Contains(message.Square))
+            if (moves.Any())
             {
                 if (currentPiece.PieceType == PieceType.Pawn && (message.Square.Row == 0 || message.Square.Row == 7))
                 {
@@ -95,7 +95,7 @@ namespace Chessington.UI.ViewModels
                     return;
                 }
 
-                currentPiece.MoveTo(Board, message.Square);
+                currentPiece.MoveTo(Board, moves.First()); // should only be 1 possibility if not a promotion
 
                 PiecesMoved();
               //  ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
@@ -124,9 +124,12 @@ namespace Chessington.UI.ViewModels
             promoting = false; // clicking anywhere else undos choice
             NotifyPromotionChanged(null);
 
-            // TODO: Allow choice of how to promote
+            // Allow choice of how to promote
             // Same as completing a regular move
-            currentPiece.MoveTo(Board, promotionSquare);
+            var move = currentPiece.GetAvailableMoves2(Board, currentSquare)
+                .First(m => m.Promotion.PieceType == pieceType && m.To == promotionSquare);
+
+            currentPiece.MoveTo(Board, move);
 
             PiecesMoved();
             //  ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));

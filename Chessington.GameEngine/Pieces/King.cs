@@ -60,6 +60,11 @@ namespace Chessington.GameEngine.Pieces
             return availableMoves;
         }
 
+        public override IEnumerable<Move> GetAvailableMoves2(Board board, Square here)
+        {
+            return GetAvailableMoves(board, here).Select(to => new Move(here, to, board));
+        }
+
         public override IEnumerable<Square> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
             List<Square> availableMoves = new List<Square>();
@@ -76,6 +81,11 @@ namespace Chessington.GameEngine.Pieces
             }
 
             return availableMoves.Where(square => square.IsValid() && board.IsEmptyOrOpponent(square, Player));
+        }
+
+        public override IEnumerable<Move> GetRelaxedAvailableMoves2(Board board, Square here)
+        {
+            return GetRelaxedAvailableMoves(board, here).Select(to => new Move(here, to, board));
         }
 
 
@@ -122,6 +132,51 @@ namespace Chessington.GameEngine.Pieces
             
             
             base.MoveTo(board, newSquare);
+        }
+
+        public override void MoveTo(Board board, Move move)
+        {
+            var currentPosition = move.From;
+            var newSquare = move.To;
+            if (Player == Player.White)
+            {
+                if (currentPosition.Equals(Square.At(7, 4)))
+                {
+                    if (newSquare.Col == 6)
+                    {
+                        board.AddPiece(Square.At(7, 5), board.GetPiece(Square.At(7, 7)));
+                        board.AddPiece(Square.At(7, 7), null);
+                    }
+                    else if (newSquare.Col == 2)
+                    {
+                        board.AddPiece(Square.At(7, 3), board.GetPiece(Square.At(7, 0)));
+                        board.AddPiece(Square.At(7, 0), null);
+                    }
+                }
+                board.RightWhiteCastling = false;
+                board.LeftWhiteCastling = false;
+
+            }
+            else
+            {
+                if (currentPosition.Equals(Square.At(0, 4)))
+                {
+                    if (newSquare.Col == 6)
+                    {
+                        board.AddPiece(Square.At(0, 5), board.GetPiece(Square.At(0, 7)));
+                        board.AddPiece(Square.At(0, 7), null);
+                    }
+                    else if (newSquare.Col == 2)
+                    {
+                        board.AddPiece(Square.At(0, 3), board.GetPiece(Square.At(0, 0)));
+                        board.AddPiece(Square.At(0, 0), null);
+                    }
+                }
+                board.RightBlackCastling = false;
+                board.LeftBlackCastling = false;
+            }
+
+            base.MoveTo(board, move);
         }
 
         public override void UndoMove(Board board, Move move, GameExtraInfo info)

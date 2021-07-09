@@ -16,7 +16,7 @@ namespace Analysis
 {
     // TODO: Double check logic surrounding DTZ and how moves should be chosen (minimising DTM should be sufficient?)
     // TODO: Remember to flip win/lose between each side
-    class ThreePieces
+    public class ThreePieces
     {
         // 10 squares for white king (with symmetry invariance) * 60 for black king * 62 for other piece
         // many such positions will be illegal, not relevant to calculation
@@ -536,12 +536,12 @@ namespace Analysis
         // storing to a file:
         // entry size:
         // Board = 16 bits (4 bits for wk, 6 for bk, 6 for other piece)
-        // Best move = 12 bits (ignoring promotion - 6 bits per square) per side (best for black/white)
-        // Leaves 8 bits spare to indicate outcome: 0 = draw, 1 = win, 2 = lose for each side
+        // Best move = 14 bits (promotion is top 2 bits) per side (best for black/white)
+        // Leaves 4 bits spare to indicate outcome: 0 = draw, 1 = win, 2 = lose for each side
         // Overall 48 bits = 6 byte entries:
         // [ Board | White Move | White Outcome | Black Move | Black Outcome ]
         // BoardToIndex computes board value: [ wk | bk | other piece ]
-        // Moves stored as [ FromRow | FromCol | ToRow | ToCol ] (still have 2 bits free to encode promotion if needed)
+        // Moves stored as [ Promote - 2 bits 00 | FromRow | FromCol | ToRow | ToCol ] 
         public static long EncodeEntry(TableEntry whiteEntry, TableEntry blackEntry, int index)
         {
             // whiteEntry/blackEntry should be for the same position (key), one may be null
@@ -551,15 +551,15 @@ namespace Analysis
             {
                 if (whiteEntry.BestMove != null)
                 {
-                    result <<= 6;
+                    result <<= 8;
                     result += whiteEntry.BestMove.From.Row * 8 + whiteEntry.BestMove.From.Col;
                     result <<= 6;
                     result += whiteEntry.BestMove.To.Row * 8 + whiteEntry.BestMove.To.Col;
                 } else
                 {
-                    result <<= 12; // may be in stale/checkmate, in which case no move possible, so set to 0
+                    result <<= 14; // may be in stale/checkmate, in which case no move possible, so set to 0
                 }
-                result <<= 4;
+                result <<= 2;
                 result += whiteEntry.Outcome == Outcome.Win ? 1 : whiteEntry.Outcome == Outcome.Lose ? 2 : 0;
             } else
             {
@@ -569,15 +569,15 @@ namespace Analysis
             {
                 if (blackEntry.BestMove != null)
                 {
-                    result <<= 6;
+                    result <<= 8;
                     result += blackEntry.BestMove.From.Row * 8 + blackEntry.BestMove.From.Col;
                     result <<= 6;
                     result += blackEntry.BestMove.To.Row * 8 + blackEntry.BestMove.To.Col;
                 } else
                 {
-                    result <<= 12;
+                    result <<= 14;
                 }
-                result <<= 4;
+                result <<= 2;
                 result += blackEntry.Outcome == Outcome.Win ? 1 : blackEntry.Outcome == Outcome.Lose ? 2 : 0;
             }
             else
@@ -606,6 +606,74 @@ namespace Analysis
                      //  fs.Write(bytes, 2, 6); // only 48 bits, not 64, so skip first 2 bytes
                     fs.Write(bytes, 4, 4); // ignore the index itself
                   //  }
+                }
+            }
+        }
+
+        // Also stores the DTM/DTZ (DTZ not actually useful), for use when generating other tables
+        // 14 bits move + 2 bits outcome + 8 bit DTM + 8 bits DTZ for each colour = 64 bits
+        // [ promotion + move | outcome | DTM | DTZ ]
+        // index is left implicit (all indices included in tablebase, so can infer from position)
+        public static long FullEncodeEntry(TableEntry whiteEntry, TableEntry blackEntry)
+        {
+            long result = 0; 
+
+            // initially 0, so don't need to shift if nothing there already
+            if (whiteEntry != null)
+            {
+                if (whiteEntry.BestMove != null)
+                {
+                    result += whiteEntry.BestMove.From.Row * 8 + whiteEntry.BestMove.From.Col;
+                    result <<= 6;
+                    result += whiteEntry.BestMove.To.Row * 8 + whiteEntry.BestMove.To.Col;
+                }
+                result <<= 2;
+                result += whiteEntry.Outcome == Outcome.Win ? 1 : whiteEntry.Outcome == Outcome.Lose ? 2 : 0;
+                result <<= 8;
+                result += whiteEntry.DTM;
+                result <<= 8;
+                result += whiteEntry.DTZ;
+            }
+
+            if (blackEntry != null)
+            {
+                if (blackEntry.BestMove != null)
+                {
+                    result <<= 8;
+                    result += blackEntry.BestMove.From.Row * 8 + blackEntry.BestMove.From.Col;
+                    result <<= 6;
+                    result += blackEntry.BestMove.To.Row * 8 + blackEntry.BestMove.To.Col;
+                }
+                else
+                {
+                    result <<= 14;
+                }
+                result <<= 2;
+                result += blackEntry.Outcome == Outcome.Win ? 1 : blackEntry.Outcome == Outcome.Lose ? 2 : 0;
+                result <<= 8;
+                result += blackEntry.DTM;
+                result <<= 8;
+                result += blackEntry.DTZ;
+            }
+            else
+            {
+                result <<= 32;
+            }
+            return result;
+        }
+
+        public void WriteFullTables(string filename)
+        {
+            using (FileStream fs = File.OpenWrite(filename))
+            {
+                for (int i = 0; i < whiteTable.Length; i++)
+                {
+                    //  if (whiteTable[i] != null || blackTable[i] != null)
+                    //  {
+                    long encoded = FullEncodeEntry(whiteTable[i], blackTable[i]);
+                    byte[] bytes = BitConverter.GetBytes(encoded);
+                    if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+                    fs.Write(bytes, 0, 8); 
                 }
             }
         }

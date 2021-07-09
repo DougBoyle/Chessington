@@ -37,7 +37,7 @@ namespace Chessington.GameEngine.AI.Endgame
             }
         }
 
-        private static void ReverseRows(Board b)
+        public static void ReverseRows(Board b)
         {
             for (int row = 0; row < GameSettings.BoardSize; row++)
             {
@@ -103,6 +103,20 @@ namespace Chessington.GameEngine.AI.Endgame
                 }
                 return square;
             };
+        }
+
+        // Have to normalise differently if pawn on board (assume white) - put white king on left side
+        public static SquareMapper NormalisePawnBoard(Board b)
+        {
+            Square king = b.FindKing(Player.White);
+            if (king.Col >= GameSettings.BoardSize / 2)
+            {
+                ReverseRows(b);
+                return square => new Square(square.Row, GameSettings.BoardSize - 1 - square.Col);
+            } else
+            {
+                return square => square;
+            }
         }
 
         // Also flips board vertically to respect direction pawns move

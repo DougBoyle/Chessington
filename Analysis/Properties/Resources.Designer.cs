@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Chessington.GameEngine.Properties {
+namespace Analysis.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Chessington.GameEngine.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Chessington.GameEngine.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Analysis.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace Chessington.GameEngine.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] codekiddy {
+        internal static byte[] KPK_DTM {
             get {
-                object obj = ResourceManager.GetObject("codekiddy", resourceCulture);
+                object obj = ResourceManager.GetObject("KPK_DTM", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace Chessington.GameEngine.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] KPK {
+        internal static byte[] KQK_DTM {
             get {
-                object obj = ResourceManager.GetObject("KPK", resourceCulture);
+                object obj = ResourceManager.GetObject("KQK_DTM", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -83,19 +83,9 @@ namespace Chessington.GameEngine.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] KQK {
+        internal static byte[] KRK_DTM {
             get {
-                object obj = ResourceManager.GetObject("KQK", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] KRK {
-            get {
-                object obj = ResourceManager.GetObject("KRK", resourceCulture);
+                object obj = ResourceManager.GetObject("KRK_DTM", resourceCulture);
                 return ((byte[])(obj));
             }
         }

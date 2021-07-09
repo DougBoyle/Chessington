@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\codekiddy.bin" />
+    <None Include="Resources\KPK.tbs" />
     <None Include="Resources\KQK.tbs" />
     <None Include="Resources\KRK.tbs" />
   </ItemGroup>

@@ -45,17 +45,32 @@
     <Compile Include="ListMax.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="TableEntry.cs" />
+    <Compile Include="ThreePiecesPawn.cs" />
     <Compile Include="ThreePieces.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Resources\KPK_DTM.tbs" />
+    <None Include="Resources\KQK_DTM.tbs" />
+    <None Include="Resources\KRK_DTM.tbs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Chessington.GameEngine\Chessington.GameEngine.csproj">
       <Project>{84243cb2-9c6d-4f65-b3b8-180690dc254a}</Project>
       <Name>Chessington.GameEngine</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

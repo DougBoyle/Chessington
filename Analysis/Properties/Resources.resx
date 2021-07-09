@@ -118,16 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="codekiddy" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\codekiddy.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="KPK_DTM" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\KPK_DTM.tbs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="KPK" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\KPK.tbs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="KQK_DTM" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\KQK_DTM.tbs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="KQK" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\KQK.tbs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="KRK" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\KRK.tbs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="KRK_DTM" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\KRK_DTM.tbs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

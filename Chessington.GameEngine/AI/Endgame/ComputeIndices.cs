@@ -48,5 +48,40 @@ namespace Chessington.GameEngine.AI.Endgame
             if (numPieces != 3) throw new ArgumentException("Board does not contain 3 pieces");
             return index;
         }
+
+        // KPK
+        // white king is on left side, white pawn is anywhere but either end row, black king anywhere
+        // 32 * 64 * 48 = 98304
+        public static int ThreePiecePawnBoardToIndex(Board b)
+        {
+            int numPieces = 0;
+            int index = 0;
+            for (int row = 0; row < 8; row++)
+            {
+                for (int col = 0; col < 8; col++)
+                {
+                    Piece piece = b.GetPiece(row, col);
+                    if (piece == null) continue;
+                    numPieces++;
+                    if (piece.PieceType == PieceType.King)
+                    {
+                        if (piece.Player == Player.White) // more complex as only 10 positions
+                        {
+                            index += 64 * 48 * (4 * row + col);
+                        }
+                        else
+                        {
+                            index += (8 * row + col) * 48;
+                        }
+                    }
+                    else
+                    {
+                        index += 8 * (row - 1) + col;
+                    }
+                }
+            }
+            if (numPieces != 3) throw new ArgumentException("Board does not contain 3 pieces");
+            return index;
+        }
     }
 }

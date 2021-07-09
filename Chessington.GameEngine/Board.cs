@@ -4,6 +4,8 @@ using System.Linq;
 using Chessington.GameEngine.AI;
 using Chessington.GameEngine.Pieces;
 
+using static Chessington.GameEngine.BitUtils;
+
 namespace Chessington.GameEngine
 {
     public class Board
@@ -11,7 +13,7 @@ namespace Chessington.GameEngine
         // TODO: This can just be a single column
         public Square? EnPassantSquare { get; set; }
         // TODO: Would be more efficient to allow accessing directly?
-        public readonly Piece[,] board;
+        private readonly Piece[,] board;
         public Player CurrentPlayer { get; set; }
         // TODO: Where is this actually used? Logic on BoardViewModel that wraps around MakeMove?
         public IList<Piece> CapturedPieces { get; private set; }
@@ -22,7 +24,14 @@ namespace Chessington.GameEngine
         public bool RightBlackCastling { get; set; } = true;
 
         // TODO: Count to 50 for stalemate
-        
+
+        // shift to using bitboards rather than Piece[,] board
+        // add functions to operate on bitboards in parallel for now
+        // White then Black, P-N-B-R-Q-K. So get index as:
+        //      (int)PieceType + 6*(int)Player
+
+
+        public ulong[] Bitboards = new ulong[12];
 
         public Board()
             : this(Player.White) { }
@@ -42,6 +51,11 @@ namespace Chessington.GameEngine
                 }
             }
 
+            for (int i = 0; i < 12; i++)
+            {
+                Bitboards[i] = board.Bitboards[i];
+            }
+
             CurrentPlayer = board.CurrentPlayer;
             EnPassantSquare = board.EnPassantSquare;
             CapturedPieces = new List<Piece>();
@@ -53,9 +67,15 @@ namespace Chessington.GameEngine
 
         public void AddPiece(Square square, Piece pawn)
         {
+            Piece previous = board[square.Row, square.Col];
             board[square.Row, square.Col] = pawn;
+
+            // must remove existing piece if present
+            ulong bit = SquareToBit(square);
+            if (previous != null) Bitboards[PieceToBoardIndex(previous)] &= ~bit;
+            if (pawn != null) Bitboards[PieceToBoardIndex(pawn)] |= bit;
         }
-    
+
         public Piece GetPiece(Square square)
         {
             return board[square.Row, square.Col];
@@ -95,6 +115,9 @@ namespace Chessington.GameEngine
         //       Currently, create a copy of the board (which doesn't copy across handlers) to avoid anything being triggered
         public void MovePiece(Square from, Square to)
         {
+            ulong bitFrom = SquareToBit(from);
+            ulong bitTo = SquareToBit(to);
+
             var movingPiece = board[from.Row, from.Col];
             if (movingPiece == null) { return; }
             
@@ -124,21 +147,34 @@ namespace Chessington.GameEngine
             if (board[to.Row, to.Col] != null)
             {
                 OnPieceCaptured(board[to.Row, to.Col]);
+                // also remove from bitboard. Bit bitTo should be set on that bitboard so could just do ^=
+                Bitboards[PieceToBoardIndex(board[to.Row, to.Col])] &= ~bitTo;
             }
 
             //Move the piece and set the 'from' square to be empty.
             board[to.Row, to.Col] = board[from.Row, from.Col];
+            Bitboards[PieceToBoardIndex(movingPiece)] |= bitTo;
             board[from.Row, from.Col] = null;
+            Bitboards[PieceToBoardIndex(movingPiece)] &= ~bitFrom;
 
             CurrentPlayer = movingPiece.Player == Player.White ? Player.Black : Player.White;
             OnCurrentPlayerChanged(CurrentPlayer);
         }
 
-        // MovePiece without all the side-effects, to allow undoing moves
+        // MovePiece without all the side-effects, to allow *undoing* moves
         public void QuietMovePiece(Square from, Square to, Piece captured)
         {
+            ulong bitFrom = SquareToBit(from);
+            ulong bitTo = SquareToBit(to);
+
+            Piece movingPiece = board[from.Row, from.Col];
+
+            // for undoing moves, so 'to' square should be unoccupied
             board[to.Row, to.Col] = board[from.Row, from.Col];
-            board[from.Row, from.Col] = captured; // En-passant captures are handled specially
+            Bitboards[PieceToBoardIndex(movingPiece)] |= bitTo;
+            Bitboards[PieceToBoardIndex(movingPiece)] &= ~bitFrom;
+            board[from.Row, from.Col] = captured; // Used for undoing moves, hence replace square with captured piece
+            if (captured != null) Bitboards[PieceToBoardIndex(captured)] |= bitFrom;
         }
 
 

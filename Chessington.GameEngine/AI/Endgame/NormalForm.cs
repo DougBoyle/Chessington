@@ -30,9 +30,9 @@ namespace Chessington.GameEngine.AI.Endgame
             {
                 for (int j = 0; j < i; j++)
                 {
-                    Piece tmp = b.board[GameSettings.BoardSize - 1 - i, j];
-                    b.board[GameSettings.BoardSize - 1 - i, j] = b.board[GameSettings.BoardSize - 1 - j, i];
-                    b.board[GameSettings.BoardSize - 1 - j, i] = tmp;
+                    Piece tmp = b.GetPiece(GameSettings.BoardSize - 1 - i, j);
+                    b.AddPiece(Square.At(GameSettings.BoardSize - 1 - i, j), b.GetPiece(GameSettings.BoardSize - 1 - j, i));
+                    b.AddPiece(Square.At(GameSettings.BoardSize - 1 - j, i), tmp);
                 }
             }
         }
@@ -43,9 +43,9 @@ namespace Chessington.GameEngine.AI.Endgame
             {
                 for (int col = 0; col < GameSettings.BoardSize / 2; col++)
                 {
-                    Piece tmp = b.board[row, col];
-                    b.board[row, col] = b.board[row, GameSettings.BoardSize - 1 - col];
-                    b.board[row, GameSettings.BoardSize - 1 - col] = tmp;
+                    Piece tmp = b.GetPiece(row, col);
+                    b.AddPiece(Square.At(row, col), b.GetPiece(row, GameSettings.BoardSize - 1 - col));
+                    b.AddPiece(Square.At(row, GameSettings.BoardSize - 1 - col), tmp);
                 }
             }
         }
@@ -56,9 +56,9 @@ namespace Chessington.GameEngine.AI.Endgame
             {
                 for (int row = 0; row < GameSettings.BoardSize / 2; row++)
                 {
-                    Piece tmp = b.board[row, col];
-                    b.board[row, col] = b.board[GameSettings.BoardSize - 1 - row, col];
-                    b.board[GameSettings.BoardSize - 1 - row, col] = tmp;
+                    Piece tmp = b.GetPiece(row, col);
+                    b.AddPiece(Square.At(row, col), b.GetPiece(GameSettings.BoardSize - 1 - row, col));
+                    b.AddPiece(Square.At(GameSettings.BoardSize - 1 - row, col), tmp);
                 }
             }
         }

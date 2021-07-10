@@ -77,14 +77,14 @@ namespace Chessington.GameEngine.Tests.Pieces
         {
             var board = new Board(Player.Black);
             var pawn = new Pawn(Player.Black);
-            board.AddPiece(Square.At(5, 2), pawn);
+            board.AddPiece(Square.At(1, 2), pawn);
 
-            pawn.MoveTo(board, new Move(Square.At(5, 2), Square.At(6, 2), board)); 
+            pawn.MoveTo(board, new Move(Square.At(1, 2), Square.At(2, 2), board)); 
             board.CurrentPlayer = Player.Black;
-            var moves = pawn.GetAvailableMoves(board, Square.At(6, 2)).Select(move => move.To).ToList();
+            var moves = pawn.GetAvailableMoves(board, Square.At(2, 2)).Select(move => move.To).ToList();
 
             moves.Should().HaveCount(1);
-            moves.Should().Contain(square => square.Equals(Square.At(7, 2)));
+            moves.Should().Contain(square => square.Equals(Square.At(3, 2)));
         }
 
         [Test]

@@ -30,7 +30,7 @@ namespace Chessington.GameEngine
         // White then Black, P-N-B-R-Q-K. So get index as:
         //      (int)PieceType + 6*(int)Player
 
-
+        // TODO: Want ulong[14] and make the last two white/black occupancies? Or computer at start of AllMoves?
         public ulong[] Bitboards = new ulong[12];
 
         public Board()
@@ -200,14 +200,17 @@ namespace Chessington.GameEngine
         public List<Move> GetAllRelaxedMoves()
         {
             List<Move> availableMoves = new List<Move>();
-            for (int i = 0; i < GameSettings.BoardSize; i++)
+
+            // faster to iterate through max 16 pieces on 6 bitboards than all 64 squares
+            for (int i = 6*(int)CurrentPlayer; i < 6*(int)CurrentPlayer + 6; i++)
             {
-                for (int j = 0; j < GameSettings.BoardSize; j++)
+                ulong bitboard = Bitboards[i];
+                while (bitboard != 0UL)
                 {
-                    var square = Square.At(i, j);
-                    var piece = GetPiece(square);
-                    if (piece == null || piece.Player != CurrentPlayer) continue;
-                    availableMoves.AddRange(piece.GetRelaxedAvailableMoves(this, square));
+                    ulong bit = GetLSB(bitboard);
+                    Square square = IndexToSquare(BitToIndex(bit));
+                    bitboard = DropLSB(bitboard);
+                    availableMoves.AddRange(GetPiece(square).GetRelaxedAvailableMoves(this, square));
                 }
             }
 
@@ -215,27 +218,25 @@ namespace Chessington.GameEngine
         }
 
         public Square FindKing(Player player) {
-            for (int i = 0; i < GameSettings.BoardSize; i++) {
-                for (int j = 0; j < GameSettings.BoardSize; j++) {
-                    var piece = GetPiece(Square.At(i, j));
-                    if (piece != null && piece.Player == player && piece is King) {
-                        return Square.At(i, j);
-                    }
-                }
-            }
+            ulong kingBoard = Bitboards[(int)player * 6 + 5];
+            if (kingBoard != 0UL) return IndexToSquare(BitToIndex(kingBoard));
+
             return Square.At(-1, -1); // allows tests without kings on the board to work
         }
 
+        // Slightly faster than using 'GetAllRelaxedMoves' as it stops as soon as 1 found
         public bool InCheck(Player player) {
             Square kingSquare = FindKing(player);
-            for (int i = 0; i < GameSettings.BoardSize; i++) {
-                for (int j = 0; j < GameSettings.BoardSize; j++) {
-                    var square = Square.At(i, j);
-                    var piece = GetPiece(square);
-                    if (piece == null || piece.Player == player) continue;
-                    if (piece.GetRelaxedAvailableMoves(this, square).Select(move => move.To).Contains(kingSquare)) {
-                        return true;
-                    }
+            for (int i = 6 * (1 - (int)player); i < 6 * (1 - (int)player) + 6; i++)
+            {
+                ulong bitboard = Bitboards[i];
+                while (bitboard != 0UL)
+                {
+                    ulong bit = GetLSB(bitboard);
+                    Square square = IndexToSquare(BitToIndex(bit));
+                    bitboard = DropLSB(bitboard);
+                    if (GetPiece(square).GetRelaxedAvailableMoves(this, square)
+                        .Select(move => move.To).Contains(kingSquare)) return true;
                 }
             }
             return false;

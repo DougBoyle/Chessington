@@ -49,7 +49,8 @@ namespace Chessington.GameEngine.Pieces
                             board.AddPiece(firstSquare, null);
                             if (!board.InCheck(Player))
                             {
-                                availableMoves.Add(new Move(currentPosition, secondSquare, board));
+                                // this constructor needed, as piece is not actually on 'currentPosition' at this point
+                                availableMoves.Add(new Move(currentPosition, secondSquare, this, null, null));
                             }
                             board.AddPiece(secondSquare, null);
                             board.AddPiece(currentPosition, this);

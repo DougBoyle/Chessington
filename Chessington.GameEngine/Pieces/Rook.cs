@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Chessington.GameEngine.AI;
+using Chessington.GameEngine.Bitboard;
 
 namespace Chessington.GameEngine.Pieces
 {
@@ -12,7 +13,12 @@ namespace Chessington.GameEngine.Pieces
 
         public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
-            return Moves.GetLateralMoves(board, currentPosition, Player);
+            // TODO: Compute these as part of the board
+            ulong myPieces = BitUtils.BoardOccupancy(board, Player);
+            ulong yourPieces = BitUtils.BoardOccupancy(board, Player == Player.White ? Player.Black : Player.White);
+
+            ulong attackMap = BitMoves.RookAttacks(currentPosition, board, myPieces, myPieces | yourPieces);
+            return BitMoves.GetMovesFromAttackMap(this, currentPosition, board, attackMap);
         }
 
         public override void MoveTo(Board board, Move move)

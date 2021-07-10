@@ -16,21 +16,21 @@ namespace Chessington.GameEngine.Bitboard
         // my/allPieces passed in to avoid recomputing in many places
         public static ulong RookAttacks(Square square, Board board, ulong myPieces, ulong allPieces)
         {
-            int index = BitUtils.SquareToIndex(square);
-            int lookup = (int)((rookMagics[index] * (rookMasks[index] & allPieces)) >> rookShifts[index]);
+            int index = SquareToIndex(square);
+            int lookup = (int)((rookMagics[index] * (rookMasks[index] & allPieces)) >> (64 - rookShifts[index]));
             return rookAttacks[rookOffsets[index] + lookup] & (~myPieces); // can't attack self
         }
 
         public static ulong BishopAttacks(Square square, Board board, ulong myPieces, ulong allPieces)
         {
-            int index = BitUtils.SquareToIndex(square);
-            int lookup = (int)((bishopMagics[index] * (bishopMasks[index] & allPieces)) >> bishopShifts[index]);
+            int index = SquareToIndex(square);
+            int lookup = (int)((bishopMagics[index] * (bishopMasks[index] & allPieces)) >> (64 - bishopShifts[index]));
             return bishopAttacks[bishopOffsets[index] + lookup] & (~myPieces); // can't attack self
         }
 
         // TODO: Just use bitboards wherever possible. e.g. working out the captured piece
         // Not for pawns/king - doesn't do anything interesting e.g. castling/en passant/promotions
-        public List<Move> GetMovesFromAttackMap(Piece moving, Square from, Board board, ulong attacks)
+        public static List<Move> GetMovesFromAttackMap(Piece moving, Square from, Board board, ulong attacks)
         {
             List<Move> result = new List<Move>();
             while (attacks != 0UL)
@@ -43,7 +43,7 @@ namespace Chessington.GameEngine.Bitboard
                 // captured piece constructed explicitly to avoid using GetPiece
                 // slower until 'Piece captured' replaced with 'int captured' in Move
                 Piece captured = null;
-                Player otherPlayer = board.CurrentPlayer == Player.White ? Player.Black : Player.White;
+                Player otherPlayer = moving.Player == Player.White ? Player.Black : Player.White;
                 // lots of tests, may be a way to do this quicker (binary search it? doesn't save much)
                 // have to include possibility of capturing king due to how 'relaxed' moves work/testing for check
                 if ((bit & board.Bitboards[(int)otherPlayer * 6]) != 0) captured = new Pawn(otherPlayer);

@@ -11,10 +11,10 @@ namespace Chessington.GameEngine
     public class BitUtils
     {
         // haven't decided if these should be part of bitboards[] or not yet
-        public ulong BoardOccupancy(Board board, Player player)
+        public static ulong BoardOccupancy(Board board, Player player)
         {
             ulong result = 0UL;
-            for (int i = (int)player; i < (int)player + 6; i++)
+            for (int i = (int)player * 6; i < (int)player * 6 + 6; i++)
             {
                 result |= board.Bitboards[i];
             }

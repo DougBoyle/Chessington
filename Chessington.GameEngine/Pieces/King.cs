@@ -3,6 +3,10 @@ using System.Linq;
 
 using Chessington.GameEngine.AI;
 
+using static Chessington.GameEngine.Bitboard.OtherMasks;
+using static Chessington.GameEngine.BitUtils;
+using static Chessington.GameEngine.Bitboard.BitMoves;
+
 namespace Chessington.GameEngine.Pieces
 {
     public class King : Piece
@@ -18,6 +22,7 @@ namespace Chessington.GameEngine.Pieces
         {
             List<Move> availableMoves = base.GetAvailableMoves(board, currentPosition).ToList();
 
+            // just determines castling (can't do for RelaxedMoves as it involves calling InCheck)
             if (!board.InCheck(Player))
             {
                 foreach (var direction in new int[] { -1, 1 })
@@ -62,23 +67,13 @@ namespace Chessington.GameEngine.Pieces
             return availableMoves;
         }
 
+        // TODO: Relaxed available moves doesn't consider castling (issue for engine)
         public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
-            List<Square> availableMoves = new List<Square>();
-
-            for (int x = -1; x < 2; x++)
-            {
-                for (int y = -1; y < 2; y++)
-                {
-                    if (x != 0 || y != 0)
-                    {
-                        availableMoves.Add(new Square(currentPosition.Row + x, currentPosition.Col + y));
-                    }
-                }
-            }
-
-            return availableMoves.Where(square => square.IsValid() && board.IsEmptyOrOpponent(square, Player))
-                .Select(square => new Move(currentPosition, square, board));
+            ulong myPieces = BoardOccupancy(board, Player);
+            int index = SquareToIndex(currentPosition);
+            ulong attackMap = kingMasks[index] & (~myPieces);
+            return GetMovesFromAttackMap(this, currentPosition, board, attackMap);
         }
 
         public override void MoveTo(Board board, Move move)

@@ -4,6 +4,10 @@ using System.Linq;
 
 using Chessington.GameEngine.AI;
 
+using static Chessington.GameEngine.Bitboard.OtherMasks;
+using static Chessington.GameEngine.BitUtils;
+using static Chessington.GameEngine.Bitboard.BitMoves;
+
 namespace Chessington.GameEngine.Pieces
 {
     public class Knight : Piece
@@ -13,20 +17,10 @@ namespace Chessington.GameEngine.Pieces
 
         public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
-            List<Square> availableSquares = new List<Square>();
-            var dir = new int[] { -1, 1 };
-            foreach (var twoStep in dir)
-            {
-                foreach (var oneStep in dir)
-                {
-                    availableSquares.Add(new Square(currentPosition.Row + 2 * twoStep,
-                        currentPosition.Col + oneStep));
-                    availableSquares.Add(new Square(currentPosition.Row + oneStep,
-                        currentPosition.Col + 2 * twoStep));
-                }
-            }
-            return availableSquares.Where(square => square.IsValid() && board.IsEmptyOrOpponent(square, Player))
-                .Select(to => new Move(currentPosition, to, board));
+            ulong myPieces = BoardOccupancy(board, Player);
+            int index = SquareToIndex(currentPosition);
+            ulong attackMap = knightMasks[index] & (~myPieces);
+            return GetMovesFromAttackMap(this, currentPosition, board, attackMap);
         }
     }
 }

@@ -17,13 +17,13 @@ namespace Chessington.GameEngine.Pieces {
             {
                 if (to.Row == 7 || to.Row == 0)
                 {
-                    result.Add(new Move(here, to, board.GetPiece(to), new Knight(Player)));
-                    result.Add(new Move(here, to, board.GetPiece(to), new Rook(Player)));
-                    result.Add(new Move(here, to, board.GetPiece(to), new Bishop(Player)));
-                    result.Add(new Move(here, to, board.GetPiece(to), new Queen(Player)));
+                    result.Add(new Move(here, to, this, board.GetPiece(to), new Knight(Player)));
+                    result.Add(new Move(here, to, this, board.GetPiece(to), new Rook(Player)));
+                    result.Add(new Move(here, to, this, board.GetPiece(to), new Bishop(Player)));
+                    result.Add(new Move(here, to, this, board.GetPiece(to), new Queen(Player)));
                 } else
                 {
-                    result.Add(new Move(here, to, board.GetPiece(to), null));
+                    result.Add(new Move(here, to, this, board.GetPiece(to), null));
                 }
             }
             return result;

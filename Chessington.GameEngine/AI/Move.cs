@@ -10,7 +10,10 @@ namespace Chessington.GameEngine.AI
 {
     // For ordering all moves when doing alpha-beta pruning (rather than one piece at a time)
     // and to allow making/undoing moves
-    // TODO: Produce these rather than Lists of Squares when generating moves
+
+    // TODO: Add Piece 'moving' to allow finding correct bitboard to make/undo moves (really just need an int index)
+    //       e.g. int movingPiece = pieceType + 6*player
+    //       Depending on how moves generated, will generally be known e.g. specifically generate rook moves (new constructor)
     public class Move
     {
         // TODO: Make format of everything more efficient e.g. byte vs 4 bools, 2 ints for Square rather than 1 byte 0-63
@@ -20,16 +23,21 @@ namespace Chessington.GameEngine.AI
 
         public Piece Captured; // is null for en-passant
         // Promotion = null if not promoting, else is the piece to replace with
-        public Piece Promotion; 
+        public Piece Promotion;
+
+        public int MovingPiece; // 0-5 = white, 6-11 = black. Corresponds to Bitboard[] to allow changing correct board
 
         // information about 50-move counter/castling status/en-passant can be remembered once from the board, not stored per move
 
-        public Move(Square from, Square to, Piece captured, Piece promotion)
+     
+        // moving = board.GetPiece(from)
+        public Move(Square from, Square to, Piece moving, Piece captured, Piece promotion)
         {
             From = from;
             To = to;
             Captured = captured;
             Promotion = promotion;
+            MovingPiece = BitUtils.PieceToBoardIndex(moving);
         }
 
         // convert a pair of squares to a 'Move' - TODO: Produce Move instances directly
@@ -44,6 +52,7 @@ namespace Chessington.GameEngine.AI
             // System.Diagnostics.Debug.Assert(before.GetPiece(from).PieceType != PieceType.Pawn || !(to.Row == 0 || to.Row == 7));
            
             Promotion = null; // (before.GetPiece(from).PieceType == PieceType.Pawn) && (to.Row == 0 || to.Row == 7);
+            MovingPiece = BitUtils.PieceToBoardIndex(before.GetPiece(from));
         }
 
         // for converting polyglot entries to move objects. See: http://hgm.nubati.net/book_format.html
@@ -79,6 +88,8 @@ namespace Chessington.GameEngine.AI
                     default: Promotion = null; break;
                 }
             }
+
+            MovingPiece = BitUtils.PieceToBoardIndex(board.GetPiece(From));
         }
 
         public static char[] columns = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };

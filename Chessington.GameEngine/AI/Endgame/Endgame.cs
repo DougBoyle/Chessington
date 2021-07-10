@@ -79,7 +79,7 @@ namespace Chessington.GameEngine.AI.Endgame
             else if (promotionKey == 2) promotion = new Queen(original.CurrentPlayer);
 
             Console.WriteLine("Played endgame move");
-            return new Move(from, to, original.GetPiece(to), promotion);
+            return new Move(from, to, original.GetPiece(from), original.GetPiece(to), promotion);
         }
 
         public static Move KQK(Board board, Board original) // original used if a move is found, undo invariances

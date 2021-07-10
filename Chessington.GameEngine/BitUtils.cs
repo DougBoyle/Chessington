@@ -10,6 +10,18 @@ namespace Chessington.GameEngine
     // lots of functions for processing bitboards, or converting between Squares and bitboard positions etc.
     public class BitUtils
     {
+        // haven't decided if these should be part of bitboards[] or not yet
+        public ulong BoardOccupancy(Board board, Player player)
+        {
+            ulong result = 0UL;
+            for (int i = (int)player; i < (int)player + 6; i++)
+            {
+                result |= board.Bitboards[i];
+            }
+            return result;
+        }
+
+
         /* Multiplier gotten from https://www.chessprogramming.org/De_Bruijn_Sequence
            Table checked with Python:
 
@@ -46,6 +58,13 @@ namespace Chessington.GameEngine
             return board & (board - 1);
         }
 
+        public static int Count1s(ulong board)
+        {
+            int r;
+            for (r = 0; board != 0; r++) board = DropLSB(board);
+            return r;
+        }
+
         public static int PieceToBoardIndex(Piece piece)
         {
             return (int)piece.PieceType + 6 * (int)piece.Player;
@@ -54,6 +73,16 @@ namespace Chessington.GameEngine
         public static ulong SquareToBit(Square square)
         {
             return 1UL << ((7 - square.Row) * 8 + square.Col);
+        }
+
+        public static int SquareToIndex(Square square)
+        {
+            return (7 - square.Row) * 8 + square.Col;
+        }
+
+        public static Square IndexToSquare(int index)
+        {
+            return Square.At(7 - index / 8, index % 8);
         }
     }
 }

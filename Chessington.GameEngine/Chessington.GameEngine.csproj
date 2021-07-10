@@ -42,6 +42,8 @@
     <Compile Include="AI\GameExtraInfo.cs" />
     <Compile Include="AI\Move.cs" />
     <Compile Include="AI\Polyglot.cs" />
+    <Compile Include="Bitboard\BestMagics.cs" />
+    <Compile Include="Bitboard\BitMoves.cs" />
     <Compile Include="BitUtils.cs" />
     <Compile Include="Pieces\Bishop.cs" />
     <Compile Include="Board.cs" />

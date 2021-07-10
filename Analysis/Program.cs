@@ -16,26 +16,28 @@ namespace Analysis
     {
         static void Main(string[] args)
         {
-            /*Board b = new Board();
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
 
-            b.AddPiece(Square.At(4, 3), new King(Player.White));
+            //  Console.WriteLine(Magic.FindMagics.VerifyBestMagics());
+            // Magic.FindMagics.FindAllMagics(false, 1);
+            //   Console.WriteLine(BitUtils.Count1s(Magic.FindMagics.rookMask(7, 7)));
+            //   Console.WriteLine(Magic.FindMagics.TryRookMagic(0x7645FFFECBFEA79EUL, 11, 7, 7));
+            //     Console.WriteLine(Magic.FindMagics.FindMagic(false, 4, 1, 1));
+      //      Chessington.GameEngine.Bitboard.BestMagics.InitialiseTables();
+            Console.WriteLine(Chessington.GameEngine.Bitboard.BestMagics.rookAttacks.Length);
+            Console.WriteLine(Chessington.GameEngine.Bitboard.BestMagics.bishopAttacks.Length);
 
-            NormalForm.SquareMapper mapper = NormalForm.NormaliseBoard(b);
+            watch.Stop();
+            Console.WriteLine($"Execution Time: {watch.ElapsedMilliseconds} ms");
 
-            Square k = b.FindKing(Player.White);
-            Console.WriteLine(k);
-            Console.WriteLine(mapper(k));*/
+            Console.WriteLine("Done! Press enter to close");
+            Console.ReadLine();
+            // ComputeEndgameTable()
+        }
 
-            /*
-            ThreePieces threePieces = new ThreePieces();
-           //  threePieces.SolveForQueen();
-            threePieces.SolveForRook();
-
-            Console.WriteLine("Longest chain: {0}", threePieces.whiteTable.Select(entry => entry == null ? 0 : entry.DTM).Max());
-
-            Console.WriteLine("Writing to: {0}", Path.Combine(Directory.GetCurrentDirectory(), "KRK.tbs"));
-            threePieces.WriteTables(Path.Combine(Directory.GetCurrentDirectory(), "KRK.tbs"));*/
-
+        private static void ComputeEndgameTable()
+        {
             ThreePiecesPawn threePieces = new ThreePiecesPawn();
             //  threePieces.SolveForQueen();
             threePieces.SolveForPawn();

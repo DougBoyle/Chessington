@@ -5,6 +5,8 @@ using Chessington.GameEngine.AI;
 using Chessington.GameEngine.Pieces;
 
 using static Chessington.GameEngine.BitUtils;
+using static Chessington.GameEngine.Bitboard.OtherMasks;
+using static Chessington.GameEngine.Bitboard.BitMoves;
 
 namespace Chessington.GameEngine
 {
@@ -224,22 +226,35 @@ namespace Chessington.GameEngine
             return Square.At(-1, -1); // allows tests without kings on the board to work
         }
 
-        // Slightly faster than using 'GetAllRelaxedMoves' as it stops as soon as 1 found
-        public bool InCheck(Player player) {
-            Square kingSquare = FindKing(player);
-            for (int i = 6 * (1 - (int)player); i < 6 * (1 - (int)player) + 6; i++)
-            {
-                ulong bitboard = Bitboards[i];
-                while (bitboard != 0UL)
-                {
-                    ulong bit = GetLSB(bitboard);
-                    Square square = IndexToSquare(BitToIndex(bit));
-                    bitboard = DropLSB(bitboard);
-                    if (GetPiece(square).GetRelaxedAvailableMoves(this, square)
-                        .Select(move => move.To).Contains(kingSquare)) return true;
-                }
-            }
-            return false;
+        public bool InCheck(Player player)
+        {
+            return InCheck(player, FindKing(player));
+        }
+
+        // Make InCheck more efficient to compute, don't need to look at all pieces
+        // determine if king under attack by REVERSE lookup (as if queen/knight/pawn was on king's square)
+        // avoids doing GetAvailable/RelaxedMoves so no recursive loop (doesn't consider castling, can't capture king that way)
+        // (able to pass in the square of the king to make computing if castling possible easier)
+        public bool InCheck(Player player, Square kingSquare) {
+            ulong myPieces = BoardOccupancy(this, player);
+            ulong yourPieces = BoardOccupancy(this, player == Player.White ? Player.Black : Player.White);
+            Player otherPlayer = player == Player.White ? Player.Black : Player.White;
+
+            ulong attackMap = BishopAttacks(kingSquare, this, myPieces, myPieces | yourPieces)
+                & (Bitboards[(int)otherPlayer * 6 + BISHOP_BOARD] | Bitboards[(int)otherPlayer * 6 + QUEEN_BOARD]);
+            attackMap |= RookAttacks(kingSquare, this, myPieces, myPieces | yourPieces)
+                & (Bitboards[(int)otherPlayer * 6 + ROOK_BOARD] | Bitboards[(int)otherPlayer * 6 + QUEEN_BOARD]);
+            int kingIndex = SquareToIndex(kingSquare);
+            attackMap |= knightMasks[kingIndex] & Bitboards[(int)otherPlayer * 6 + KNIGHT_BOARD];
+            // can never capture opponent by castling
+            // kings can never actually get adjacent, but need this check to prevent that happening
+            attackMap |= kingMasks[kingIndex] & Bitboards[(int)otherPlayer * 6 + KING_BOARD];
+            // pawn
+            ulong bit = 1UL << kingIndex;
+            attackMap |= (player == Player.White ? bit << 9 : bit >> 7) & Not_A_File & Bitboards[(int)otherPlayer * 6 + PAWN_BOARD];
+            attackMap |= (player == Player.White ? bit << 7 : bit >> 9) & Not_H_File & Bitboards[(int)otherPlayer * 6 + PAWN_BOARD];
+
+            return attackMap != 0UL;
         }
         
         public delegate void PieceCapturedEventHandler(Piece piece);

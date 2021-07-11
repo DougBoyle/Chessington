@@ -10,6 +10,9 @@ namespace Chessington.GameEngine
     // lots of functions for processing bitboards, or converting between Squares and bitboard positions etc.
     public class BitUtils
     {
+        public const int PAWN_BOARD = 0, KNIGHT_BOARD = 1, BISHOP_BOARD = 2,
+            ROOK_BOARD = 3, QUEEN_BOARD = 4, KING_BOARD = 5;
+
         // haven't decided if these should be part of bitboards[] or not yet
         public static ulong BoardOccupancy(Board board, Player player)
         {

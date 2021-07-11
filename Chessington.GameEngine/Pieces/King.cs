@@ -17,63 +17,45 @@ namespace Chessington.GameEngine.Pieces
             PieceType = PieceType.King;
         }
 
-
-        public override IEnumerable<Move> GetAvailableMoves(Board board, Square currentPosition)
+        // can use InCheck to compute castling now that it no longer recursively looks at GetAvailable/RelaxedMoves
+        // doesn't check that move wouldn't leave king in check, that's the purpose of GetAvailableMoves vs Relaxed
+        public IEnumerable<Move> GetCastling(Board board, Square here)
         {
-            List<Move> availableMoves = base.GetAvailableMoves(board, currentPosition).ToList();
+            var result = new List<Move>();
+            if (board.InCheck(Player, here)) return result;
+            ulong occupancy = BoardOccupancy(board, Player.White) | BoardOccupancy(board, Player.Black);
+            if (Player == Player.Black) occupancy >>= 56; // move to bottom row
 
-            // just determines castling (can't do for RelaxedMoves as it involves calling InCheck)
-            if (!board.InCheck(Player))
+            // due to the ways king could possibly be attacked, and given that king not in check currently,
+            // no need to move king before computing if would move into check
+
+            // short castling
+            if ((Player == Player.White ? board.RightWhiteCastling : board.RightBlackCastling) &&
+                (occupancy & 0x60UL) == 0UL && 
+                board.InCheck(Player, Square.At(here.Row, here.Col + 1)))
             {
-                foreach (var direction in new int[] { -1, 1 })
-                {
-                    var blackBool = direction == -1 ? board.LeftBlackCastling : board.RightBlackCastling;
-                    var whiteBool = direction == -1 ? board.LeftWhiteCastling : board.RightWhiteCastling;
-                    if (Player == Player.White && whiteBool ||
-                        Player == Player.Black && blackBool)
-                    {
-                        if (direction == -1 && !board.IsSquareEmpty(Square.At(currentPosition.Row, currentPosition.Col - 3)))
-                        {
-                            continue;
-                        }
-
-                        Square firstSquare = Square.At(currentPosition.Row, currentPosition.Col + 1 * direction);
-                        Square secondSquare = Square.At(currentPosition.Row, currentPosition.Col + 2 * direction);
-                        if (board.IsSquareEmpty(firstSquare) &&
-                            board.IsSquareEmpty(secondSquare))
-                        {
-                            board.AddPiece(firstSquare, this);
-                            board.AddPiece(currentPosition, null);
-                            if (board.InCheck(Player))
-                            {
-                                board.AddPiece(firstSquare, null);
-                                board.AddPiece(currentPosition, this);
-                                continue;
-                            }
-                            board.AddPiece(secondSquare, this);
-                            board.AddPiece(firstSquare, null);
-                            if (!board.InCheck(Player))
-                            {
-                                // this constructor needed, as piece is not actually on 'currentPosition' at this point
-                                availableMoves.Add(new Move(currentPosition, secondSquare, this, null, null));
-                            }
-                            board.AddPiece(secondSquare, null);
-                            board.AddPiece(currentPosition, this);
-                        }
-                    }
-                }
+                // can guarentee nothing captured/promoted
+                result.Add(new Move(here, Square.At(here.Row, here.Col + 2), this, null, null));
             }
 
-            return availableMoves;
+            // long castling
+            if ((Player == Player.White ? board.LeftWhiteCastling : board.LeftBlackCastling) &&
+                (occupancy & 0xeUL) == 0UL &&
+                board.InCheck(Player, Square.At(here.Row, here.Col - 1)))
+            {
+                result.Add(new Move(here, Square.At(here.Row, here.Col - 2), this, null, null));
+            }
+
+            return result;
         }
 
-        // TODO: Relaxed available moves doesn't consider castling (issue for engine)
         public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition)
         {
             ulong myPieces = BoardOccupancy(board, Player);
             int index = SquareToIndex(currentPosition);
             ulong attackMap = kingMasks[index] & (~myPieces);
-            return GetMovesFromAttackMap(this, currentPosition, board, attackMap);
+            return GetMovesFromAttackMap(this, currentPosition, board, attackMap)
+                .Concat(GetCastling(board, currentPosition));
         }
 
         public override void MoveTo(Board board, Move move)

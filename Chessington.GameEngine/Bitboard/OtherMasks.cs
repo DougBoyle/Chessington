@@ -20,6 +20,10 @@ namespace Chessington.GameEngine.Bitboard
         public const ulong Not_A_File = 0xfefefefefefefefeUL;
         public const ulong Not_AB_File = 0xfcfcfcfcfcfcfcfcUL;
 
+        // if moving once puts pawn on these ranks, can move 2 squares
+        public const ulong PawnPushedRanks = 0xff0000ff0000UL;
+        public const ulong PromotionRanks = 0xff000000000000ffUL;
+
         static OtherMasks() {
             InitialiseTables();
         }

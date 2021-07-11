@@ -4,26 +4,49 @@ using System.Linq;
 
 using Chessington.GameEngine.AI;
 
+using static Chessington.GameEngine.Bitboard.OtherMasks;
+using static Chessington.GameEngine.BitUtils;
+
 namespace Chessington.GameEngine.Pieces {
     public class Pawn : Piece {
         public Pawn(Player player)
             : base(player) { PieceType = PieceType.Pawn; }
 
 
-        private IEnumerable<Move> SquaresToMoves(Board board, Square here, IEnumerable<Square> squares)
+
+        // TODO: Know only diagonal moves can be captures (but could be en-passant, so can reduce number of tests)
+        private IEnumerable<Move> AttackMapToMoves(Board board, Square here, ulong attacks)
         {
             List<Move> result = new List<Move>();
-            foreach (Square to in squares)
+            while (attacks != 0UL)
             {
-                if (to.Row == 7 || to.Row == 0)
+                ulong bit = GetLSB(attacks);
+                int bitIndex = BitToIndex(bit);
+                attacks = DropLSB(attacks);
+                Square to = IndexToSquare(bitIndex);
+
+                // captured piece constructed explicitly to avoid using GetPiece
+                // slower until 'Piece captured' replaced with 'int captured' in Move
+                Piece captured = null;
+                Player otherPlayer = Player == Player.White ? Player.Black : Player.White;
+                // lots of tests, may be a way to do this quicker (binary search it? doesn't save much)
+                // have to include possibility of capturing king due to how 'relaxed' moves work/testing for check
+                if ((bit & board.Bitboards[(int)otherPlayer * 6]) != 0) captured = new Pawn(otherPlayer);
+                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 1]) != 0) captured = new Knight(otherPlayer);
+                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 2]) != 0) captured = new Bishop(otherPlayer);
+                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 3]) != 0) captured = new Rook(otherPlayer);
+                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 4]) != 0) captured = new Queen(otherPlayer);
+                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 5]) != 0) captured = new King(otherPlayer);
+
+                if ((bit & PromotionRanks) == 0)
                 {
-                    result.Add(new Move(here, to, this, board.GetPiece(to), new Knight(Player)));
-                    result.Add(new Move(here, to, this, board.GetPiece(to), new Rook(Player)));
-                    result.Add(new Move(here, to, this, board.GetPiece(to), new Bishop(Player)));
-                    result.Add(new Move(here, to, this, board.GetPiece(to), new Queen(Player)));
+                    result.Add(new Move(here, to, this, captured, null));
                 } else
                 {
-                    result.Add(new Move(here, to, this, board.GetPiece(to), null));
+                    result.Add(new Move(here, to, this, captured, new Knight(Player)));
+                    result.Add(new Move(here, to, this, captured, new Rook(Player)));
+                    result.Add(new Move(here, to, this, captured, new Bishop(Player)));
+                    result.Add(new Move(here, to, this, captured, new Queen(Player)));
                 }
             }
             return result;
@@ -32,31 +55,28 @@ namespace Chessington.GameEngine.Pieces {
         // creates list of possible squares, then generates promotions where needed
         public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square here)
         {
-            var direction = Player == Player.White ? -1 : 1;
-            var homeRow = Player == Player.White ? GameSettings.BoardSize - 2 : 1;
+            // TODO: Calculate moves for all pawns at once, rather than one at a time
+            ulong myPieces = BoardOccupancy(board, Player);
+            ulong yourPieces = BoardOccupancy(board, Player == Player.White ? Player.Black : Player.White);
+            ulong freeSquares = ~(myPieces | yourPieces);
+            int index = SquareToIndex(here);
+            ulong bit = 1UL << index;
 
-            var available = new List<Square>()
-            {
-                new Square(here.Row + direction, here.Col - 1),
-                new Square(here.Row + direction, here.Col + 1)
-            }.Where(square => square.IsValid() && board.IsOpponent(square, Player)
-                              || square.Equals(board.EnPassantSquare)).ToList();
-            Square targetMove = new Square(here.Row + direction, here.Col);
+            ulong result = (Player == Player.White ? bit << 8 : bit >> 8) & freeSquares; // 1 move
+            
+            result |= (Player == Player.White ? (result & PawnPushedRanks) << 8 : (result & PawnPushedRanks) >> 8) // 2 move
+                & freeSquares;
 
-            if (!targetMove.IsValid() || !board.IsSquareEmpty(targetMove))
-            {
-                return SquaresToMoves(board, here, available);
-            }
-            available.Add(targetMove);
+            // captures (include en-passant tile)
+            if (board.EnPassantSquare is Square square) yourPieces |= 1UL << SquareToIndex(square);
+            // rather than moveRight(bit & notH), can equally do moveRight(bit) & notA
+            // capture right
+            result |= (Player == Player.White ? bit << 9 : bit >> 7) & yourPieces & Not_A_File;
+            // capture left
+            result |= (Player == Player.White ? bit << 7 : bit >> 9) & yourPieces & Not_H_File;
 
-            Square targetMove2 = new Square(here.Row + 2 * direction, here.Col);
-            if (here.Row == homeRow && board.IsSquareEmpty(targetMove2))
-
-            {
-                available.Add(targetMove2);
-            }
-
-            return SquaresToMoves(board, here, available);
+            // BitMoves.GetMovesFromAttackMap not used due to needing to handle promotions
+            return AttackMapToMoves(board, here, result);
         }
 
       
@@ -80,12 +100,6 @@ namespace Chessington.GameEngine.Pieces {
                 board.AddPiece(newSquare, move.Promotion);
 
             }
-            /*
-            if (newSquare.Row == 0 || newSquare.Row == 7) // TODO: Allow choosing how to promote
-            {
-                board.OnPieceCaptured(this);
-                board.AddPiece(newSquare, new Queen(Player));
-            }*/
         }
 
         public override void UndoMove(Board board, Move move, GameExtraInfo info)

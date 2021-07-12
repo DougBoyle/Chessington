@@ -43,5 +43,19 @@ namespace Chessington.GameEngine.Bitboard
             }
             return result;
         }
+
+        public static List<Move> GetMovesFromAttackMap(int moving, Square from, Board board, ulong attacks)
+        {
+            List<Move> result = new List<Move>();
+            while (attacks != 0UL)
+            {
+                ulong bit = GetLSB(attacks);
+                int bitIndex = BitToIndex(bit);
+                attacks = DropLSB(attacks);
+                Square to = IndexToSquare(bitIndex);
+                result.Add(new Move(from, to, moving, board.GetPieceIndex(to), NO_PIECE));
+            }
+            return result;
+        }
     }
 }

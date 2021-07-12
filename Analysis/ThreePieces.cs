@@ -121,7 +121,7 @@ namespace Analysis
                         var allEntries = allAvailableMoves.Select(move =>
                         {
                             var boardCopy = new Board(board);
-                            boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                            boardCopy.MakeMove(move);
                             NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
                             return new Tuple<Move, TableEntry>(move, whiteTable[SimpleThreePieceBoardToIndex(boardCopy)]);
                         });
@@ -185,7 +185,7 @@ namespace Analysis
                         var allEntries = allAvailableMoves.Select(move =>
                         {
                             var boardCopy = new Board(board);
-                            boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                            boardCopy.MakeMove(move);
                             NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
                             return new Tuple<Move, TableEntry>(move, blackTable[SimpleThreePieceBoardToIndex(boardCopy)]);
                         });
@@ -241,7 +241,7 @@ namespace Analysis
                 var choice = allAvailableMoves.Where(move =>
                 {
                     var boardCopy = new Board(board);
-                    boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                    boardCopy.MakeMove(move);
                     NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
                         TableEntry result = whiteTable[SimpleThreePieceBoardToIndex(boardCopy)];
                     return result.Outcome == Outcome.Draw || result.Outcome == Outcome.Unknown; // unknown = draw now
@@ -266,7 +266,7 @@ namespace Analysis
                 var choice = allAvailableMoves.Where(move =>
                 {
                     var boardCopy = new Board(board);
-                    boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                    boardCopy.MakeMove(move);
                     NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
                     TableEntry result = blackTable[SimpleThreePieceBoardToIndex(boardCopy)];
                     return result.Outcome == Outcome.Draw || result.Outcome == Outcome.Unknown; // unknown = draw now
@@ -375,7 +375,7 @@ namespace Analysis
                         var allEntries = allAvailableMoves.Select(move =>
                         {
                             var boardCopy = new Board(board);
-                            boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                            boardCopy.MakeMove(move);
                             NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
                             return new Tuple<Move, TableEntry>(move, whiteTable[SimpleThreePieceBoardToIndex(boardCopy)]);
                         });
@@ -439,7 +439,7 @@ namespace Analysis
                         var allEntries = allAvailableMoves.Select(move =>
                         {
                             var boardCopy = new Board(board);
-                            boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                            boardCopy.MakeMove(move);
                             NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
                             return new Tuple<Move, TableEntry>(move, blackTable[SimpleThreePieceBoardToIndex(boardCopy)]);
                         });
@@ -495,7 +495,7 @@ namespace Analysis
                 var choice = allAvailableMoves.Where(move =>
                 {
                     var boardCopy = new Board(board);
-                    boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                    boardCopy.MakeMove(move);
                     NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
                     TableEntry result = whiteTable[SimpleThreePieceBoardToIndex(boardCopy)];
                     return result.Outcome == Outcome.Draw || result.Outcome == Outcome.Unknown; // unknown = draw now
@@ -520,7 +520,7 @@ namespace Analysis
                 var choice = allAvailableMoves.Where(move =>
                 {
                     var boardCopy = new Board(board);
-                    boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                    boardCopy.MakeMove(move);
                     NormaliseBoard(boardCopy); // reason a copy of board needed, can't undo
                     TableEntry result = blackTable[SimpleThreePieceBoardToIndex(boardCopy)];
                     return result.Outcome == Outcome.Draw || result.Outcome == Outcome.Unknown; // unknown = draw now

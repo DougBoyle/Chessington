@@ -20,5 +20,11 @@ namespace Chessington.GameEngine.Pieces
             ulong attackMap = BitMoves.BishopAttacks(position, board, myPieces, myPieces | yourPieces);
             return BitMoves.GetMovesFromAttackMap(this, position, board, attackMap);
         }
+
+        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition, Player player, ulong mine, ulong yours)
+        {
+            ulong attackMap = BitMoves.BishopAttacks(currentPosition, board, mine, mine | yours);
+            return BitMoves.GetMovesFromAttackMap(6 * (int)player + BitUtils.BISHOP_BOARD, currentPosition, board, attackMap);
+        }
     }
 }

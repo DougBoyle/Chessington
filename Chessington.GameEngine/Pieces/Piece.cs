@@ -33,12 +33,12 @@ namespace Chessington.GameEngine.Pieces
 
             foreach (var move in possible)
             {
-                MoveTo(tempBoard, move);
+                tempBoard.MakeMove(move);
                 if (!tempBoard.InCheck(Player))
                 {
                     actual.Add(move);
                 }
-                UndoMove(tempBoard, move, gameInfo);
+                tempBoard.UndoMove(move, gameInfo);
             }
             return actual;
         }
@@ -46,17 +46,9 @@ namespace Chessington.GameEngine.Pieces
         // Takes the position of the piece as an input, rather than having to find it twice
         public abstract IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square position);
 
-        // TODO: replace to do move on board, rather than needing instances of pieces
-        public virtual void MoveTo(Board board, Move move)
-        {
-            board.MakeMove(move);
-          //  board.MovePiece(move.From, move.To);
-          //  board.EnPassantSquare = null;
-        }
-
         // for computer evaluation
         // GameExtraInfo restores all information about castling/en passant (and also current player) that can't be reversed otherwise
-        public virtual void UndoMove(Board board, Move move, GameExtraInfo info)
+        public static void UndoMove(Board board, Move move, GameExtraInfo info)
         {
             if (move.PromotionPiece != NO_PIECE)
             {

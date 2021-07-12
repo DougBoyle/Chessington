@@ -24,9 +24,16 @@ namespace Analysis
             //   Console.WriteLine(BitUtils.Count1s(Magic.FindMagics.rookMask(7, 7)));
             //   Console.WriteLine(Magic.FindMagics.TryRookMagic(0x7645FFFECBFEA79EUL, 11, 7, 7));
             //     Console.WriteLine(Magic.FindMagics.FindMagic(false, 4, 1, 1));
-      //      Chessington.GameEngine.Bitboard.BestMagics.InitialiseTables();
+            //      Chessington.GameEngine.Bitboard.BestMagics.InitialiseTables();
+
+            /*
             Console.WriteLine(Chessington.GameEngine.Bitboard.BestMagics.rookAttacks.Length);
             Console.WriteLine(Chessington.GameEngine.Bitboard.BestMagics.bishopAttacks.Length);
+            */
+
+            Board board = new Board();
+            StartingPositionFactory.Setup(board);
+            Console.WriteLine("Perft depth 5: {0}", Perft.PerftTest.CountLeaves(board, 5));
 
             watch.Stop();
             Console.WriteLine($"Execution Time: {watch.ElapsedMilliseconds} ms");

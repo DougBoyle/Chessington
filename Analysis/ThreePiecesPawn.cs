@@ -138,7 +138,7 @@ namespace Analysis
                         var allEntries = allAvailableMoves.Select(move =>
                         {
                             var boardCopy = new Board(board);
-                            boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                            boardCopy.MakeMove(move);
                             NormalisePawnBoard(boardCopy); // reason a copy of board needed, can't undo
                             return new Tuple<Move, TableEntry>(move, whiteTable[ThreePiecePawnBoardToIndex(boardCopy)]);
                         });
@@ -202,7 +202,7 @@ namespace Analysis
                         var allEntries = allAvailableMoves.Select(move =>
                         {
                             var boardCopy = new Board(board);
-                            boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                            boardCopy.MakeMove(move);
 
                             TableEntry result;
 
@@ -294,7 +294,7 @@ namespace Analysis
                 {
                     if (move.CapturedPiece >= 0) return true; // guaranteed draw by insufficient material
                     var boardCopy = new Board(board);
-                    boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                    boardCopy.MakeMove(move);
 
                     // black has no pawn to promote, so must still be KP-K game
                     NormalisePawnBoard(boardCopy); // reason a copy of board needed, can't undo
@@ -323,7 +323,7 @@ namespace Analysis
                 {
                     // only black piece is a king, so don't need to consider captures
                     var boardCopy = new Board(board);
-                    boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
+                    boardCopy.MakeMove(move);
 
                     TableEntry result;
 

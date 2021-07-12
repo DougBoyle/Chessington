@@ -95,7 +95,7 @@ namespace Chessington.UI.ViewModels
                     return;
                 }
 
-                currentPiece.MoveTo(Board, moves.First()); // should only be 1 possibility if not a promotion
+                Board.MakeMove(moves.First()); // should only be 1 possibility if not a promotion
 
                 PiecesMoved();
               //  ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
@@ -129,7 +129,7 @@ namespace Chessington.UI.ViewModels
             var move = currentPiece.GetAvailableMoves(Board, currentSquare)
                 .First(m => m.PromotionPiece % 6 == (int)pieceType && m.To == promotionSquare);
 
-            currentPiece.MoveTo(Board, move);
+            Board.MakeMove(move);
 
             PiecesMoved();
             //  ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
@@ -161,7 +161,7 @@ namespace Chessington.UI.ViewModels
             if (move != null)
             {
                 Console.WriteLine("Move played: {0}", move);
-                Board.GetPiece(move.From).MoveTo(Board, move);
+                Board.MakeMove(move);
                 PiecesMoved();
             //    ChessingtonServices.EventAggregator.Publish(new PiecesMoved(Board));
             }

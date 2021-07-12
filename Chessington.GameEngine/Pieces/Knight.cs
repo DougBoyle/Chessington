@@ -22,5 +22,12 @@ namespace Chessington.GameEngine.Pieces
             ulong attackMap = knightMasks[index] & (~myPieces);
             return GetMovesFromAttackMap(this, currentPosition, board, attackMap);
         }
+
+        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition, Player player, ulong mine, ulong yours)
+        {
+            int index = SquareToIndex(currentPosition);
+            ulong attackMap = knightMasks[index] & (~mine);
+            return GetMovesFromAttackMap(6 * (int)player + KNIGHT_BOARD, currentPosition, board, attackMap);
+        }
     }
 }

@@ -19,31 +19,31 @@ namespace Chessington.GameEngine.Pieces
 
         // can use InCheck to compute castling now that it no longer recursively looks at GetAvailable/RelaxedMoves
         // doesn't check that move wouldn't leave king in check, that's the purpose of GetAvailableMoves vs Relaxed
-        public IEnumerable<Move> GetCastling(Board board, Square here)
+        public static IEnumerable<Move> GetCastling(Board board, Square here, Player player)
         {
             var result = new List<Move>();
-            if (board.InCheck(Player, here)) return result;
+            if (board.InCheck(player, here)) return result;
             ulong occupancy = BoardOccupancy(board, Player.White) | BoardOccupancy(board, Player.Black);
-            if (Player == Player.Black) occupancy >>= 56; // move to bottom row
+            if (player == Player.Black) occupancy >>= 56; // move to bottom row
 
             // due to the ways king could possibly be attacked, and given that king not in check currently,
             // no need to move king before computing if would move into check
 
             // short castling
-            if ((Player == Player.White ? board.RightWhiteCastling : board.RightBlackCastling) &&
+            if ((player == Player.White ? board.RightWhiteCastling : board.RightBlackCastling) &&
                 (occupancy & 0x60UL) == 0UL && 
-                !board.InCheck(Player, Square.At(here.Row, here.Col + 1)))
+                !board.InCheck(player, Square.At(here.Row, here.Col + 1)))
             {
                 // can guarentee nothing captured/promoted
-                result.Add(new Move(here, Square.At(here.Row, here.Col + 2), KING_BOARD + 6*(int)Player, NO_PIECE, NO_PIECE));
+                result.Add(new Move(here, Square.At(here.Row, here.Col + 2), KING_BOARD + 6*(int)player, NO_PIECE, NO_PIECE));
             }
 
             // long castling
-            if ((Player == Player.White ? board.LeftWhiteCastling : board.LeftBlackCastling) &&
+            if ((player == Player.White ? board.LeftWhiteCastling : board.LeftBlackCastling) &&
                 (occupancy & 0xeUL) == 0UL &&
-                !board.InCheck(Player, Square.At(here.Row, here.Col - 1)))
+                !board.InCheck(player, Square.At(here.Row, here.Col - 1)))
             {
-                result.Add(new Move(here, Square.At(here.Row, here.Col - 2), KING_BOARD + 6 * (int)Player, NO_PIECE, NO_PIECE));
+                result.Add(new Move(here, Square.At(here.Row, here.Col - 2), KING_BOARD + 6 * (int)player, NO_PIECE, NO_PIECE));
             }
 
             return result;
@@ -55,10 +55,18 @@ namespace Chessington.GameEngine.Pieces
             int index = SquareToIndex(currentPosition);
             ulong attackMap = kingMasks[index] & (~myPieces);
             return GetMovesFromAttackMap(this, currentPosition, board, attackMap)
-                .Concat(GetCastling(board, currentPosition));
+                .Concat(GetCastling(board, currentPosition, Player));
         }
 
-        public static void MakeMove(Board board, Move move)
+        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition, Player player, ulong mine, ulong yours)
+        {
+            int index = SquareToIndex(currentPosition);
+            ulong attackMap = kingMasks[index] & (~mine);
+            return GetMovesFromAttackMap(6*(int)player + KING_BOARD, currentPosition, board, attackMap)
+                .Concat(GetCastling(board, currentPosition, player));
+        }
+
+        public static new void MakeMove(Board board, Move move)
         {
             int fromIdx = SquareToIndex(move.From);
             int toIdx = SquareToIndex(move.To);
@@ -107,7 +115,7 @@ namespace Chessington.GameEngine.Pieces
             Piece.MakeMove(board, move);
         }
 
-        public override void UndoMove(Board board, Move move, GameExtraInfo info)
+        public static new void UndoMove(Board board, Move move, GameExtraInfo info)
         {
             // Undo moving the rook for castling
             // Detected differently to above
@@ -120,7 +128,7 @@ namespace Chessington.GameEngine.Pieces
                 board.QuietMovePiece(Square.At(move.From.Row, 3), Square.At(move.From.Row, 0), NO_PIECE, move.MovingPiece - 2);
             }
 
-            base.UndoMove(board, move, info);
+            Piece.UndoMove(board, move, info);
         }
     }
 }

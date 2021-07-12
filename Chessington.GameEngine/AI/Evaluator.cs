@@ -10,35 +10,27 @@ namespace Chessington.GameEngine.AI
 {
     public class Evaluator
     {
-        // map pieces to values
-        public static Dictionary<PieceType, int> PieceValues = new Dictionary<PieceType, int>
-        {
-            {PieceType.Pawn, 100}, {PieceType.Knight, 300}, {PieceType.Bishop, 320}, {PieceType.Rook, 500}, {PieceType.Queen, 900}, {PieceType.King, 10000}
-        };
-
+        // TODO: Take account of position
+        private static readonly int[] pieceScores = { 100, 300, 320, 500, 900, 10000 };
 
         // calculates the score from white's perspective, position not taken into account
         public static int GetBoardValue(Board b)
         {
-            int total = 0;
-            for (int i = 0; i < GameSettings.BoardSize; i++)
+            int[] playerTotals = { 0, 0 };
+
+            for (int player = 0; player < 2; player++)
             {
-                for (int j = 0; j < GameSettings.BoardSize; j++)
+                for (int i = 0; i < 6; i++)
                 {
-                    Piece p = b.GetPiece(i, j);
-                    if (p != null)
+                    ulong bitboard = b.Bitboards[i + 6 * player];
+                    while (bitboard != 0UL)
                     {
-                        if (p.Player == Player.White)
-                        {
-                            total += PieceValues[p.PieceType];
-                        } else
-                        {
-                            total -= PieceValues[p.PieceType];
-                        }
+                        playerTotals[player] += pieceScores[i];
+                        bitboard = BitUtils.DropLSB(bitboard);
                     }
                 }
             }
-            return total;
+            return playerTotals[0] - playerTotals[1];
         }
     }
 }

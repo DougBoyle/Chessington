@@ -127,8 +127,19 @@ namespace Chessington.GameEngine
                 // pawns need to be handled specially (en-passant/promotion)
                 case PieceType.Pawn: Pawn.MakeMove(this, move); break;
                 // king needs to be handled specially (castling)
-                case PieceType.King: King.MakeMove(this, move); break; // TODO!
+                case PieceType.King: King.MakeMove(this, move); break;
                 default: Piece.MakeMove(this, move); break;
+            }
+        }
+
+        // as above
+        public void UndoMove(Move move, GameExtraInfo info)
+        {
+            switch ((PieceType)(move.MovingPiece % 6))
+            {
+                case PieceType.Pawn: Pawn.UndoMove(this, move, info); break;
+                case PieceType.King: King.UndoMove(this, move, info); break;
+                default: Piece.UndoMove(this, move, info); break;
             }
         }
 
@@ -148,36 +159,50 @@ namespace Chessington.GameEngine
         // TODO: May be worth just doing GetRelaxedAvailableMoves and checking them all at top level?
         public List<Move> GetAllAvailableMoves()
         {
-            List<Move> availableMoves = new List<Move>();
-            for (int i = 0; i < GameSettings.BoardSize; i++)
-            {
-                for (int j = 0; j < GameSettings.BoardSize; j++)
-                {
-                    var square = Square.At(i, j);
-                    var piece = GetPiece(square);
-                    if (piece == null || piece.Player != CurrentPlayer) continue;
-                    availableMoves.AddRange(piece.GetAvailableMoves(this, square));
-                }
-            }
+            IEnumerable<Move> possible = GetAllRelaxedMoves();
+            List<Move> actual = new List<Move>();
 
-            return availableMoves;
+            var tempBoard = new Board(this); // make a copy due to possible event handlers for moves/captures
+            var gameInfo = new GameExtraInfo(this);
+
+            foreach (var move in possible)
+            {
+                tempBoard.MakeMove(move);
+                if (!tempBoard.InCheck(CurrentPlayer))
+                {
+                    actual.Add(move);
+                }
+                tempBoard.UndoMove(move, gameInfo);
+            }
+            return actual;
         }
+
+        // TODO: Probably a better way of doing this/better place to put this.
+        // downside of not having class instances, effectively have to make pointers explicit
+        public delegate IEnumerable<Move> MoveGetter(Board board, Square here, Player player, ulong mine, ulong yours);
+        private readonly MoveGetter[] moveGetters =
+            {Pawn.GetRelaxedAvailableMoves, Knight.GetRelaxedAvailableMoves, Bishop.GetRelaxedAvailableMoves,
+             Rook.GetRelaxedAvailableMoves, Queen.GetRelaxedAvailableMoves, King.GetRelaxedAvailableMoves};
+
 
         // avoid repeating effort for computer search - can just use relaxed moves, very negative score will indicate check
         public List<Move> GetAllRelaxedMoves()
         {
+            ulong myPieces = BoardOccupancy(this, CurrentPlayer);
+            ulong yourPieces = BoardOccupancy(this, CurrentPlayer == Player.White ? Player.Black : Player.White);
+
             List<Move> availableMoves = new List<Move>();
 
             // faster to iterate through max 16 pieces on 6 bitboards than all 64 squares
-            for (int i = 6*(int)CurrentPlayer; i < 6*(int)CurrentPlayer + 6; i++)
+            for (int i = 0; i < 6; i++)
             {
-                ulong bitboard = Bitboards[i];
+                ulong bitboard = Bitboards[i + 6 * (int)CurrentPlayer];
                 while (bitboard != 0UL)
                 {
                     ulong bit = GetLSB(bitboard);
                     Square square = IndexToSquare(BitToIndex(bit));
                     bitboard = DropLSB(bitboard);
-                    availableMoves.AddRange(GetPiece(square).GetRelaxedAvailableMoves(this, square));
+                    availableMoves.AddRange(moveGetters[i](this, square, CurrentPlayer, myPieces, yourPieces));
                 }
             }
 

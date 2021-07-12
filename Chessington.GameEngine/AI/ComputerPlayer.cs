@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Chessington.GameEngine.Pieces;
 
 namespace Chessington.GameEngine.AI
 {
@@ -12,7 +8,7 @@ namespace Chessington.GameEngine.AI
     {
         private static Random r = new Random();
 
-        private const int MAX_DEPTH = 1; // 2 ply, mine then yours
+        private const int MAX_DEPTH = 4; // 2 ply, mine then yours
 
         // TODO: Can put 'this' in type definition of list to make it an extension method i.e. lst.Shuffle()
         private static void Shuffle<T>(IList<T> list)
@@ -62,9 +58,7 @@ namespace Chessington.GameEngine.AI
 
             foreach (Move move in allAvailableMoves)
             {
-                Piece piece = Board.GetPiece(move.From);
-
-                piece.MoveTo(tempBoard, move);
+                tempBoard.MakeMove(move);
 
                 int score = -AlphaBeta(tempBoard, MAX_DEPTH - 1, -bestScore);
                 if (score > bestScore)
@@ -73,7 +67,7 @@ namespace Chessington.GameEngine.AI
                     bestMove = move;
                 }
 
-                piece.UndoMove(tempBoard, move, gameInfo); // undo the move
+                tempBoard.UndoMove(move, gameInfo); // undo the move
             }
 
             Console.WriteLine("Best score found: {0}", bestScore);
@@ -116,18 +110,16 @@ namespace Chessington.GameEngine.AI
 
                 foreach (Move move in allAvailableMoves)
                 {
-                    Piece piece = Board.GetPiece(move.From);
-
                     if (move.CapturedPiece == BitUtils.KING_BOARD 
                         || move.CapturedPiece == BitUtils.KING_BOARD + 6) return 1000000 + 1000 * depth;
 
-                    piece.MoveTo(Board, move);
+                    Board.MakeMove(move);
 
                     // as soon as recursive call finds a path worse than bestScore for us, we know we won't go down that route
                     // hence -bestScore is the new recursive upperBound
                     //    bestScore = Math.Max(bestScore, -AlphaBeta(newBoard, depth - 1, -bestScore));
                     bestScore = Math.Max(bestScore, -AlphaBeta(Board, depth - 1, -bestScore));
-                    piece.UndoMove(Board, move, gameInfo); // undo the move
+                    Board.UndoMove(move, gameInfo);  // undo the move
                     if (bestScore > upperBound) return bestScore;
                 }
 

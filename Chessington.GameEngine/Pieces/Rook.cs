@@ -21,33 +21,10 @@ namespace Chessington.GameEngine.Pieces
             return BitMoves.GetMovesFromAttackMap(this, currentPosition, board, attackMap);
         }
 
-        /*
-        public override void MoveTo(Board board, Move move)
+        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition, Player player, ulong mine, ulong yours)
         {
-            var currentSquare = move.From;
-            if (Player == Player.White)
-            {
-                if (currentSquare.Equals(Square.At(7, 0)))
-                {
-                    board.LeftWhiteCastling = false;
-                }
-                else if (currentSquare.Equals(Square.At(7, 7)))
-                {
-                    board.RightWhiteCastling = false;
-                }
-            }
-            else
-            {
-                if (currentSquare.Equals(Square.At(0, 0)))
-                {
-                    board.LeftBlackCastling = false;
-                }
-                else if (currentSquare.Equals(Square.At(0, 7)))
-                {
-                    board.RightBlackCastling = false;
-                }
-            }
-            base.MoveTo(board, move);
-        }*/
+            ulong attackMap = BitMoves.RookAttacks(currentPosition, board, mine, mine | yours);
+            return BitMoves.GetMovesFromAttackMap(6*(int)player + BitUtils.ROOK_BOARD, currentPosition, board, attackMap);
+        }
     }
 }

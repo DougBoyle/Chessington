@@ -1,7 +1,7 @@
 using Chessington.GameEngine;
 using Chessington.GameEngine.Pieces;
 
-namespace Chessington.UI.Factories
+namespace Chessington.GameEngine
 {
     /// <summary>
     /// Owns the logic of how to set up a chess board.

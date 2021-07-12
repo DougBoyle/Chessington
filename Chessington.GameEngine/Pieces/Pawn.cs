@@ -15,7 +15,7 @@ namespace Chessington.GameEngine.Pieces {
 
 
         // TODO: Know only diagonal moves can be captures (but could be en-passant, so can reduce number of tests)
-        private IEnumerable<Move> AttackMapToMoves(Board board, Square here, ulong attacks)
+        private static IEnumerable<Move> AttackMapToMoves(Board board, Square here, Player player, ulong attacks)
         {
             List<Move> result = new List<Move>();
             while (attacks != 0UL)
@@ -28,14 +28,14 @@ namespace Chessington.GameEngine.Pieces {
                 int captured = board.GetPieceIndex(to);
                 if ((bit & PromotionRanks) == 0)
                 {
-                    result.Add(new Move(here, to, 6*(int)Player, captured, NO_PIECE));
+                    result.Add(new Move(here, to, 6*(int)player, captured, NO_PIECE));
                 } else
                 {
-                    int playerOffset = (int)Player * 6;
-                    result.Add(new Move(here, to, 6 * (int)Player, captured, playerOffset + KNIGHT_BOARD));
-                    result.Add(new Move(here, to, 6 * (int)Player, captured, playerOffset + BISHOP_BOARD));
-                    result.Add(new Move(here, to, 6 * (int)Player, captured, playerOffset + ROOK_BOARD));
-                    result.Add(new Move(here, to, 6 * (int)Player, captured, playerOffset + QUEEN_BOARD));
+                    int playerOffset = (int)player * 6;
+                    result.Add(new Move(here, to, 6 * (int)player, captured, playerOffset + KNIGHT_BOARD));
+                    result.Add(new Move(here, to, 6 * (int)player, captured, playerOffset + BISHOP_BOARD));
+                    result.Add(new Move(here, to, 6 * (int)player, captured, playerOffset + ROOK_BOARD));
+                    result.Add(new Move(here, to, 6 * (int)player, captured, playerOffset + QUEEN_BOARD));
                 }
             }
             return result;
@@ -65,10 +65,34 @@ namespace Chessington.GameEngine.Pieces {
             result |= (Player == Player.White ? bit << 7 : bit >> 9) & yourPieces & Not_H_File;
 
             // BitMoves.GetMovesFromAttackMap not used due to needing to handle promotions
-            return AttackMapToMoves(board, here, result);
+            return AttackMapToMoves(board, here, Player, result);
         }
 
-        public static void MakeMove(Board board, Move move)
+        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square here, Player player, ulong mine, ulong yours)
+        {
+            // TODO: Calculate moves for all pawns at once, rather than one at a time
+            ulong freeSquares = ~(mine | yours);
+            int index = SquareToIndex(here);
+            ulong bit = 1UL << index;
+
+            ulong result = (player == Player.White ? bit << 8 : bit >> 8) & freeSquares; // 1 move
+
+            result |= (player == Player.White ? (result & Rank3) << 8 : (result & Rank6) >> 8) // 2 move
+                & freeSquares;
+
+            // captures (include en-passant tile)
+            if (board.EnPassantSquare is Square square) yours |= 1UL << SquareToIndex(square);
+            // rather than moveRight(bit & notH), can equally do moveRight(bit) & notA
+            // capture right
+            result |= (player == Player.White ? bit << 9 : bit >> 7) & yours & Not_A_File;
+            // capture left
+            result |= (player == Player.White ? bit << 7 : bit >> 9) & yours & Not_H_File;
+
+            // BitMoves.GetMovesFromAttackMap not used due to needing to handle promotions
+            return AttackMapToMoves(board, here, player, result);
+        }
+
+        public static new void MakeMove(Board board, Move move)
         {
             int fromIdx = SquareToIndex(move.From);
             int toIdx = SquareToIndex(move.To);
@@ -104,7 +128,7 @@ namespace Chessington.GameEngine.Pieces {
 
 
 
-        public override void UndoMove(Board board, Move move, GameExtraInfo info)
+        public static new void UndoMove(Board board, Move move, GameExtraInfo info)
         {
             // handles en-passant capture, otherwise just fall back to base case
             if (move.To.Col != move.From.Col && move.CapturedPiece == NO_PIECE)
@@ -113,7 +137,7 @@ namespace Chessington.GameEngine.Pieces {
                 board.AddPiece(Square.At(move.From.Row, move.To.Col), new Pawn(board.CurrentPlayer));
 
             }
-            base.UndoMove(board, move, info);
+            Piece.UndoMove(board, move, info);
         }
     }
 }

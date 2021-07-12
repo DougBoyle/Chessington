@@ -6,6 +6,7 @@ using Chessington.GameEngine.Pieces;
 using static Chessington.GameEngine.AI.Endgame.NormalForm;
 using System.IO;
 using static Chessington.GameEngine.AI.Endgame.ComputeIndices;
+using static Chessington.GameEngine.BitUtils;
 
 using System;
 using System.Collections.Generic;
@@ -207,18 +208,18 @@ namespace Analysis
 
                             // table to check changes depending on (if) promotion made
                             // need to change board depending on which pieces now present
-                            if (move.Promotion == null)
+                            if (move.PromotionPiece == NO_PIECE)
                             {
                                 // still a KP-K position
                                 NormalisePawnBoard(boardCopy); // reason a copy of board needed, can't undo
                                 result = blackTable[ThreePiecePawnBoardToIndex(boardCopy)];
                             }
-                            else if (move.Promotion.PieceType == PieceType.Queen)
+                            else if (move.PromotionPiece % 6 == QUEEN_BOARD)
                             {
                                 NormaliseBoard(boardCopy);
                                 result = queenTable.blackTable[SimpleThreePieceBoardToIndex(boardCopy)];
                             }
-                            else if (move.Promotion.PieceType == PieceType.Rook)
+                            else if (move.PromotionPiece % 6 == ROOK_BOARD)
                             {
                                 NormaliseBoard(boardCopy);
                                 result = rookTable.blackTable[SimpleThreePieceBoardToIndex(boardCopy)];
@@ -327,18 +328,18 @@ namespace Analysis
                     TableEntry result;
 
                     // need to change board depending on which pieces now present
-                    if (move.Promotion == null)
+                    if (move.PromotionPiece == NO_PIECE)
                     {
                         // still a KP-K position
                         NormalisePawnBoard(boardCopy); // reason a copy of board needed, can't undo
                         result = blackTable[ThreePiecePawnBoardToIndex(boardCopy)];
                     }
-                    else if (move.Promotion.PieceType == PieceType.Queen)
+                    else if (move.PromotionPiece % 6 == QUEEN_BOARD)
                     {
                         NormaliseBoard(boardCopy);
                         result = queenTable.blackTable[SimpleThreePieceBoardToIndex(boardCopy)];
                     }
-                    else if (move.Promotion.PieceType == PieceType.Rook)
+                    else if (move.PromotionPiece % 6 == ROOK_BOARD)
                     {
                         NormaliseBoard(boardCopy);
                         result = rookTable.blackTable[SimpleThreePieceBoardToIndex(boardCopy)];
@@ -379,9 +380,9 @@ namespace Analysis
                 if (whiteEntry.BestMove != null)
                 {
                     result <<= 2;
-                    if (whiteEntry.BestMove.Promotion is Piece piece)
+                    if (whiteEntry.BestMove.PromotionPiece >= 0)
                     {
-                        if (piece.PieceType == PieceType.Rook) result += 1;
+                        if (whiteEntry.BestMove.PromotionPiece == ROOK_BOARD) result += 1;
                         else result += 2; // queen - a bishop/knight would mean a draw by insufficient material
                     }
                     result <<= 6;
@@ -455,9 +456,9 @@ namespace Analysis
             {
                 if (whiteEntry.BestMove != null)
                 {
-                    if (whiteEntry.BestMove.Promotion is Piece piece)
+                    if (whiteEntry.BestMove.PromotionPiece >= 0)
                     {
-                        if (piece.PieceType == PieceType.Rook) result += 1;
+                        if (whiteEntry.BestMove.PromotionPiece == ROOK_BOARD) result += 1;
                         else result += 2; // queen - a bishop/knight would mean a draw by insufficient material
                     }
                     result <<= 6;

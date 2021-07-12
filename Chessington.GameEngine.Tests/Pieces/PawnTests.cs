@@ -5,6 +5,8 @@ using Chessington.GameEngine.Pieces;
 using FluentAssertions;
 using NUnit.Framework;
 
+using static Chessington.GameEngine.BitUtils;
+
 namespace Chessington.GameEngine.Tests.Pieces
 {
     [TestFixture]
@@ -298,14 +300,14 @@ namespace Chessington.GameEngine.Tests.Pieces
             var moves = pawn.GetAvailableMoves(board, Square.At(1, 0));
 
             moves.All(move => move.To == Square.At(0, 0)).Should().BeTrue();
-            moves.All(move => move.Promotion.Player == Player.White).Should().BeTrue();
+            moves.All(move => (Player)(move.PromotionPiece/6) == Player.White).Should().BeTrue();
 
-            var expectedPieces = new List<PieceType>
+            var expectedPieces = new List<int>
             {
-                PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen
+                KNIGHT_BOARD, BISHOP_BOARD, ROOK_BOARD, QUEEN_BOARD
             };
 
-            moves.Select(move => move.Promotion.PieceType).ShouldAllBeEquivalentTo(expectedPieces);
+            moves.Select(move => move.PromotionPiece).ShouldAllBeEquivalentTo(expectedPieces);
         }
 
         [Test]
@@ -318,14 +320,14 @@ namespace Chessington.GameEngine.Tests.Pieces
 
 
             moves.All(move => move.To == Square.At(7, 0)).Should().BeTrue();
-            moves.All(move => move.Promotion.Player == Player.Black).Should().BeTrue();
+            moves.All(move => (Player)(move.PromotionPiece / 6) == Player.Black).Should().BeTrue();
 
-            var expectedPieces = new List<PieceType>
+            var expectedPieces = new List<int>
             {
-                PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen
+                KNIGHT_BOARD, BISHOP_BOARD, ROOK_BOARD, QUEEN_BOARD
             };
 
-            moves.Select(move => move.Promotion.PieceType).ShouldAllBeEquivalentTo(expectedPieces);
+            moves.Select(move => move.PromotionPiece % 6).ShouldAllBeEquivalentTo(expectedPieces);
         }
 
     }

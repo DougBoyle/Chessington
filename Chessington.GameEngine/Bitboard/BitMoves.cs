@@ -39,21 +39,7 @@ namespace Chessington.GameEngine.Bitboard
                 int bitIndex = BitToIndex(bit);
                 attacks = DropLSB(attacks);
                 Square to = IndexToSquare(bitIndex);
-
-                // captured piece constructed explicitly to avoid using GetPiece
-                // slower until 'Piece captured' replaced with 'int captured' in Move
-                Piece captured = null;
-                Player otherPlayer = moving.Player == Player.White ? Player.Black : Player.White;
-                // lots of tests, may be a way to do this quicker (binary search it? doesn't save much)
-                // have to include possibility of capturing king due to how 'relaxed' moves work/testing for check
-                if ((bit & board.Bitboards[(int)otherPlayer * 6]) != 0) captured = new Pawn(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 1]) != 0) captured = new Knight(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 2]) != 0) captured = new Bishop(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 3]) != 0) captured = new Rook(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 4]) != 0) captured = new Queen(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 5]) != 0) captured = new King(otherPlayer);
-
-                result.Add(new Move(from, to, moving, captured, null));
+                result.Add(new Move(from, to, PieceToBoardIndex(moving), board.GetPieceIndex(to), NO_PIECE));
             }
             return result;
         }

@@ -23,8 +23,7 @@ namespace Chessington.GameEngine.AI
 
         // TODO: Switch to ints rather than Piece objects - (-1 = NO_PIECE) used as null (and en-passant)
         public int CapturedPiece;
-        // Promotion = null if not promoting, else is the piece to replace with
-        public Piece Promotion;
+        // Promotion = NO_PIECE (-1) if not promoting, else is the piece to replace with
         public int PromotionPiece;
 
         // TODO: Use this to add a MakeMove/UndoMove function to Board, so no longer need to do GetPiece/work with objects
@@ -33,20 +32,17 @@ namespace Chessington.GameEngine.AI
 
         // information about 50-move counter/castling status/en-passant can be remembered once from the board, not stored per move
 
-     
-        // moving = board.GetPiece(from)
-        public Move(Square from, Square to, Piece moving, Piece captured, Piece promotion)
+
+        public Move(Square from, Square to, int moving, int captured, int promotion)
         {
             From = from;
             To = to;
-            CapturedPiece = captured == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(captured);
-            Promotion = promotion;
-            PromotionPiece = promotion == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(promotion);
-            MovingPiece = BitUtils.PieceToBoardIndex(moving);
+            CapturedPiece = captured;
+            PromotionPiece = promotion;
+            MovingPiece = moving;
         }
 
-        // convert a pair of squares to a 'Move' - TODO: Produce Move instances directly
-        // Note: Can't be used for pawn promotions, don't know what to promote to
+        // TODO: Only used for pawn tests, rewrite tests + remove this
         public Move(Square from, Square to, Board before)
         {
             From = from;
@@ -57,7 +53,6 @@ namespace Chessington.GameEngine.AI
             // doesn't detect promotions
             // System.Diagnostics.Debug.Assert(before.GetPiece(from).PieceType != PieceType.Pawn || !(to.Row == 0 || to.Row == 7));
 
-            Promotion = null; // (before.GetPiece(from).PieceType == PieceType.Pawn) && (to.Row == 0 || to.Row == 7);
             PromotionPiece = -1;
             MovingPiece = BitUtils.PieceToBoardIndex(before.GetPiece(from));
         }
@@ -74,32 +69,21 @@ namespace Chessington.GameEngine.AI
             {
                 To = Square.At(From.Row, 2);
                 CapturedPiece = BitUtils.NO_PIECE;
-                Promotion = null;
+                PromotionPiece = BitUtils.NO_PIECE;
             }
             else if (board.GetPiece(From).PieceType == PieceType.King && From.Col == 4 && To.Col == 7)
             {
                 To = Square.At(From.Row, 6);
                 CapturedPiece = BitUtils.NO_PIECE;
-                Promotion = null;
+                PromotionPiece = BitUtils.NO_PIECE;
             }
             else
             {
                 // expensive, but only used when converting opening table entry to move, so not too bad
                 // TODO: May even change board.GetPiece to return an int anyway
                 CapturedPiece = board.GetPiece(To) == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(board.GetPiece(To));
-                int promote = (move & 0xF000) >> 12;
-                switch (promote)
-                {
-                    case 1: Promotion = new Knight(board.CurrentPlayer); break;
-                    case 2: Promotion = new Bishop(board.CurrentPlayer); break;
-                    case 3: Promotion = new Rook(board.CurrentPlayer); break;
-                    case 4: Promotion = new Queen(board.CurrentPlayer); break;
-                    default: Promotion = null; break;
-                }
+                PromotionPiece = ((move & 0xF000) >> 12) + 6 * (int)board.CurrentPlayer;
             }
-
-            
-            PromotionPiece = Promotion == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(Promotion);
             MovingPiece = BitUtils.PieceToBoardIndex(board.GetPiece(From));
         }
 

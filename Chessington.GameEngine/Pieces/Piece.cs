@@ -9,7 +9,7 @@ using static Chessington.GameEngine.BitUtils;
 namespace Chessington.GameEngine.Pieces
 {
     // ultimately, don't want to be dealing with class instances, use efficient ints etc. instead
-    public enum PieceType { Pawn, Knight, Bishop, Rook, Queen, King };
+    public enum PieceType { Pawn = 0, Knight = 1, Bishop = 2, Rook = 3, Queen = 4, King = 5 };
 
     public abstract class Piece
     {
@@ -58,9 +58,11 @@ namespace Chessington.GameEngine.Pieces
         // GameExtraInfo restores all information about castling/en passant (and also current player) that can't be reversed otherwise
         public virtual void UndoMove(Board board, Move move, GameExtraInfo info)
         {
-            if (move.Promotion != null)
+            if (move.PromotionPiece != NO_PIECE)
             {
-                board.AddPiece(move.To, new Pawn(info.CurrentPlayer));
+                ulong to = SquareToBit(move.To);
+                board.Bitboards[move.PromotionPiece] ^= to;
+                board.Bitboards[6 * (int)info.CurrentPlayer] |= to;
             }
             board.QuietMovePiece(move.To, move.From, move.CapturedPiece, move.MovingPiece);
             info.RestoreInfo(board);

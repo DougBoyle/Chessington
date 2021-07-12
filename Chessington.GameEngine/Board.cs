@@ -94,6 +94,18 @@ namespace Chessington.GameEngine
             }
             return null;
         }
+
+        public int GetPieceIndex(Square square)
+        {
+            ulong bit = SquareToBit(square);
+            for (int i = 0; i < 12; i++)
+            {
+                if ((Bitboards[i] & bit) != 0) return i;
+               
+            }
+            return NO_PIECE;
+        }
+
         // TODO: Replace with passing in index rather than row/col (here 0,0 = a8, not a1)
         public Piece GetPiece(int row, int col)
         {

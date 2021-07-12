@@ -73,13 +73,13 @@ namespace Chessington.GameEngine.AI.Endgame
             Square from = transform(Square.At((result >> 11) & 0x7, (result >> 8) & 0x7));
             Square to = transform(Square.At((result >> 5) & 0x7, (result >> 2) & 0x7));
 
-            Piece promotion = null;
-            int promotionKey = (int)((uint)(result) >> 14); // to achieve logical rather than arithmetic shift
-            if (promotionKey == 1) promotion = new Rook(original.CurrentPlayer);
-            else if (promotionKey == 2) promotion = new Queen(original.CurrentPlayer);
+            int promotion = BitUtils.NO_PIECE;
+            int promotionKey = (int)((uint)result >> 14); // to achieve logical rather than arithmetic shift
+            if (promotionKey == 1) promotion = BitUtils.ROOK_BOARD + 6 * (int)original.CurrentPlayer;
+            else if (promotionKey == 2) promotion = BitUtils.QUEEN_BOARD + 6 * (int)original.CurrentPlayer;
 
             Console.WriteLine("Played endgame move");
-            return new Move(from, to, original.GetPiece(from), original.GetPiece(to), promotion);
+            return new Move(from, to, original.GetPieceIndex(from), original.GetPieceIndex(to), promotion);
         }
 
         public static Move KQK(Board board, Board original) // original used if a move is found, undo invariances

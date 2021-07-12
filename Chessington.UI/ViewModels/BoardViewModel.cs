@@ -127,7 +127,7 @@ namespace Chessington.UI.ViewModels
             // Allow choice of how to promote
             // Same as completing a regular move
             var move = currentPiece.GetAvailableMoves(Board, currentSquare)
-                .First(m => m.Promotion.PieceType == pieceType && m.To == promotionSquare);
+                .First(m => m.PromotionPiece % 6 == (int)pieceType && m.To == promotionSquare);
 
             currentPiece.MoveTo(Board, move);
 

@@ -35,7 +35,7 @@ namespace Chessington.GameEngine.Pieces
                 !board.InCheck(Player, Square.At(here.Row, here.Col + 1)))
             {
                 // can guarentee nothing captured/promoted
-                result.Add(new Move(here, Square.At(here.Row, here.Col + 2), this, null, null));
+                result.Add(new Move(here, Square.At(here.Row, here.Col + 2), KING_BOARD + 6*(int)Player, NO_PIECE, NO_PIECE));
             }
 
             // long castling
@@ -43,7 +43,7 @@ namespace Chessington.GameEngine.Pieces
                 (occupancy & 0xeUL) == 0UL &&
                 !board.InCheck(Player, Square.At(here.Row, here.Col - 1)))
             {
-                result.Add(new Move(here, Square.At(here.Row, here.Col - 2), this, null, null));
+                result.Add(new Move(here, Square.At(here.Row, here.Col - 2), KING_BOARD + 6 * (int)Player, NO_PIECE, NO_PIECE));
             }
 
             return result;

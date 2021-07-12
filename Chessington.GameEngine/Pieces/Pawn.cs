@@ -25,28 +25,17 @@ namespace Chessington.GameEngine.Pieces {
                 attacks = DropLSB(attacks);
                 Square to = IndexToSquare(bitIndex);
 
-                // captured piece constructed explicitly to avoid using GetPiece
-                // slower until 'Piece captured' replaced with 'int captured' in Move
-                Piece captured = null;
-                Player otherPlayer = Player == Player.White ? Player.Black : Player.White;
-                // lots of tests, may be a way to do this quicker (binary search it? doesn't save much)
-                // have to include possibility of capturing king due to how 'relaxed' moves work/testing for check
-                if ((bit & board.Bitboards[(int)otherPlayer * 6]) != 0) captured = new Pawn(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 1]) != 0) captured = new Knight(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 2]) != 0) captured = new Bishop(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 3]) != 0) captured = new Rook(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 4]) != 0) captured = new Queen(otherPlayer);
-                else if ((bit & board.Bitboards[(int)otherPlayer * 6 + 5]) != 0) captured = new King(otherPlayer);
-
+                int captured = board.GetPieceIndex(to);
                 if ((bit & PromotionRanks) == 0)
                 {
-                    result.Add(new Move(here, to, this, captured, null));
+                    result.Add(new Move(here, to, 6*(int)Player, captured, NO_PIECE));
                 } else
                 {
-                    result.Add(new Move(here, to, this, captured, new Knight(Player)));
-                    result.Add(new Move(here, to, this, captured, new Rook(Player)));
-                    result.Add(new Move(here, to, this, captured, new Bishop(Player)));
-                    result.Add(new Move(here, to, this, captured, new Queen(Player)));
+                    int playerOffset = (int)Player * 6;
+                    result.Add(new Move(here, to, 6 * (int)Player, captured, playerOffset + KNIGHT_BOARD));
+                    result.Add(new Move(here, to, 6 * (int)Player, captured, playerOffset + BISHOP_BOARD));
+                    result.Add(new Move(here, to, 6 * (int)Player, captured, playerOffset + ROOK_BOARD));
+                    result.Add(new Move(here, to, 6 * (int)Player, captured, playerOffset + QUEEN_BOARD));
                 }
             }
             return result;
@@ -64,7 +53,7 @@ namespace Chessington.GameEngine.Pieces {
 
             ulong result = (Player == Player.White ? bit << 8 : bit >> 8) & freeSquares; // 1 move
             
-            result |= (Player == Player.White ? (result & PawnPushedRanks) << 8 : (result & PawnPushedRanks) >> 8) // 2 move
+            result |= (Player == Player.White ? (result & Rank3) << 8 : (result & Rank6) >> 8) // 2 move
                 & freeSquares;
 
             // captures (include en-passant tile)
@@ -103,13 +92,13 @@ namespace Chessington.GameEngine.Pieces {
                 board.EnPassantSquare = IndexToSquare((toIdx + fromIdx) / 2);
             }
 
-            if (move.Promotion != null)
+            if (move.PromotionPiece != NO_PIECE)
             {
                 // piece has now moved, so is on move.To square
                 board.OnPieceCaptured(move.MovingPiece);
 
                 board.Bitboards[move.MovingPiece] ^= bitTo;
-                board.Bitboards[PieceToBoardIndex(move.Promotion)] ^= bitTo; // &= ~bitFrom;
+                board.Bitboards[move.PromotionPiece] ^= bitTo; // &= ~bitFrom;
             }
         }
 

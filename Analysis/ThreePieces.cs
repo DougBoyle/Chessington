@@ -103,7 +103,7 @@ namespace Analysis
                         entry.DTM = 0;
                         entry.DTZ = 0;
                         entry.Outcome = board.InCheck(Player.Black) ? Outcome.Lose : Outcome.Draw;
-                    } else if (allAvailableMoves.Exists(move => move.Captured != null)) // queen captured
+                    } else if (allAvailableMoves.Exists(move => move.CapturedPiece >= 0)) // queen captured
                     {
                         changing = true;
                         entry.DTM = 0;
@@ -356,7 +356,7 @@ namespace Analysis
                         entry.DTZ = 0;
                         entry.Outcome = board.InCheck(Player.Black) ? Outcome.Lose : Outcome.Draw;
                     }
-                    else if (allAvailableMoves.Exists(move => move.Captured != null)) // queen captured
+                    else if (allAvailableMoves.Exists(move => move.CapturedPiece >= 0)) // queen captured
                     {
                         changing = true;
                         entry.DTM = 0;

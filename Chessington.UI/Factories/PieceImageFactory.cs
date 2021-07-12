@@ -32,17 +32,32 @@ namespace Chessington.UI.Factories
             { PieceType.Queen, "Q" },
         };
 
+        private static readonly Dictionary<int, string> PieceIndices = new Dictionary<int, string>
+        {
+            { 0, "P" },
+            { 1, "N" },
+            { 2, "B" },
+            { 3, "R" },
+            { 4, "Q" },
+            { 5, "K" }
+        };
+
         public static BitmapImage GetImage(PieceType piece, Player player)
         {
             return new BitmapImage(new Uri(string.Format("{0}{1} {2}.ico", InterfaceSettings.IconRoot, player, PieceTypeSuffixes[piece])));
         }
 
-
         public static BitmapImage GetImage(Piece piece)
         {
             return new BitmapImage(new Uri(string.Format("{0}{1} {2}.ico", InterfaceSettings.IconRoot, piece.Player, PieceSuffixes[piece.GetType()])));
         }
-        
+
+        public static BitmapImage GetImage(int piece)
+        {
+            return new BitmapImage(new Uri(string.Format("{0}{1} {2}.ico", InterfaceSettings.IconRoot,
+                (Player)(piece / 6), PieceIndices[piece % 6])));
+        }
+
         public static BitmapImage GetRedImage(Piece piece)
         {
             return new BitmapImage(new Uri(string.Format("{0}{1} K Red.ico", InterfaceSettings.IconRoot, piece.Player)));

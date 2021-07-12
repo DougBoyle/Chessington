@@ -116,7 +116,7 @@ namespace Analysis
                         entry.DTZ = 0;
                         entry.Outcome = board.InCheck(Player.Black) ? Outcome.Lose : Outcome.Draw;
                     }
-                    else if (allAvailableMoves.Exists(move => move.Captured != null)) // pawn captured (best black can expect is draw)
+                    else if (allAvailableMoves.Exists(move => move.CapturedPiece >= 0)) // pawn captured (best black can expect is draw)
                     {
                         changing = true;
                         entry.DTM = 0;
@@ -291,7 +291,7 @@ namespace Analysis
 
                 var choice = allAvailableMoves.Where(move =>
                 {
-                    if (move.Captured != null) return true; // guaranteed draw by insufficient material
+                    if (move.CapturedPiece >= 0) return true; // guaranteed draw by insufficient material
                     var boardCopy = new Board(board);
                     boardCopy.GetPiece(move.From).MoveTo(boardCopy, move);
 

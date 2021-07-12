@@ -113,149 +113,23 @@ namespace Chessington.GameEngine
             switch ((PieceType)(move.MovingPiece % 6))
             {
                 // pawns need to be handled specially (en-passant/promotion)
-                case PieceType.Pawn: PawnMakeMove(this, move); break;
+                case PieceType.Pawn: Pawn.MakeMove(this, move); break;
                 // king needs to be handled specially (castling)
-                case PieceType.King: KingMakeMove(this, move); break; // TODO!
-                default: PieceMakeMove(this, move); break;
+                case PieceType.King: King.MakeMove(this, move); break; // TODO!
+                default: Piece.MakeMove(this, move); break;
             }
         }
 
-        // just like Piece.MoveTo, but uses extra fields of move to access bitboards more efficiently than Board.MovePiece
-        // TODO: Move to Piece class once board[,] no longer used
-        public static void PieceMakeMove(Board board, Move move)
-        {
-            int fromIdx = SquareToIndex(move.From);
-            int toIdx = SquareToIndex(move.To);
-            ulong bitFrom = 1UL << fromIdx;
-            ulong bitTo = 1UL << toIdx;
-
-            // Board.MovePiece allowed possibility that moving piece does not exist.
-            // no longer allowed. Also don't check that piece belongs to correct player
-
-            // var movingPiece = board[from.Row, from.Col];
-            //  if (movingPiece == null) { return; }
-
-            // also testing fromIdx handles moving rooks initially too
-            if (toIdx == 0 || fromIdx == 0) board.LeftWhiteCastling = false;
-            if (toIdx == 7 || fromIdx == 7) board.RightWhiteCastling = false;
-            if (toIdx == 56 || fromIdx == 56) board.LeftBlackCastling = false;
-            if (toIdx == 63 || fromIdx == 63) board.RightBlackCastling = false;
-
-
-            // if (movingPiece.Player != CurrentPlayer)
-            // {
-            //     throw new ArgumentException("The supplied piece does not belong to the current player.");
-            // }
-
-            // TODO: Switch to using ints rather than Piece objects
-            if (move.Captured != null)
-            {
-                board.OnPieceCaptured(move.Captured);
-                board.Bitboards[PieceToBoardIndex(move.Captured)] ^= bitTo; // should be same as &= (~bitTo)
-            }
-
-            //Move the piece and set the 'from' square to be empty.
-            board.Bitboards[move.MovingPiece] |= bitTo;
-            board.Bitboards[move.MovingPiece] ^= bitFrom; // &= ~bitFrom;
-
-            board.CurrentPlayer = (Player)(move.MovingPiece / 6) == Player.White ? Player.Black : Player.White;
-            board.OnCurrentPlayerChanged(board.CurrentPlayer);
-
-            board.EnPassantSquare = null;
-        }
-
-        public static void PawnMakeMove(Board board, Move move)
-        {
-            int fromIdx = SquareToIndex(move.From);
-            int toIdx = SquareToIndex(move.To);
-            ulong bitTo = 1UL << toIdx;
-
-
-            if (board.EnPassantSquare is Square square && toIdx == SquareToIndex(square))
-            {
-                // TODO: Change OnPieceCaptured to not use Piece class
-                // square is just bitTo shifted left/right 8
-                board.OnPieceCaptured(board.GetPiece(Square.At(move.From.Row, move.To.Col)));
-                // as pawns are either 0 or 6
-                board.Bitboards[6 - move.MovingPiece] ^= SquareToBit(Square.At(move.From.Row, move.To.Col));
-            }
-
-            PieceMakeMove(board, move);
-
-            // set up en-passant
-            if (fromIdx - toIdx == 16 || toIdx - fromIdx == 16)
-            {
-                board.EnPassantSquare = IndexToSquare((toIdx + fromIdx) / 2);
-            }
-
-            if (move.Promotion != null)
-            {
-                // piece has now moved, so is on move.To square
-                board.OnPieceCaptured(board.GetPiece(move.To));
-
-                board.Bitboards[move.MovingPiece] ^= bitTo;
-                board.Bitboards[PieceToBoardIndex(move.Promotion)] ^= bitTo; // &= ~bitFrom;
-            }
-        }
-
-        public static void KingMakeMove(Board board, Move move)
-        {
-            int fromIdx = SquareToIndex(move.From);
-            int toIdx = SquareToIndex(move.To);
-            ulong bitFrom = 1UL << fromIdx;
-            ulong bitTo = 1UL << toIdx;
-
-            var currentPosition = move.From;
-            var newSquare = move.To;
-
-            // should be able to use either board.CurrentPlayer or move.MovingPiece/6
-            if (board.CurrentPlayer == Player.White)
-            {
-                if (fromIdx == 4)
-                {
-                    board.RightWhiteCastling = false;
-                    board.LeftWhiteCastling = false;
-                    // short castling
-                    if (toIdx == 6)
-                    {
-                        board.Bitboards[ROOK_BOARD] ^= 0xa0UL; // 0000_0101
-                    } else if (toIdx == 2)
-                    {
-                        board.Bitboards[ROOK_BOARD] ^= 0x9UL; // 1001_0000
-                    }
-                }
-            }
-            else
-            {
-                if (fromIdx == 60)
-                {
-                    board.RightBlackCastling = false;
-                    board.LeftBlackCastling = false;
-                    // short castling
-                    if (toIdx == 62)
-                    {
-                        board.Bitboards[6 + ROOK_BOARD] ^= 0xa000000000000000UL; // 0000_0101
-                    }
-                    else if (toIdx == 58)
-                    {
-                        board.Bitboards[6 + ROOK_BOARD] ^= 0x900000000000000UL; // 1001_0000
-                    }
-                }
-            }
-
-            PieceMakeMove(board, move);
-        }
-
-
+       
         // MovePiece without all the side-effects, to allow *undoing* moves
-        public void QuietMovePiece(Square from, Square to, Piece captured, int movingPiece)
+        public void QuietMovePiece(Square from, Square to, int captured, int movingPiece)
         {
             ulong bitFrom = SquareToBit(from);
             ulong bitTo = SquareToBit(to);
 
             // for undoing moves, so 'to' square should be unoccupied
             Bitboards[movingPiece] ^= bitTo|bitFrom;
-            if (captured != null) Bitboards[PieceToBoardIndex(captured)] |= bitFrom;
+            if (captured >= 0) Bitboards[captured] |= bitFrom;
         }
 
 
@@ -336,11 +210,11 @@ namespace Chessington.GameEngine
             return attackMap != 0UL;
         }
         
-        public delegate void PieceCapturedEventHandler(Piece piece);
+        public delegate void PieceCapturedEventHandler(int piece);
         
         public event PieceCapturedEventHandler PieceCaptured;
 
-        public virtual void OnPieceCaptured(Piece piece)
+        public virtual void OnPieceCaptured(int piece)
         {
             var handler = PieceCaptured;
             if (handler != null) handler(piece);
@@ -350,7 +224,7 @@ namespace Chessington.GameEngine
 
         public event CurrentPlayerChangedEventHandler CurrentPlayerChanged;
 
-        protected virtual void OnCurrentPlayerChanged(Player player)
+        public virtual void OnCurrentPlayerChanged(Player player)
         {
             var handler = CurrentPlayerChanged;
             if (handler != null) handler(player);

@@ -79,33 +79,46 @@ namespace Chessington.GameEngine.Pieces {
             return AttackMapToMoves(board, here, result);
         }
 
-      /*
-        public override void MoveTo(Board board, Move move)
+        public static void MakeMove(Board board, Move move)
         {
-            var currentSquare = move.From;
-            var newSquare = move.To;
-            if (newSquare.Equals(board.EnPassantSquare))
+            int fromIdx = SquareToIndex(move.From);
+            int toIdx = SquareToIndex(move.To);
+            ulong bitTo = 1UL << toIdx;
+
+
+            if (board.EnPassantSquare is Square square && toIdx == SquareToIndex(square))
             {
-                board.OnPieceCaptured(board.GetPiece(Square.At(currentSquare.Row, newSquare.Col)));
-                board.AddPiece(Square.At(currentSquare.Row, newSquare.Col), null);
+                // TODO: Change OnPieceCaptured to not use Piece class
+                // square is just bitTo shifted left/right 8
+                board.OnPieceCaptured(6 - move.MovingPiece);
+                // as pawns are either 0 or 6
+                board.Bitboards[6 - move.MovingPiece] ^= SquareToBit(Square.At(move.From.Row, move.To.Col));
             }
-            base.MoveTo(board, move); // changes the current player
-            if (currentSquare.Row - newSquare.Row == 2 || currentSquare.Row - newSquare.Row == -2)
+
+            Piece.MakeMove(board, move);
+
+            // set up en-passant
+            if (fromIdx - toIdx == 16 || toIdx - fromIdx == 16)
             {
-                board.EnPassantSquare = Square.At((currentSquare.Row + newSquare.Row) / 2, newSquare.Col);
+                board.EnPassantSquare = IndexToSquare((toIdx + fromIdx) / 2);
             }
+
             if (move.Promotion != null)
             {
-                board.OnPieceCaptured(this);
-                board.AddPiece(newSquare, move.Promotion);
+                // piece has now moved, so is on move.To square
+                board.OnPieceCaptured(move.MovingPiece);
 
+                board.Bitboards[move.MovingPiece] ^= bitTo;
+                board.Bitboards[PieceToBoardIndex(move.Promotion)] ^= bitTo; // &= ~bitFrom;
             }
-        }*/
+        }
+
+
 
         public override void UndoMove(Board board, Move move, GameExtraInfo info)
         {
             // handles en-passant capture, otherwise just fall back to base case
-            if (move.To.Col != move.From.Col && move.Captured == null)
+            if (move.To.Col != move.From.Col && move.CapturedPiece == NO_PIECE)
             {
                 // en-passant, restore piece
                 board.AddPiece(Square.At(move.From.Row, move.To.Col), new Pawn(board.CurrentPlayer));

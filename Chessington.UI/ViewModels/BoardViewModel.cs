@@ -136,7 +136,7 @@ namespace Chessington.UI.ViewModels
             ChessingtonServices.EventAggregator.Publish(new SelectionCleared());
         }
 
-        private static void BoardOnPieceCaptured(Piece piece)
+        private static void BoardOnPieceCaptured(int piece)
         {
             ChessingtonServices.EventAggregator.Publish(new PieceTaken(piece));
         }

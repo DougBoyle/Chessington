@@ -58,51 +58,54 @@ namespace Chessington.GameEngine.Pieces
                 .Concat(GetCastling(board, currentPosition));
         }
 
-        /*
-        public override void MoveTo(Board board, Move move)
+        public static void MakeMove(Board board, Move move)
         {
+            int fromIdx = SquareToIndex(move.From);
+            int toIdx = SquareToIndex(move.To);
+            ulong bitFrom = 1UL << fromIdx;
+            ulong bitTo = 1UL << toIdx;
+
             var currentPosition = move.From;
             var newSquare = move.To;
-            if (Player == Player.White)
+
+            // should be able to use either board.CurrentPlayer or move.MovingPiece/6
+            if (board.CurrentPlayer == Player.White)
             {
-                if (currentPosition.Equals(Square.At(7, 4)))
+                if (fromIdx == 4)
                 {
-                    if (newSquare.Col == 6)
+                    board.RightWhiteCastling = false;
+                    board.LeftWhiteCastling = false;
+                    // short castling
+                    if (toIdx == 6)
                     {
-                        board.AddPiece(Square.At(7, 5), board.GetPiece(Square.At(7, 7)));
-                        board.AddPiece(Square.At(7, 7), null);
+                        board.Bitboards[ROOK_BOARD] ^= 0xa0UL; // 0000_0101
                     }
-                    else if (newSquare.Col == 2)
+                    else if (toIdx == 2)
                     {
-                        board.AddPiece(Square.At(7, 3), board.GetPiece(Square.At(7, 0)));
-                        board.AddPiece(Square.At(7, 0), null);
+                        board.Bitboards[ROOK_BOARD] ^= 0x9UL; // 1001_0000
                     }
                 }
-                board.RightWhiteCastling = false;
-                board.LeftWhiteCastling = false;
-
             }
             else
             {
-                if (currentPosition.Equals(Square.At(0, 4)))
+                if (fromIdx == 60)
                 {
-                    if (newSquare.Col == 6)
+                    board.RightBlackCastling = false;
+                    board.LeftBlackCastling = false;
+                    // short castling
+                    if (toIdx == 62)
                     {
-                        board.AddPiece(Square.At(0, 5), board.GetPiece(Square.At(0, 7)));
-                        board.AddPiece(Square.At(0, 7), null);
+                        board.Bitboards[6 + ROOK_BOARD] ^= 0xa000000000000000UL; // 0000_0101
                     }
-                    else if (newSquare.Col == 2)
+                    else if (toIdx == 58)
                     {
-                        board.AddPiece(Square.At(0, 3), board.GetPiece(Square.At(0, 0)));
-                        board.AddPiece(Square.At(0, 0), null);
+                        board.Bitboards[6 + ROOK_BOARD] ^= 0x900000000000000UL; // 1001_0000
                     }
                 }
-                board.RightBlackCastling = false;
-                board.LeftBlackCastling = false;
             }
 
-            base.MoveTo(board, move);
-        }*/
+            Piece.MakeMove(board, move);
+        }
 
         public override void UndoMove(Board board, Move move, GameExtraInfo info)
         {
@@ -111,10 +114,10 @@ namespace Chessington.GameEngine.Pieces
             if (move.From.Col == 4 && move.To.Col == 6)
             {
                 // king = 5 so (MovingPiece - 2) is the rook of the same colour
-                board.QuietMovePiece(Square.At(move.From.Row, 5), Square.At(move.From.Row, 7), null, move.MovingPiece - 2);
+                board.QuietMovePiece(Square.At(move.From.Row, 5), Square.At(move.From.Row, 7), NO_PIECE, move.MovingPiece - 2);
             } else if (move.From.Col == 4 && move.To.Col == 2)
             {
-                board.QuietMovePiece(Square.At(move.From.Row, 3), Square.At(move.From.Row, 0), null, move.MovingPiece - 2);
+                board.QuietMovePiece(Square.At(move.From.Row, 3), Square.At(move.From.Row, 0), NO_PIECE, move.MovingPiece - 2);
             }
 
             base.UndoMove(board, move, info);

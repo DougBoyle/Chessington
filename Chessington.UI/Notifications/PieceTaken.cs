@@ -4,11 +4,11 @@ namespace Chessington.UI.Notifications
 {
     public class PieceTaken
     {
-        public PieceTaken(Piece piece)
+        public PieceTaken(int index)
         {
-            Piece = piece;
+            PieceIndex = index;
         }
 
-        public Piece Piece { get; set; }
+        public int PieceIndex { get; set; }
     }
 }

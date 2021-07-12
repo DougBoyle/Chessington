@@ -62,10 +62,51 @@ namespace Chessington.GameEngine.Pieces
             {
                 board.AddPiece(move.To, new Pawn(info.CurrentPlayer));
             }
-            board.QuietMovePiece(move.To, move.From, move.Captured, move.MovingPiece);
+            board.QuietMovePiece(move.To, move.From, move.CapturedPiece, move.MovingPiece);
             info.RestoreInfo(board);
         }
 
-       
+
+        public static void MakeMove(Board board, Move move)
+        {
+            int fromIdx = SquareToIndex(move.From);
+            int toIdx = SquareToIndex(move.To);
+            ulong bitFrom = 1UL << fromIdx;
+            ulong bitTo = 1UL << toIdx;
+
+            // Board.MovePiece allowed possibility that moving piece does not exist.
+            // no longer allowed. Also don't check that piece belongs to correct player
+
+            // var movingPiece = board[from.Row, from.Col];
+            //  if (movingPiece == null) { return; }
+
+            // also testing fromIdx handles moving rooks initially too
+            if (toIdx == 0 || fromIdx == 0) board.LeftWhiteCastling = false;
+            if (toIdx == 7 || fromIdx == 7) board.RightWhiteCastling = false;
+            if (toIdx == 56 || fromIdx == 56) board.LeftBlackCastling = false;
+            if (toIdx == 63 || fromIdx == 63) board.RightBlackCastling = false;
+
+
+            // if (movingPiece.Player != CurrentPlayer)
+            // {
+            //     throw new ArgumentException("The supplied piece does not belong to the current player.");
+            // }
+
+            // TODO: Switch to using ints rather than Piece objects
+            if (move.CapturedPiece >= 0)
+            {
+                board.OnPieceCaptured(move.CapturedPiece);
+                board.Bitboards[move.CapturedPiece] ^= bitTo; // should be same as &= (~bitTo)
+            }
+
+            //Move the piece and set the 'from' square to be empty.
+            board.Bitboards[move.MovingPiece] |= bitTo;
+            board.Bitboards[move.MovingPiece] ^= bitFrom; // &= ~bitFrom;
+
+            board.CurrentPlayer = (Player)(move.MovingPiece / 6) == Player.White ? Player.Black : Player.White;
+            board.OnCurrentPlayerChanged(board.CurrentPlayer);
+
+            board.EnPassantSquare = null;
+        }
     }
 }

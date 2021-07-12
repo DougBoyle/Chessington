@@ -37,7 +37,7 @@ namespace Chessington.UI.ViewModels
 
         public void Handle(PieceTaken message)
         {
-            CapturedPieces.Add(PieceImageFactory.GetImage(message.Piece));
+            CapturedPieces.Add(PieceImageFactory.GetImage(message.PieceIndex));
         }
 
         public void Handle(CurrentPlayerChanged message)

@@ -21,10 +21,11 @@ namespace Chessington.GameEngine.AI
         public readonly Square From;
         public readonly Square To;
 
-        // TODO: Switch to ints rather than Piece objects
-        public Piece Captured; // is null for en-passant 
+        // TODO: Switch to ints rather than Piece objects - (-1 = NO_PIECE) used as null (and en-passant)
+        public int CapturedPiece;
         // Promotion = null if not promoting, else is the piece to replace with
         public Piece Promotion;
+        public int PromotionPiece;
 
         // TODO: Use this to add a MakeMove/UndoMove function to Board, so no longer need to do GetPiece/work with objects
         // using overriden method is inefficient, as it requires storing pieces as objects rather than single bits
@@ -38,8 +39,9 @@ namespace Chessington.GameEngine.AI
         {
             From = from;
             To = to;
-            Captured = captured;
+            CapturedPiece = captured == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(captured);
             Promotion = promotion;
+            PromotionPiece = promotion == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(promotion);
             MovingPiece = BitUtils.PieceToBoardIndex(moving);
         }
 
@@ -49,12 +51,14 @@ namespace Chessington.GameEngine.AI
         {
             From = from;
             To = to;
-            Captured = before.GetPiece(to);
+            var captured = before.GetPiece(to);
+            CapturedPiece = captured == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(captured);
 
             // doesn't detect promotions
             // System.Diagnostics.Debug.Assert(before.GetPiece(from).PieceType != PieceType.Pawn || !(to.Row == 0 || to.Row == 7));
-           
+
             Promotion = null; // (before.GetPiece(from).PieceType == PieceType.Pawn) && (to.Row == 0 || to.Row == 7);
+            PromotionPiece = -1;
             MovingPiece = BitUtils.PieceToBoardIndex(before.GetPiece(from));
         }
 
@@ -69,18 +73,20 @@ namespace Chessington.GameEngine.AI
             if (board.GetPiece(From).PieceType == PieceType.King && From.Col == 4 && To.Col == 0)
             {
                 To = Square.At(From.Row, 2);
-                Captured = null;
+                CapturedPiece = BitUtils.NO_PIECE;
                 Promotion = null;
             }
             else if (board.GetPiece(From).PieceType == PieceType.King && From.Col == 4 && To.Col == 7)
             {
                 To = Square.At(From.Row, 6);
-                Captured = null;
+                CapturedPiece = BitUtils.NO_PIECE;
                 Promotion = null;
             }
             else
             {
-                Captured = board.GetPiece(To);
+                // expensive, but only used when converting opening table entry to move, so not too bad
+                // TODO: May even change board.GetPiece to return an int anyway
+                CapturedPiece = board.GetPiece(To) == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(board.GetPiece(To));
                 int promote = (move & 0xF000) >> 12;
                 switch (promote)
                 {
@@ -92,6 +98,8 @@ namespace Chessington.GameEngine.AI
                 }
             }
 
+            
+            PromotionPiece = Promotion == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(Promotion);
             MovingPiece = BitUtils.PieceToBoardIndex(board.GetPiece(From));
         }
 

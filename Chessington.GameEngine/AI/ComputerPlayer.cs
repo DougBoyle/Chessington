@@ -118,7 +118,8 @@ namespace Chessington.GameEngine.AI
                 {
                     Piece piece = Board.GetPiece(move.From);
 
-                    if (move.Captured != null && move.Captured.PieceType == PieceType.King) return 1000000 + 1000 * depth;
+                    if (move.CapturedPiece == BitUtils.KING_BOARD 
+                        || move.CapturedPiece == BitUtils.KING_BOARD + 6) return 1000000 + 1000 * depth;
 
                     piece.MoveTo(Board, move);
 

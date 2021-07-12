@@ -38,7 +38,7 @@ namespace Analysis
 
         public static bool ResetsFiftyMoveCounter(Board board, Move move)
         {
-            return move.Captured != null || board.GetPiece(move.From).PieceType == Chessington.GameEngine.Pieces.PieceType.Pawn;
+            return move.CapturedPiece >= 0 || board.GetPiece(move.From).PieceType == Chessington.GameEngine.Pieces.PieceType.Pawn;
         }
     }
 }

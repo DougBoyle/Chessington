@@ -12,6 +12,7 @@ namespace Chessington.GameEngine
     {
         public const int PAWN_BOARD = 0, KNIGHT_BOARD = 1, BISHOP_BOARD = 2,
             ROOK_BOARD = 3, QUEEN_BOARD = 4, KING_BOARD = 5;
+        public const int NO_PIECE = -1;
 
         // haven't decided if these should be part of bitboards[] or not yet
         public static ulong BoardOccupancy(Board board, Player player)

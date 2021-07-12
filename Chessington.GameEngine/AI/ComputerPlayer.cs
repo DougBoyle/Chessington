@@ -12,7 +12,7 @@ namespace Chessington.GameEngine.AI
     {
         private static Random r = new Random();
 
-        private const int MAX_DEPTH = 4; // 2 ply, mine then yours
+        private const int MAX_DEPTH = 3; // 2 ply, mine then yours
 
         // TODO: Can put 'this' in type definition of list to make it an extension method i.e. lst.Shuffle()
         private static void Shuffle<T>(IList<T> list)

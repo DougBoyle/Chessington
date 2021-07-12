@@ -21,10 +21,13 @@ namespace Chessington.GameEngine.AI
         public readonly Square From;
         public readonly Square To;
 
-        public Piece Captured; // is null for en-passant
+        // TODO: Switch to ints rather than Piece objects
+        public Piece Captured; // is null for en-passant 
         // Promotion = null if not promoting, else is the piece to replace with
         public Piece Promotion;
 
+        // TODO: Use this to add a MakeMove/UndoMove function to Board, so no longer need to do GetPiece/work with objects
+        // using overriden method is inefficient, as it requires storing pieces as objects rather than single bits
         public int MovingPiece; // 0-5 = white, 6-11 = black. Corresponds to Bitboard[] to allow changing correct board
 
         // information about 50-move counter/castling status/en-passant can be remembered once from the board, not stored per move

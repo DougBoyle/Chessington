@@ -79,7 +79,7 @@ namespace Chessington.GameEngine.Pieces {
             return AttackMapToMoves(board, here, result);
         }
 
-      
+      /*
         public override void MoveTo(Board board, Move move)
         {
             var currentSquare = move.From;
@@ -100,7 +100,7 @@ namespace Chessington.GameEngine.Pieces {
                 board.AddPiece(newSquare, move.Promotion);
 
             }
-        }
+        }*/
 
         public override void UndoMove(Board board, Move move, GameExtraInfo info)
         {

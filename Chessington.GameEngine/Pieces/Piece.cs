@@ -4,6 +4,8 @@ using System.Linq;
 
 using Chessington.GameEngine.AI;
 
+using static Chessington.GameEngine.BitUtils;
+
 namespace Chessington.GameEngine.Pieces
 {
     // ultimately, don't want to be dealing with class instances, use efficient ints etc. instead
@@ -44,11 +46,12 @@ namespace Chessington.GameEngine.Pieces
         // Takes the position of the piece as an input, rather than having to find it twice
         public abstract IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square position);
 
-
+        // TODO: replace to do move on board, rather than needing instances of pieces
         public virtual void MoveTo(Board board, Move move)
         {
-            board.MovePiece(move.From, move.To);
-            board.EnPassantSquare = null;
+            board.MakeMove(move);
+          //  board.MovePiece(move.From, move.To);
+          //  board.EnPassantSquare = null;
         }
 
         // for computer evaluation
@@ -59,8 +62,10 @@ namespace Chessington.GameEngine.Pieces
             {
                 board.AddPiece(move.To, new Pawn(info.CurrentPlayer));
             }
-            board.QuietMovePiece(move.To, move.From, move.Captured);
+            board.QuietMovePiece(move.To, move.From, move.Captured, move.MovingPiece);
             info.RestoreInfo(board);
         }
+
+       
     }
 }

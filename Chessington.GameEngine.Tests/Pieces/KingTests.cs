@@ -85,5 +85,36 @@ namespace Chessington.GameEngine.Tests.Pieces
             var moves = king.GetAvailableMoves(board, Square.At(4, 4)).Select(move => move.To);
             moves.Should().NotContain(Square.At(4, 5));
         }
+
+        [Test]
+        public void WhiteKingCanCastle()
+        {
+            var board = new Board();
+            var king = new King(Player.White);
+            board.AddPiece(Square.At(7, 4), king);
+            var rook = new Rook(Player.White);
+            board.AddPiece(Square.At(7, 0), rook);
+            rook = new Rook(Player.White);
+            board.AddPiece(Square.At(7, 7), rook);
+
+            // add a piece so that long castling not currently valid
+            var pawn = new Pawn(Player.White);
+            board.AddPiece(Square.At(7, 1), pawn);
+
+            var moves = king.GetAvailableMoves(board, Square.At(7, 4)).Select(move => move.To);
+            
+            var expectedMoves = new List<Square>
+            {
+                // normal moves
+                Square.At(7, 3),
+                Square.At(6, 3),
+                Square.At(6, 4),
+                Square.At(7, 5),
+                Square.At(6, 5),
+                Square.At(7, 6) // castling move
+            };
+
+            moves.ShouldAllBeEquivalentTo(expectedMoves);
+        }
     }
 }

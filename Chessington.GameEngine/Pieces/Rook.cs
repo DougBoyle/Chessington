@@ -21,6 +21,7 @@ namespace Chessington.GameEngine.Pieces
             return BitMoves.GetMovesFromAttackMap(this, currentPosition, board, attackMap);
         }
 
+        /*
         public override void MoveTo(Board board, Move move)
         {
             var currentSquare = move.From;
@@ -47,6 +48,6 @@ namespace Chessington.GameEngine.Pieces
                 }
             }
             base.MoveTo(board, move);
-        }
+        }*/
     }
 }

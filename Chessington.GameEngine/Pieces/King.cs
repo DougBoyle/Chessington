@@ -32,7 +32,7 @@ namespace Chessington.GameEngine.Pieces
             // short castling
             if ((Player == Player.White ? board.RightWhiteCastling : board.RightBlackCastling) &&
                 (occupancy & 0x60UL) == 0UL && 
-                board.InCheck(Player, Square.At(here.Row, here.Col + 1)))
+                !board.InCheck(Player, Square.At(here.Row, here.Col + 1)))
             {
                 // can guarentee nothing captured/promoted
                 result.Add(new Move(here, Square.At(here.Row, here.Col + 2), this, null, null));
@@ -41,7 +41,7 @@ namespace Chessington.GameEngine.Pieces
             // long castling
             if ((Player == Player.White ? board.LeftWhiteCastling : board.LeftBlackCastling) &&
                 (occupancy & 0xeUL) == 0UL &&
-                board.InCheck(Player, Square.At(here.Row, here.Col - 1)))
+                !board.InCheck(Player, Square.At(here.Row, here.Col - 1)))
             {
                 result.Add(new Move(here, Square.At(here.Row, here.Col - 2), this, null, null));
             }
@@ -58,6 +58,7 @@ namespace Chessington.GameEngine.Pieces
                 .Concat(GetCastling(board, currentPosition));
         }
 
+        /*
         public override void MoveTo(Board board, Move move)
         {
             var currentPosition = move.From;
@@ -101,7 +102,7 @@ namespace Chessington.GameEngine.Pieces
             }
 
             base.MoveTo(board, move);
-        }
+        }*/
 
         public override void UndoMove(Board board, Move move, GameExtraInfo info)
         {
@@ -109,10 +110,11 @@ namespace Chessington.GameEngine.Pieces
             // Detected differently to above
             if (move.From.Col == 4 && move.To.Col == 6)
             {
-                board.QuietMovePiece(Square.At(move.From.Row, 5), Square.At(move.From.Row, 7), null);
+                // king = 5 so (MovingPiece - 2) is the rook of the same colour
+                board.QuietMovePiece(Square.At(move.From.Row, 5), Square.At(move.From.Row, 7), null, move.MovingPiece - 2);
             } else if (move.From.Col == 4 && move.To.Col == 2)
             {
-                board.QuietMovePiece(Square.At(move.From.Row, 3), Square.At(move.From.Row, 0), null);
+                board.QuietMovePiece(Square.At(move.From.Row, 3), Square.At(move.From.Row, 0), null, move.MovingPiece - 2);
             }
 
             base.UndoMove(board, move, info);

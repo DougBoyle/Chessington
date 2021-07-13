@@ -182,8 +182,10 @@ namespace Chessington.GameEngine
         // TODO: Probably a better way of doing this/better place to put this.
         // downside of not having class instances, effectively have to make pointers explicit
         public delegate IEnumerable<Move> MoveGetter(Board board, byte hereIdx, Player player, ulong mine, ulong yours);
+
+        // Pawns done globally, hence null entry
         private readonly MoveGetter[] moveGetters =
-            {Pawn.GetRelaxedAvailableMoves, Knight.GetRelaxedAvailableMoves, Bishop.GetRelaxedAvailableMoves,
+            {null, Knight.GetRelaxedAvailableMoves, Bishop.GetRelaxedAvailableMoves,
              Rook.GetRelaxedAvailableMoves, Queen.GetRelaxedAvailableMoves, King.GetRelaxedAvailableMoves};
 
 

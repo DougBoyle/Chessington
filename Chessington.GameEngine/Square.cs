@@ -11,6 +11,12 @@
             Col = col;
         }
 
+        // 0 = a1, rather than SquareToIndex from BitUtils
+        public byte AsIndex()
+        {
+            return (byte)(Row * 8 + Col);
+        }
+
         public static Square At(int row, int col)
         {
             return new Square(row, col);

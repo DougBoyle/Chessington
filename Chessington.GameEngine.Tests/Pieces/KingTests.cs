@@ -20,7 +20,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var king = new King(Player.White);
             board.AddPiece(Square.At(4, 4), king);
 
-            var moves = king.GetAvailableMoves(board, Square.At(4, 4)).Select(move => move.To);
+            var moves = king.GetAvailableMoves(board, Square.At(4, 4)).Select(move => BitUtils.IndexToSquare(move.ToIdx));
 
             var expectedMoves = new List<Square>
             {
@@ -48,7 +48,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var king = new King(Player.White);
             board.AddPiece(Square.At(0, 0), king);
 
-            var moves = king.GetAvailableMoves(board, Square.At(0, 0)).Select(move => move.To);
+            var moves = king.GetAvailableMoves(board, Square.At(0, 0)).Select(move => BitUtils.IndexToSquare(move.ToIdx));
 
             var expectedMoves = new List<Square>
             {
@@ -69,7 +69,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.Black);
             board.AddPiece(Square.At(4, 5), pawn);
 
-            var moves = king.GetAvailableMoves(board, Square.At(4, 4)).Select(move => move.To);
+            var moves = king.GetAvailableMoves(board, Square.At(4, 4)).Select(move => BitUtils.IndexToSquare(move.ToIdx));
             moves.Should().Contain(Square.At(4, 5));
         }
 
@@ -82,7 +82,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(4, 5), pawn);
 
-            var moves = king.GetAvailableMoves(board, Square.At(4, 4)).Select(move => move.To);
+            var moves = king.GetAvailableMoves(board, Square.At(4, 4)).Select(move => BitUtils.IndexToSquare(move.ToIdx));
             moves.Should().NotContain(Square.At(4, 5));
         }
 
@@ -101,7 +101,7 @@ namespace Chessington.GameEngine.Tests.Pieces
             var pawn = new Pawn(Player.White);
             board.AddPiece(Square.At(7, 1), pawn);
 
-            var moves = king.GetAvailableMoves(board, Square.At(7, 4)).Select(move => move.To);
+            var moves = king.GetAvailableMoves(board, Square.At(7, 4)).Select(move => BitUtils.IndexToSquare(move.ToIdx));
             
             var expectedMoves = new List<Square>
             {

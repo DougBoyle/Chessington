@@ -102,7 +102,9 @@ namespace Chessington.GameEngine.AI
             {
                 // use relaxed moves to avoid searching all moves at next level for check, just to evaluate them all again
                 // when that level is actually searched (TODO: Can't detect stalemate, looks like losing)
+                // TODO: Sorting??
                 var allAvailableMoves = Board.GetAllRelaxedMoves();
+                allAvailableMoves.Sort();
 
                 int bestScore = -1000000 - 1000*depth; // the sooner in the search a checkmate is, the worse it is valued
                 var gameInfo = new GameExtraInfo(Board);

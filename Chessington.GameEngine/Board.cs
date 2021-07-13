@@ -95,6 +95,11 @@ namespace Chessington.GameEngine
             return null;
         }
 
+        public Piece GetPiece(byte squareIdx)
+        {
+            return GetPiece(IndexToSquare(squareIdx));
+        }
+
         public int GetPieceIndex(Square square)
         {
             ulong bit = SquareToBit(square);
@@ -102,6 +107,17 @@ namespace Chessington.GameEngine
             {
                 if ((Bitboards[i] & bit) != 0) return i;
                
+            }
+            return NO_PIECE;
+        }
+
+        public int GetPieceIndex(byte index)
+        {
+            ulong bit = 1UL << index;
+            for (int i = 0; i < 12; i++)
+            {
+                if ((Bitboards[i] & bit) != 0) return i;
+
             }
             return NO_PIECE;
         }
@@ -145,13 +161,14 @@ namespace Chessington.GameEngine
 
        
         // MovePiece without all the side-effects, to allow *undoing* moves
-        public void QuietMovePiece(Square from, Square to, int captured, int movingPiece)
+        // 'from' here was 'to' when move was made
+        public void QuietMovePiece(int fromIdx, int toIdx, int captured, int movingPiece)
         {
-            ulong bitFrom = SquareToBit(from);
-            ulong bitTo = SquareToBit(to);
+            ulong bitFrom = 1UL << fromIdx;
+            ulong bitTo = 1UL << toIdx;
 
-            // for undoing moves, so 'to' square should be unoccupied
-            Bitboards[movingPiece] ^= bitTo|bitFrom;
+            // for undoing moves, so 'to' square should be unoccupied and 'from' should be piece that was captured
+            Bitboards[movingPiece] ^= bitTo | bitFrom;
             if (captured >= 0) Bitboards[captured] |= bitFrom;
         }
 

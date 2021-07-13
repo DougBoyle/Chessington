@@ -27,7 +27,7 @@ namespace Chessington.GameEngine.Pieces
         {
             int index = SquareToIndex(currentPosition);
             ulong attackMap = knightMasks[index] & (~mine);
-            return GetMovesFromAttackMap(6 * (int)player + KNIGHT_BOARD, currentPosition, board, attackMap);
+            return GetMovesFromAttackMap(6 * (int)player + KNIGHT_BOARD, SquareToIndex(currentPosition), board, attackMap);
         }
     }
 }

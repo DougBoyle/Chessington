@@ -17,25 +17,25 @@ namespace Chessington.GameEngine.Pieces {
         // TODO: Know only diagonal moves can be captures (but could be en-passant, so can reduce number of tests)
         private static IEnumerable<Move> AttackMapToMoves(Board board, Square here, Player player, ulong attacks)
         {
+            byte hereIdx = SquareToIndex(here);
             List<Move> result = new List<Move>();
             while (attacks != 0UL)
             {
                 ulong bit = GetLSB(attacks);
-                int bitIndex = BitToIndex(bit);
+                byte bitIndex = BitToIndex(bit);
                 attacks = DropLSB(attacks);
-                Square to = IndexToSquare(bitIndex);
 
-                int captured = board.GetPieceIndex(to);
+                int captured = board.GetPieceIndex(bitIndex);
                 if ((bit & PromotionRanks) == 0)
                 {
-                    result.Add(new Move(here, to, 6*(int)player, captured, NO_PIECE));
+                    result.Add(new Move(hereIdx, bitIndex, 6*(int)player, captured, NO_PIECE));
                 } else
                 {
                     int playerOffset = (int)player * 6;
-                    result.Add(new Move(here, to, 6 * (int)player, captured, playerOffset + KNIGHT_BOARD));
-                    result.Add(new Move(here, to, 6 * (int)player, captured, playerOffset + BISHOP_BOARD));
-                    result.Add(new Move(here, to, 6 * (int)player, captured, playerOffset + ROOK_BOARD));
-                    result.Add(new Move(here, to, 6 * (int)player, captured, playerOffset + QUEEN_BOARD));
+                    result.Add(new Move(hereIdx, bitIndex, 6 * (int)player, captured, playerOffset + KNIGHT_BOARD));
+                    result.Add(new Move(hereIdx, bitIndex, 6 * (int)player, captured, playerOffset + BISHOP_BOARD));
+                    result.Add(new Move(hereIdx, bitIndex, 6 * (int)player, captured, playerOffset + ROOK_BOARD));
+                    result.Add(new Move(hereIdx, bitIndex, 6 * (int)player, captured, playerOffset + QUEEN_BOARD));
                 }
             }
             return result;
@@ -94,8 +94,8 @@ namespace Chessington.GameEngine.Pieces {
 
         public static new void MakeMove(Board board, Move move)
         {
-            int fromIdx = SquareToIndex(move.From);
-            int toIdx = SquareToIndex(move.To);
+            int fromIdx = move.FromIdx;
+            int toIdx = move.ToIdx;
             ulong bitTo = 1UL << toIdx;
 
 
@@ -105,7 +105,7 @@ namespace Chessington.GameEngine.Pieces {
                 // square is just bitTo shifted left/right 8
                 board.OnPieceCaptured(6 - move.MovingPiece);
                 // as pawns are either 0 or 6
-                board.Bitboards[6 - move.MovingPiece] ^= SquareToBit(Square.At(move.From.Row, move.To.Col));
+                board.Bitboards[6 - move.MovingPiece] ^= 1UL << 8*(move.FromIdx / 8) + (move.ToIdx % 8);
             }
 
             Piece.MakeMove(board, move);
@@ -131,11 +131,10 @@ namespace Chessington.GameEngine.Pieces {
         public static new void UndoMove(Board board, Move move, GameExtraInfo info)
         {
             // handles en-passant capture, otherwise just fall back to base case
-            if (move.To.Col != move.From.Col && move.CapturedPiece == NO_PIECE)
+            if ((move.ToIdx % 8) != (move.FromIdx % 8) && move.CapturedPiece == NO_PIECE)
             {
                 // en-passant, restore piece
-                board.AddPiece(Square.At(move.From.Row, move.To.Col), new Pawn(board.CurrentPlayer));
-
+                board.Bitboards[6 - move.MovingPiece] ^= 1UL << 8 * (move.FromIdx / 8) + (move.ToIdx % 8);
             }
             Piece.UndoMove(board, move, info);
         }

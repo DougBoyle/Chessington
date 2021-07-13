@@ -24,7 +24,7 @@ namespace Chessington.GameEngine.Pieces {
         {
             ulong attackMap = BitMoves.RookAttacks(currentPosition, board, mine, mine | yours) | 
                 BitMoves.BishopAttacks(currentPosition, board, mine, mine | yours);
-            return BitMoves.GetMovesFromAttackMap(6 * (int)player + BitUtils.QUEEN_BOARD, currentPosition, board, attackMap);
+            return BitMoves.GetMovesFromAttackMap(6 * (int)player + BitUtils.QUEEN_BOARD, BitUtils.SquareToIndex(currentPosition), board, attackMap);
         }
     }
 }

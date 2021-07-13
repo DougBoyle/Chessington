@@ -386,9 +386,9 @@ namespace Analysis
                         else result += 2; // queen - a bishop/knight would mean a draw by insufficient material
                     }
                     result <<= 6;
-                    result += whiteEntry.BestMove.From.Row * 8 + whiteEntry.BestMove.From.Col;
+                    result += SwapRow(whiteEntry.BestMove.FromIdx); 
                     result <<= 6;
-                    result += whiteEntry.BestMove.To.Row * 8 + whiteEntry.BestMove.To.Col;
+                    result += SwapRow(whiteEntry.BestMove.ToIdx);
                 }
                 else
                 {
@@ -407,9 +407,9 @@ namespace Analysis
                 {
                     // can ignore promotion, as now pawns
                     result <<= 8;
-                    result += blackEntry.BestMove.From.Row * 8 + blackEntry.BestMove.From.Col;
+                    result += SwapRow(blackEntry.BestMove.FromIdx);
                     result <<= 6;
-                    result += blackEntry.BestMove.To.Row * 8 + blackEntry.BestMove.To.Col;
+                    result += SwapRow(blackEntry.BestMove.ToIdx);
                 }
                 else
                 {
@@ -462,9 +462,9 @@ namespace Analysis
                         else result += 2; // queen - a bishop/knight would mean a draw by insufficient material
                     }
                     result <<= 6;
-                    result += whiteEntry.BestMove.From.Row * 8 + whiteEntry.BestMove.From.Col;
+                    result += SwapRow(whiteEntry.BestMove.FromIdx);
                     result <<= 6;
-                    result += whiteEntry.BestMove.To.Row * 8 + whiteEntry.BestMove.To.Col;
+                    result += SwapRow(whiteEntry.BestMove.ToIdx);
                 }
                 result <<= 2;
                 result += whiteEntry.Outcome == Outcome.Win ? 1 : whiteEntry.Outcome == Outcome.Lose ? 2 : 0;
@@ -479,9 +479,9 @@ namespace Analysis
                 if (blackEntry.BestMove != null)
                 {
                     result <<= 8;
-                    result += blackEntry.BestMove.From.Row * 8 + blackEntry.BestMove.From.Col;
+                    result += SwapRow(blackEntry.BestMove.FromIdx);
                     result <<= 6;
-                    result += blackEntry.BestMove.To.Row * 8 + blackEntry.BestMove.To.Col;
+                    result += SwapRow(blackEntry.BestMove.ToIdx);
                 }
                 else
                 {

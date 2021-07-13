@@ -551,10 +551,11 @@ namespace Analysis
             {
                 if (whiteEntry.BestMove != null)
                 {
+                    // TODO: Swap so 0 = a1 rather than a8
                     result <<= 8;
-                    result += whiteEntry.BestMove.From.Row * 8 + whiteEntry.BestMove.From.Col;
+                    result += BitUtils.SwapRow(whiteEntry.BestMove.FromIdx);
                     result <<= 6;
-                    result += whiteEntry.BestMove.To.Row * 8 + whiteEntry.BestMove.To.Col;
+                    result += BitUtils.SwapRow(whiteEntry.BestMove.ToIdx);
                 } else
                 {
                     result <<= 14; // may be in stale/checkmate, in which case no move possible, so set to 0
@@ -570,9 +571,9 @@ namespace Analysis
                 if (blackEntry.BestMove != null)
                 {
                     result <<= 8;
-                    result += blackEntry.BestMove.From.Row * 8 + blackEntry.BestMove.From.Col;
+                    result += BitUtils.SwapRow(blackEntry.BestMove.FromIdx);
                     result <<= 6;
-                    result += blackEntry.BestMove.To.Row * 8 + blackEntry.BestMove.To.Col;
+                    result += BitUtils.SwapRow(blackEntry.BestMove.ToIdx);
                 } else
                 {
                     result <<= 14;
@@ -623,9 +624,9 @@ namespace Analysis
             {
                 if (whiteEntry.BestMove != null)
                 {
-                    result += whiteEntry.BestMove.From.Row * 8 + whiteEntry.BestMove.From.Col;
+                    result += BitUtils.SwapRow(whiteEntry.BestMove.FromIdx);
                     result <<= 6;
-                    result += whiteEntry.BestMove.To.Row * 8 + whiteEntry.BestMove.To.Col;
+                    result += BitUtils.SwapRow(whiteEntry.BestMove.ToIdx);
                 }
                 result <<= 2;
                 result += whiteEntry.Outcome == Outcome.Win ? 1 : whiteEntry.Outcome == Outcome.Lose ? 2 : 0;
@@ -640,9 +641,9 @@ namespace Analysis
                 if (blackEntry.BestMove != null)
                 {
                     result <<= 8;
-                    result += blackEntry.BestMove.From.Row * 8 + blackEntry.BestMove.From.Col;
+                    result += BitUtils.SwapRow(blackEntry.BestMove.FromIdx);
                     result <<= 6;
-                    result += blackEntry.BestMove.To.Row * 8 + blackEntry.BestMove.To.Col;
+                    result += BitUtils.SwapRow(blackEntry.BestMove.ToIdx);
                 }
                 else
                 {

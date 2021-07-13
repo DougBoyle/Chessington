@@ -23,6 +23,8 @@ namespace Chessington.GameEngine.Pieces
         {
             var result = new List<Move>();
             if (board.InCheck(player, here)) return result;
+
+            byte hereIdx = SquareToIndex(here);
             ulong occupancy = BoardOccupancy(board, Player.White) | BoardOccupancy(board, Player.Black);
             if (player == Player.Black) occupancy >>= 56; // move to bottom row
 
@@ -35,7 +37,7 @@ namespace Chessington.GameEngine.Pieces
                 !board.InCheck(player, Square.At(here.Row, here.Col + 1)))
             {
                 // can guarentee nothing captured/promoted
-                result.Add(new Move(here, Square.At(here.Row, here.Col + 2), KING_BOARD + 6*(int)player, NO_PIECE, NO_PIECE));
+                result.Add(new Move(hereIdx, (byte)(hereIdx + 2), KING_BOARD + 6*(int)player, NO_PIECE, NO_PIECE));
             }
 
             // long castling
@@ -43,7 +45,7 @@ namespace Chessington.GameEngine.Pieces
                 (occupancy & 0xeUL) == 0UL &&
                 !board.InCheck(player, Square.At(here.Row, here.Col - 1)))
             {
-                result.Add(new Move(here, Square.At(here.Row, here.Col - 2), KING_BOARD + 6 * (int)player, NO_PIECE, NO_PIECE));
+                result.Add(new Move(hereIdx, (byte)(hereIdx - 2), KING_BOARD + 6 * (int)player, NO_PIECE, NO_PIECE));
             }
 
             return result;
@@ -62,19 +64,14 @@ namespace Chessington.GameEngine.Pieces
         {
             int index = SquareToIndex(currentPosition);
             ulong attackMap = kingMasks[index] & (~mine);
-            return GetMovesFromAttackMap(6*(int)player + KING_BOARD, currentPosition, board, attackMap)
+            return GetMovesFromAttackMap(6*(int)player + KING_BOARD, SquareToIndex(currentPosition), board, attackMap)
                 .Concat(GetCastling(board, currentPosition, player));
         }
 
         public static new void MakeMove(Board board, Move move)
         {
-            int fromIdx = SquareToIndex(move.From);
-            int toIdx = SquareToIndex(move.To);
-            ulong bitFrom = 1UL << fromIdx;
-            ulong bitTo = 1UL << toIdx;
-
-            var currentPosition = move.From;
-            var newSquare = move.To;
+            int fromIdx = move.FromIdx;
+            int toIdx = move.ToIdx;
 
             // should be able to use either board.CurrentPlayer or move.MovingPiece/6
             if (board.CurrentPlayer == Player.White)
@@ -119,13 +116,13 @@ namespace Chessington.GameEngine.Pieces
         {
             // Undo moving the rook for castling
             // Detected differently to above
-            if (move.From.Col == 4 && move.To.Col == 6)
+            if (move.FromIdx % 8 == 4 && move.ToIdx % 8 == 6)
             {
                 // king = 5 so (MovingPiece - 2) is the rook of the same colour
-                board.QuietMovePiece(Square.At(move.From.Row, 5), Square.At(move.From.Row, 7), NO_PIECE, move.MovingPiece - 2);
-            } else if (move.From.Col == 4 && move.To.Col == 2)
+                board.QuietMovePiece(move.FromIdx + 1, move.FromIdx + 3, NO_PIECE, move.MovingPiece - 2);
+            } else if (move.FromIdx % 8 == 4 && move.ToIdx % 8 == 2)
             {
-                board.QuietMovePiece(Square.At(move.From.Row, 3), Square.At(move.From.Row, 0), NO_PIECE, move.MovingPiece - 2);
+                board.QuietMovePiece(move.FromIdx - 1, move.FromIdx - 4, NO_PIECE, move.MovingPiece - 2);
             }
 
             Piece.UndoMove(board, move, info);

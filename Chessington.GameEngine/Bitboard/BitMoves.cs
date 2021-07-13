@@ -36,24 +36,22 @@ namespace Chessington.GameEngine.Bitboard
             while (attacks != 0UL)
             {
                 ulong bit = GetLSB(attacks);
-                int bitIndex = BitToIndex(bit);
+                byte bitIndex = BitToIndex(bit);
                 attacks = DropLSB(attacks);
-                Square to = IndexToSquare(bitIndex);
-                result.Add(new Move(from, to, PieceToBoardIndex(moving), board.GetPieceIndex(to), NO_PIECE));
+                result.Add(new Move(SquareToIndex(from), bitIndex, PieceToBoardIndex(moving), board.GetPieceIndex(bitIndex), NO_PIECE));
             }
             return result;
         }
 
-        public static List<Move> GetMovesFromAttackMap(int moving, Square from, Board board, ulong attacks)
+        public static List<Move> GetMovesFromAttackMap(int moving, byte fromIdx, Board board, ulong attacks)
         {
             List<Move> result = new List<Move>();
             while (attacks != 0UL)
             {
                 ulong bit = GetLSB(attacks);
-                int bitIndex = BitToIndex(bit);
+                byte bitIndex = (byte) BitToIndex(bit);
                 attacks = DropLSB(attacks);
-                Square to = IndexToSquare(bitIndex);
-                result.Add(new Move(from, to, moving, board.GetPieceIndex(to), NO_PIECE));
+                result.Add(new Move(fromIdx, bitIndex, moving, board.GetPieceIndex(bitIndex), NO_PIECE));
             }
             return result;
         }

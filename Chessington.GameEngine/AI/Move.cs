@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Chessington.GameEngine.Pieces;
 
@@ -14,12 +10,12 @@ namespace Chessington.GameEngine.AI
     // TODO: Add Piece 'moving' to allow finding correct bitboard to make/undo moves (really just need an int index)
     //       e.g. int movingPiece = pieceType + 6*player
     //       Depending on how moves generated, will generally be known e.g. specifically generate rook moves (new constructor)
-    public class Move
+    public class Move : IComparable<Move>
     {
         // TODO: Make format of everything more efficient e.g. byte vs 4 bools, 2 ints for Square rather than 1 byte 0-63
-        // Important: Original move was From->To, so now need to move in reverse direction
-        public readonly Square From;
-        public readonly Square To;
+        // TODO: In terms of bitboard, still have the row reversed issue with Square vs index (BitUtils.SwapRow)
+        public byte FromIdx;
+        public byte ToIdx;
 
         // TODO: Switch to ints rather than Piece objects - (-1 = NO_PIECE) used as null (and en-passant)
         public int CapturedPiece;
@@ -33,20 +29,20 @@ namespace Chessington.GameEngine.AI
         // information about 50-move counter/castling status/en-passant can be remembered once from the board, not stored per move
 
 
-        public Move(Square from, Square to, int moving, int captured, int promotion)
+        public Move(byte from, byte to, int moving, int captured, int promotion)
         {
-            From = from;
-            To = to;
+        //    To = to;
             CapturedPiece = captured;
             PromotionPiece = promotion;
             MovingPiece = moving;
+
+            FromIdx = from;
+            ToIdx = to;
         }
 
         // TODO: Only used for pawn tests, rewrite tests + remove this
         public Move(Square from, Square to, Board before)
         {
-            From = from;
-            To = to;
             var captured = before.GetPiece(to);
             CapturedPiece = captured == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(captured);
 
@@ -55,14 +51,17 @@ namespace Chessington.GameEngine.AI
 
             PromotionPiece = -1;
             MovingPiece = BitUtils.PieceToBoardIndex(before.GetPiece(from));
+
+            FromIdx = (byte)BitUtils.SquareToIndex(from);
+            ToIdx = (byte)BitUtils.SquareToIndex(to);
         }
 
         // for converting polyglot entries to move objects. See: http://hgm.nubati.net/book_format.html
         // only done for opening move choices, so need not be efficient
         public Move(ushort move, Board board)
         {
-            From = Square.At(7 - ((move & 0b111000_000000) >> 9), (move & 0b111_000000) >> 6);
-            To = Square.At(7 - ((move & 0b111000) >> 3), move & 0b111);
+            Square From = Square.At(7 - ((move & 0b111000_000000) >> 9), (move & 0b111_000000) >> 6);
+            Square To = Square.At(7 - ((move & 0b111000) >> 3), move & 0b111);
 
             // Polyglot treats castling as moving from file 4 (e) to file 0/7 so need to correct for this
             if (board.GetPiece(From).PieceType == PieceType.King && From.Col == 4 && To.Col == 0)
@@ -82,9 +81,14 @@ namespace Chessington.GameEngine.AI
                 // expensive, but only used when converting opening table entry to move, so not too bad
                 // TODO: May even change board.GetPiece to return an int anyway
                 CapturedPiece = board.GetPiece(To) == null ? BitUtils.NO_PIECE : BitUtils.PieceToBoardIndex(board.GetPiece(To));
-                PromotionPiece = ((move & 0xF000) >> 12) + 6 * (int)board.CurrentPlayer;
+                int promotion = (move & 0xF000) >> 12;
+                if (promotion == 0) PromotionPiece = BitUtils.NO_PIECE;
+                else PromotionPiece = promotion + 6 * (int)board.CurrentPlayer;
             }
             MovingPiece = BitUtils.PieceToBoardIndex(board.GetPiece(From));
+
+            FromIdx = (byte)BitUtils.SquareToIndex(From);
+            ToIdx = (byte)BitUtils.SquareToIndex(To);
         }
 
         public static char[] columns = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
@@ -92,7 +96,12 @@ namespace Chessington.GameEngine.AI
         // 0 is top of the board, 7 is bottom (white)
         public override string ToString()
         {
-            return columns[From.Col] + (8 - From.Row).ToString() + "-" + columns[To.Col] + (8 - To.Row).ToString();
+            return columns[FromIdx % 8] + (1 + FromIdx/8).ToString() + "-" + columns[ToIdx % 8] + (1 + ToIdx/8).ToString();
+        }
+
+        public int CompareTo(Move other)
+        {
+            return other.CapturedPiece - CapturedPiece; // more significant capture => earlier in list
         }
     }
 }

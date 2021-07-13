@@ -70,8 +70,8 @@ namespace Chessington.GameEngine.AI.Endgame
             if ((result & 0xFFFC) == 0) return null;
 
             // compute move in terms of original board (can ignore promotion value, just 00 placeholder)
-            Square from = transform(Square.At((result >> 11) & 0x7, (result >> 8) & 0x7));
-            Square to = transform(Square.At((result >> 5) & 0x7, (result >> 2) & 0x7));
+            byte from = BitUtils.SquareToIndex(transform(Square.At((result >> 11) & 0x7, (result >> 8) & 0x7)));
+            byte to = BitUtils.SquareToIndex(transform(Square.At((result >> 5) & 0x7, (result >> 2) & 0x7)));
 
             int promotion = BitUtils.NO_PIECE;
             int promotionKey = (int)((uint)result >> 14); // to achieve logical rather than arithmetic shift

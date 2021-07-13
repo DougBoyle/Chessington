@@ -24,7 +24,7 @@ namespace Chessington.GameEngine.Pieces
         public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition, Player player, ulong mine, ulong yours)
         {
             ulong attackMap = BitMoves.RookAttacks(currentPosition, board, mine, mine | yours);
-            return BitMoves.GetMovesFromAttackMap(6*(int)player + BitUtils.ROOK_BOARD, currentPosition, board, attackMap);
+            return BitMoves.GetMovesFromAttackMap(6*(int)player + BitUtils.ROOK_BOARD, BitUtils.SquareToIndex(currentPosition), board, attackMap);
         }
     }
 }

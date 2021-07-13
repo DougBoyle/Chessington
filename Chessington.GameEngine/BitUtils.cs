@@ -40,7 +40,7 @@ namespace Chessington.GameEngine
 		        mp[n] = i
         */
         const ulong deBruijn64 = 0x022fdd63cc95386dUL;
-        private static readonly int[] deBruijnHashtbl = 
+        private static readonly byte[] deBruijnHashtbl = 
             {0, 1, 2, 53, 3, 7, 54, 27, 4, 38, 41, 8, 34, 55,
             48, 28, 62, 5, 39, 46, 44, 42, 22, 9, 24, 35, 59,
             56, 49, 18, 29, 11, 63, 52, 6, 26, 37, 40, 33, 47,
@@ -48,7 +48,7 @@ namespace Chessington.GameEngine
             20, 57, 16, 50, 31, 19, 15, 30, 14, 13, 12};
 
         // assumes exactly 1 bit set in string. (returns position 0 if no bits set, same as if last bit set)
-        public static int BitToIndex(ulong bit) 
+        public static byte BitToIndex(ulong bit) 
         {
             return deBruijnHashtbl[(deBruijn64 * bit) >> 58];
         }
@@ -80,14 +80,20 @@ namespace Chessington.GameEngine
             return 1UL << ((7 - square.Row) * 8 + square.Col);
         }
 
-        public static int SquareToIndex(Square square)
+        public static byte SquareToIndex(Square square)
         {
-            return (7 - square.Row) * 8 + square.Col;
+            return (byte)((7 - square.Row) * 8 + square.Col);
         }
 
         public static Square IndexToSquare(int index)
         {
             return Square.At(7 - index / 8, index % 8);
+        }
+
+        // switch between Square and Bitboard concept of 0 i.e. a1 vs a8
+        public static byte SwapRow(int index)
+        {
+            return (byte)(8 * (7 - index / 8) + index % 8);
         }
     }
 }

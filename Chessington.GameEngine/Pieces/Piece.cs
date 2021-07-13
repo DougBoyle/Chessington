@@ -52,19 +52,19 @@ namespace Chessington.GameEngine.Pieces
         {
             if (move.PromotionPiece != NO_PIECE)
             {
-                ulong to = SquareToBit(move.To);
+                ulong to = 1UL << move.ToIdx;
                 board.Bitboards[move.PromotionPiece] ^= to;
                 board.Bitboards[6 * (int)info.CurrentPlayer] |= to;
             }
-            board.QuietMovePiece(move.To, move.From, move.CapturedPiece, move.MovingPiece);
+            board.QuietMovePiece(move.ToIdx, move.FromIdx, move.CapturedPiece, move.MovingPiece);
             info.RestoreInfo(board);
         }
 
 
         public static void MakeMove(Board board, Move move)
         {
-            int fromIdx = SquareToIndex(move.From);
-            int toIdx = SquareToIndex(move.To);
+            int fromIdx = move.FromIdx;
+            int toIdx = move.ToIdx;
             ulong bitFrom = 1UL << fromIdx;
             ulong bitTo = 1UL << toIdx;
 

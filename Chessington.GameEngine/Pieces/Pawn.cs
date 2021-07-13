@@ -29,6 +29,11 @@ namespace Chessington.GameEngine.Pieces {
             // can't be a capture
             ulong oneMove = (player == Player.White ? pawnBoard << 8 : pawnBoard >> 8) & freeSquares;
 
+           
+            /****************************** Double move ***********************************/
+            // can't be a promotion or capture
+            ulong twoMove = (player == Player.White ? (oneMove & Rank3) << 8 : (oneMove & Rank6) >> 8) & freeSquares;
+
             ulong promoted = oneMove & PromotionRanks;
             oneMove &= (~PromotionRanks);
             while (promoted != 0UL)
@@ -41,18 +46,21 @@ namespace Chessington.GameEngine.Pieces {
                 result.Add(new Move((byte)(bitIndex - direction), bitIndex, playerOffset, NO_PIECE, playerOffset + BISHOP_BOARD));
                 result.Add(new Move((byte)(bitIndex - direction), bitIndex, playerOffset, NO_PIECE, playerOffset + ROOK_BOARD));
                 result.Add(new Move((byte)(bitIndex - direction), bitIndex, playerOffset, NO_PIECE, playerOffset + QUEEN_BOARD));
-                
-            }
 
-            /****************************** Double move ***********************************/
-            // can't be a promotion or capture
-            oneMove |= (player == Player.White ? (oneMove & Rank3) << 8 : (oneMove & Rank6) >> 8) & freeSquares;
+            }
             while (oneMove != 0UL)
             {
                 ulong bit = GetLSB(oneMove);
                 byte bitIndex = BitToIndex(bit);
                 oneMove = DropLSB(oneMove);
-
+                result.Add(new Move((byte)(bitIndex - direction), bitIndex, playerOffset, NO_PIECE, NO_PIECE));
+            }
+            direction *= 2;
+            while (twoMove != 0UL)
+            {
+                ulong bit = GetLSB(twoMove);
+                byte bitIndex = BitToIndex(bit);
+                twoMove = DropLSB(twoMove);
                 result.Add(new Move((byte)(bitIndex - direction), bitIndex, playerOffset, NO_PIECE, NO_PIECE));
             }
 

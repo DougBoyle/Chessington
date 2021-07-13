@@ -22,29 +22,6 @@ namespace Chessington.GameEngine.Pieces
 
         public Player Player { get; private set; }
 
-        public virtual IEnumerable<Move> GetAvailableMoves(Board board, Square position)
-        {
-            IEnumerable<Move> possible = GetRelaxedAvailableMoves(board, position);
-            List<Move> actual = new List<Move>();
-
-            // could also just be done at the whole board level
-            var tempBoard = new Board(board);
-            var gameInfo = new GameExtraInfo(board);
-
-            foreach (var move in possible)
-            {
-                tempBoard.MakeMove(move);
-                if (!tempBoard.InCheck(Player))
-                {
-                    actual.Add(move);
-                }
-                tempBoard.UndoMove(move, gameInfo);
-            }
-            return actual;
-        }
-
-        // Takes the position of the piece as an input, rather than having to find it twice
-        public abstract IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square position);
 
         // for computer evaluation
         // GameExtraInfo restores all information about castling/en passant (and also current player) that can't be reversed otherwise

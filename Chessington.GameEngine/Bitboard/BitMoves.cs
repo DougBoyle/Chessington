@@ -21,11 +21,23 @@ namespace Chessington.GameEngine.Bitboard
             return rookAttacks[rookOffsets[index] + lookup] & (~myPieces); // can't attack self
         }
 
+        public static ulong RookAttacks(int squareIdx, ulong myPieces, ulong allPieces)
+        {
+            int lookup = (int)((rookMagics[squareIdx] * (rookMasks[squareIdx] & allPieces)) >> (64 - rookShifts[squareIdx]));
+            return rookAttacks[rookOffsets[squareIdx] + lookup] & (~myPieces); // can't attack self
+        }
+
         public static ulong BishopAttacks(Square square, Board board, ulong myPieces, ulong allPieces)
         {
             int index = SquareToIndex(square);
             int lookup = (int)((bishopMagics[index] * (bishopMasks[index] & allPieces)) >> (64 - bishopShifts[index]));
             return bishopAttacks[bishopOffsets[index] + lookup] & (~myPieces); // can't attack self
+        }
+
+        public static ulong BishopAttacks(int squareIdx, ulong myPieces, ulong allPieces)
+        {
+            int lookup = (int)((bishopMagics[squareIdx] * (bishopMasks[squareIdx] & allPieces)) >> (64 - bishopShifts[squareIdx]));
+            return bishopAttacks[bishopOffsets[squareIdx] + lookup] & (~myPieces); // can't attack self
         }
 
         // TODO: Just use bitboards wherever possible. e.g. working out the captured piece
@@ -49,7 +61,7 @@ namespace Chessington.GameEngine.Bitboard
             while (attacks != 0UL)
             {
                 ulong bit = GetLSB(attacks);
-                byte bitIndex = (byte) BitToIndex(bit);
+                byte bitIndex = BitToIndex(bit);
                 attacks = DropLSB(attacks);
                 result.Add(new Move(fromIdx, bitIndex, moving, board.GetPieceIndex(bitIndex), NO_PIECE));
             }

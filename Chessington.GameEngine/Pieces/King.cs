@@ -51,21 +51,43 @@ namespace Chessington.GameEngine.Pieces
             return result;
         }
 
-        public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition)
+        public static IEnumerable<Move> GetCastling(Board board, byte hereIdx, Player player)
         {
-            ulong myPieces = BoardOccupancy(board, Player);
-            int index = SquareToIndex(currentPosition);
-            ulong attackMap = kingMasks[index] & (~myPieces);
-            return GetMovesFromAttackMap(this, currentPosition, board, attackMap)
-                .Concat(GetCastling(board, currentPosition, Player));
+            var result = new List<Move>();
+            if (board.InCheck(player, hereIdx)) return result;
+
+            ulong occupancy = BoardOccupancy(board, Player.White) | BoardOccupancy(board, Player.Black);
+            if (player == Player.Black) occupancy >>= 56; // move to bottom row
+
+            // due to the ways king could possibly be attacked, and given that king not in check currently,
+            // no need to move king before computing if would move into check
+
+            // short castling
+            if ((player == Player.White ? board.RightWhiteCastling : board.RightBlackCastling) &&
+                (occupancy & 0x60UL) == 0UL &&
+                !board.InCheck(player, (byte)(hereIdx + 1)))
+            {
+                // can guarentee nothing captured/promoted
+                result.Add(new Move(hereIdx, (byte)(hereIdx + 2), KING_BOARD + 6 * (int)player, NO_PIECE, NO_PIECE));
+            }
+
+            // long castling
+            if ((player == Player.White ? board.LeftWhiteCastling : board.LeftBlackCastling) &&
+                (occupancy & 0xeUL) == 0UL &&
+                !board.InCheck(player, (byte)(hereIdx - 1)))
+            {
+                result.Add(new Move(hereIdx, (byte)(hereIdx - 2), KING_BOARD + 6 * (int)player, NO_PIECE, NO_PIECE));
+            }
+
+            return result;
         }
 
-        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition, Player player, ulong mine, ulong yours)
+
+        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, byte squareIdx, Player player, ulong mine, ulong yours)
         {
-            int index = SquareToIndex(currentPosition);
-            ulong attackMap = kingMasks[index] & (~mine);
-            return GetMovesFromAttackMap(6*(int)player + KING_BOARD, SquareToIndex(currentPosition), board, attackMap)
-                .Concat(GetCastling(board, currentPosition, player));
+            ulong attackMap = kingMasks[squareIdx] & (~mine);
+            return GetMovesFromAttackMap(6 * (int)player + KING_BOARD, squareIdx, board, attackMap)
+                .Concat(GetCastling(board, squareIdx, player));
         }
 
         public static new void MakeMove(Board board, Move move)

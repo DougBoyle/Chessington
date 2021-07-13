@@ -15,19 +15,10 @@ namespace Chessington.GameEngine.Pieces
         public Knight(Player player)
             : base(player) { PieceType = PieceType.Knight; }
 
-        public override IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition)
+        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, byte squareIdx, Player player, ulong mine, ulong yours)
         {
-            ulong myPieces = BoardOccupancy(board, Player);
-            int index = SquareToIndex(currentPosition);
-            ulong attackMap = knightMasks[index] & (~myPieces);
-            return GetMovesFromAttackMap(this, currentPosition, board, attackMap);
-        }
-
-        public static IEnumerable<Move> GetRelaxedAvailableMoves(Board board, Square currentPosition, Player player, ulong mine, ulong yours)
-        {
-            int index = SquareToIndex(currentPosition);
-            ulong attackMap = knightMasks[index] & (~mine);
-            return GetMovesFromAttackMap(6 * (int)player + KNIGHT_BOARD, SquareToIndex(currentPosition), board, attackMap);
+            ulong attackMap = knightMasks[squareIdx] & (~mine);
+            return GetMovesFromAttackMap(6 * (int)player + KNIGHT_BOARD, squareIdx, board, attackMap);
         }
     }
 }

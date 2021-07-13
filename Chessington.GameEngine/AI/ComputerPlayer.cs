@@ -8,7 +8,7 @@ namespace Chessington.GameEngine.AI
     {
         private static Random r = new Random();
 
-        private const int MAX_DEPTH = 4; // 2 ply, mine then yours
+        private const int MAX_DEPTH = 3; // 2 ply, mine then yours
 
         // TODO: Can put 'this' in type definition of list to make it an extension method i.e. lst.Shuffle()
         private static void Shuffle<T>(IList<T> list)
@@ -124,33 +124,6 @@ namespace Chessington.GameEngine.AI
                     Board.UndoMove(move, gameInfo);  // undo the move
                     if (bestScore > upperBound) return bestScore;
                 }
-
-            /*    foreach (KeyValuePair<Square, List<Square>> piece in allAvailableMoves)
-                {
-                    
-                    foreach (Square MoveTo in piece.Value)
-                    {
-                        // Note: Done inside loop in case piece removed then replaced during search (e.g. en-passant)
-                        Piece actualPiece = Board.GetPiece(piece.Key);
-
-                        //   var newBoard = new Board(Board);
-                        //   actualPiece.MoveTo(newBoard, MoveTo);
-                        var move = new Move(piece.Key, MoveTo, Board);
-
-                        // early exit if previous move was not actually valid (now able to capture king)
-                        if (move.Captured != null && move.Captured.PieceType == PieceType.King) return 1000000 + 1000 * depth;
-
-                        actualPiece.MoveTo(Board, MoveTo);
-
-                        // as soon as recursive call finds a path worse than bestScore for us, we know we won't go down that route
-                        // hence -bestScore is the new recursive upperBound
-                        //    bestScore = Math.Max(bestScore, -AlphaBeta(newBoard, depth - 1, -bestScore));
-                        bestScore = Math.Max(bestScore, -AlphaBeta(Board, depth - 1, -bestScore));
-                        actualPiece.UndoMove(Board, move, gameInfo); // undo the move
-                        if (bestScore > upperBound) return bestScore;
-                    }
-                }*/
-
 
                 return bestScore;
             }

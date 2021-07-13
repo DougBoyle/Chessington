@@ -95,21 +95,7 @@ namespace Chessington.GameEngine
             return null;
         }
 
-        public Piece GetPiece(byte squareIdx)
-        {
-            return GetPiece(IndexToSquare(squareIdx));
-        }
 
-        public int GetPieceIndex(Square square)
-        {
-            ulong bit = SquareToBit(square);
-            for (int i = 0; i < 12; i++)
-            {
-                if ((Bitboards[i] & bit) != 0) return i;
-               
-            }
-            return NO_PIECE;
-        }
 
         public int GetPieceIndex(byte index)
         {
@@ -173,7 +159,6 @@ namespace Chessington.GameEngine
         }
 
 
-        // TODO: May be worth just doing GetRelaxedAvailableMoves and checking them all at top level?
         public List<Move> GetAllAvailableMoves()
         {
             IEnumerable<Move> possible = GetAllRelaxedMoves();
@@ -196,7 +181,7 @@ namespace Chessington.GameEngine
 
         // TODO: Probably a better way of doing this/better place to put this.
         // downside of not having class instances, effectively have to make pointers explicit
-        public delegate IEnumerable<Move> MoveGetter(Board board, Square here, Player player, ulong mine, ulong yours);
+        public delegate IEnumerable<Move> MoveGetter(Board board, byte hereIdx, Player player, ulong mine, ulong yours);
         private readonly MoveGetter[] moveGetters =
             {Pawn.GetRelaxedAvailableMoves, Knight.GetRelaxedAvailableMoves, Bishop.GetRelaxedAvailableMoves,
              Rook.GetRelaxedAvailableMoves, Queen.GetRelaxedAvailableMoves, King.GetRelaxedAvailableMoves};
@@ -210,18 +195,27 @@ namespace Chessington.GameEngine
 
             List<Move> availableMoves = new List<Move>();
 
+            // handles pawns specially, as have 1:1 mapping of each type of move
+            availableMoves.AddRange(Pawn.GetAllRelaxedPawnMoves(this, Bitboards[6 * (int)CurrentPlayer], CurrentPlayer, myPieces, yourPieces));
+
             // faster to iterate through max 16 pieces on 6 bitboards than all 64 squares
-            for (int i = 0; i < 6; i++)
+            // TODO: Can handle some specially e.g. do pawns together, know there is only 1 king
+            for (int i = 1; i < 5; i++)
             {
                 ulong bitboard = Bitboards[i + 6 * (int)CurrentPlayer];
                 while (bitboard != 0UL)
                 {
                     ulong bit = GetLSB(bitboard);
-                    Square square = IndexToSquare(BitToIndex(bit));
                     bitboard = DropLSB(bitboard);
-                    availableMoves.AddRange(moveGetters[i](this, square, CurrentPlayer, myPieces, yourPieces));
+                    availableMoves.AddRange(moveGetters[i](this, BitToIndex(bit), CurrentPlayer, myPieces, yourPieces));
                 }
             }
+
+            // handle king specially
+            ulong kingBoard = Bitboards[KING_BOARD + 6 * (int)CurrentPlayer];
+            // only needed because tests assume positions can exist with no king
+            if (kingBoard != 0UL) 
+                availableMoves.AddRange(moveGetters[KING_BOARD](this, BitToIndex(kingBoard), CurrentPlayer, myPieces, yourPieces));
 
             return availableMoves;
         }
@@ -243,27 +237,31 @@ namespace Chessington.GameEngine
         // avoids doing GetAvailable/RelaxedMoves so no recursive loop (doesn't consider castling, can't capture king that way)
         // (able to pass in the square of the king to make computing if castling possible easier)
         public bool InCheck(Player player, Square kingSquare) {
+            return InCheck(player, SquareToIndex(kingSquare));
+        }
+
+        public bool InCheck(Player player, byte kingSquareIdx)
+        {
             ulong myPieces = BoardOccupancy(this, player);
             ulong yourPieces = BoardOccupancy(this, player == Player.White ? Player.Black : Player.White);
             Player otherPlayer = player == Player.White ? Player.Black : Player.White;
 
-            ulong attackMap = BishopAttacks(kingSquare, this, myPieces, myPieces | yourPieces)
+            ulong attackMap = BishopAttacks(kingSquareIdx, myPieces, myPieces | yourPieces)
                 & (Bitboards[(int)otherPlayer * 6 + BISHOP_BOARD] | Bitboards[(int)otherPlayer * 6 + QUEEN_BOARD]);
-            attackMap |= RookAttacks(kingSquare, this, myPieces, myPieces | yourPieces)
+            attackMap |= RookAttacks(kingSquareIdx, myPieces, myPieces | yourPieces)
                 & (Bitboards[(int)otherPlayer * 6 + ROOK_BOARD] | Bitboards[(int)otherPlayer * 6 + QUEEN_BOARD]);
-            int kingIndex = SquareToIndex(kingSquare);
-            attackMap |= knightMasks[kingIndex] & Bitboards[(int)otherPlayer * 6 + KNIGHT_BOARD];
+            attackMap |= knightMasks[kingSquareIdx] & Bitboards[(int)otherPlayer * 6 + KNIGHT_BOARD];
             // can never capture opponent by castling
             // kings can never actually get adjacent, but need this check to prevent that happening
-            attackMap |= kingMasks[kingIndex] & Bitboards[(int)otherPlayer * 6 + KING_BOARD];
+            attackMap |= kingMasks[kingSquareIdx] & Bitboards[(int)otherPlayer * 6 + KING_BOARD];
             // pawn
-            ulong bit = 1UL << kingIndex;
+            ulong bit = 1UL << kingSquareIdx;
             attackMap |= (player == Player.White ? bit << 9 : bit >> 7) & Not_A_File & Bitboards[(int)otherPlayer * 6 + PAWN_BOARD];
             attackMap |= (player == Player.White ? bit << 7 : bit >> 9) & Not_H_File & Bitboards[(int)otherPlayer * 6 + PAWN_BOARD];
 
             return attackMap != 0UL;
         }
-        
+
         public delegate void PieceCapturedEventHandler(int piece);
         
         public event PieceCapturedEventHandler PieceCaptured;

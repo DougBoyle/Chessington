@@ -54,7 +54,9 @@ namespace Chessington.UI.ViewModels
             if (currentPiece == null) return;
             currentSquare = message.Square;
 
-            var moves = new ReadOnlyCollection<Square>(currentPiece.GetAvailableMoves(Board, currentSquare)
+            var moves = new ReadOnlyCollection<Square>(
+                Board.GetAllAvailableMoves()
+                .Where(move => BitUtils.IndexToSquare(move.FromIdx) == currentSquare)
                 .Select(move => BitUtils.IndexToSquare(move.ToIdx)).ToList());
             ChessingtonServices.EventAggregator.Publish(new ValidMovesUpdated(moves));
         }
@@ -83,7 +85,9 @@ namespace Chessington.UI.ViewModels
             if (currentPiece == null)
                 return;
 
-            var moves = currentPiece.GetAvailableMoves(Board, currentSquare).Where(move => BitUtils.IndexToSquare(move.ToIdx) == message.Square);
+            var moves = Board.GetAllAvailableMoves()
+                .Where(move => move.FromIdx == BitUtils.SquareToIndex(currentSquare) &&
+                               move.ToIdx == BitUtils.SquareToIndex(message.Square));
 
             if (moves.Any())
             {
@@ -127,8 +131,8 @@ namespace Chessington.UI.ViewModels
 
             // Allow choice of how to promote
             // Same as completing a regular move
-            var move = currentPiece.GetAvailableMoves(Board, currentSquare)
-                .First(m => m.PromotionPiece % 6 == (int)pieceType && m.ToIdx == BitUtils.SquareToIndex(promotionSquare));
+            var move = Board.GetAllAvailableMoves().First(m => m.PromotionPiece % 6 == (int)pieceType &&
+                m.FromIdx == BitUtils.SquareToIndex(currentSquare) && m.ToIdx == BitUtils.SquareToIndex(promotionSquare));
 
             Board.MakeMove(move);
 

@@ -125,7 +125,8 @@ namespace Chessington.GameEngine.AI.Endgame
             // take a copy rather than modifying directly
             // used for endgames so can assume no castling
             Board board = new Board(b);
-            if (b.EnPassantSquare is Square square) board.EnPassantSquare = Square.At(7 - square.Row, square.Col);
+            // KP-KP tables not yet constructed, so En-passant not actually useful
+            if (b.EnPassantIndex != Board.NO_SQUARE) board.EnPassantIndex = (byte)(8 * (7 - b.EnPassantIndex / 8) + b.EnPassantIndex % 8);
             board.CurrentPlayer = b.CurrentPlayer == Player.White ? Player.Black : Player.White;
 
             // can't easily copy pieces, so create new ones with flipped colours

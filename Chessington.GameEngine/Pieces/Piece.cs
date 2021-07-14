@@ -52,10 +52,10 @@ namespace Chessington.GameEngine.Pieces
             //  if (movingPiece == null) { return; }
 
             // also testing fromIdx handles moving rooks initially too
-            if (toIdx == 0 || fromIdx == 0) board.LeftWhiteCastling = false;
-            if (toIdx == 7 || fromIdx == 7) board.RightWhiteCastling = false;
-            if (toIdx == 56 || fromIdx == 56) board.LeftBlackCastling = false;
-            if (toIdx == 63 || fromIdx == 63) board.RightBlackCastling = false;
+            if (toIdx == 0 || fromIdx == 0) board.Castling &= Board.NOT_LEFT_WHITE_CASTLING_MASK;
+            if (toIdx == 7 || fromIdx == 7) board.Castling &= Board.NOT_RIGHT_WHITE_CASTLING_MASK;
+            if (toIdx == 56 || fromIdx == 56) board.Castling &= Board.NOT_LEFT_BLACK_CASTLING_MASK;
+            if (toIdx == 63 || fromIdx == 63) board.Castling &= Board.NOT_RIGHT_BLACK_CASTLING_MASK;
 
 
             // if (movingPiece.Player != CurrentPlayer)
@@ -77,7 +77,7 @@ namespace Chessington.GameEngine.Pieces
             board.CurrentPlayer = (Player)(move.MovingPiece / 6) == Player.White ? Player.Black : Player.White;
             board.OnCurrentPlayerChanged(board.CurrentPlayer);
 
-            board.EnPassantSquare = null;
+            board.EnPassantIndex = Board.NO_SQUARE;
         }
     }
 }

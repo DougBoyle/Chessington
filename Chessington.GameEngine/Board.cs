@@ -13,15 +13,27 @@ namespace Chessington.GameEngine
     public class Board
     {
         // TODO: This can just be a single column
-        public Square? EnPassantSquare { get; set; }
+        public const byte NO_SQUARE = 64;
+        public byte EnPassantIndex { get; set; } = NO_SQUARE;
         public Player CurrentPlayer { get; set; }
         // TODO: Where is this actually used? Logic on BoardViewModel that wraps around MakeMove?
         public IList<Piece> CapturedPieces { get; private set; }
 
-        public bool LeftWhiteCastling { get; set; } = true;
-        public bool RightWhiteCastling { get; set; } = true;
-        public bool LeftBlackCastling { get; set; } = true;
-        public bool RightBlackCastling { get; set; } = true;
+        // TODO: Put all in single byte? Depends how C# compiler optimises booleans
+        // 0000 LeftWhite RightWhite LeftBlack RightBlack
+        public byte Castling { get; set; } = 0xF;
+        public const byte LEFT_WHITE_CASTLING_MASK = 0x8;
+        public const byte RIGHT_WHITE_CASTLING_MASK = 0x4;
+        public const byte LEFT_BLACK_CASTLING_MASK = 0x2;
+        public const byte RIGHT_BLACK_CASTLING_MASK = 0x1;
+        // C# complains about conversions between negative ints and bytes, so provide constants directly rather than unchecked cast
+        public const byte NOT_LEFT_WHITE_CASTLING_MASK = 0x7;
+        public const byte NOT_RIGHT_WHITE_CASTLING_MASK = 0xB;
+        public const byte NOT_LEFT_BLACK_CASTLING_MASK = 0xD;
+        public const byte NOT_RIGHT_BLACK_CASTLING_MASK = 0xE;
+        public const byte NOT_WHITE_CASTLING_MASK = 0x3;
+        public const byte NOT_BLACK_CASTLING_MASK = 0xC;
+
 
         // TODO: Count to 50 for stalemate
 
@@ -49,12 +61,9 @@ namespace Chessington.GameEngine
             }
 
             CurrentPlayer = board.CurrentPlayer;
-            EnPassantSquare = board.EnPassantSquare;
+            EnPassantIndex = board.EnPassantIndex;
             CapturedPieces = new List<Piece>();
-            LeftBlackCastling = board.LeftBlackCastling;
-            RightBlackCastling = board.RightBlackCastling;
-            LeftWhiteCastling = board.LeftWhiteCastling;
-            RightWhiteCastling = board.RightWhiteCastling;
+            Castling = board.Castling;
         }
 
         // relatively expensive to scan through for possibly replaced piece.

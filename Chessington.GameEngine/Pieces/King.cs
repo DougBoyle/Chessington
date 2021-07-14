@@ -32,7 +32,7 @@ namespace Chessington.GameEngine.Pieces
             // no need to move king before computing if would move into check
 
             // short castling
-            if ((player == Player.White ? board.RightWhiteCastling : board.RightBlackCastling) &&
+            if ((board.Castling & (player == Player.White ? Board.RIGHT_WHITE_CASTLING_MASK : Board.RIGHT_BLACK_CASTLING_MASK)) != 0 &&
                 (occupancy & 0x60UL) == 0UL && 
                 !board.InCheck(player, Square.At(here.Row, here.Col + 1)))
             {
@@ -41,7 +41,7 @@ namespace Chessington.GameEngine.Pieces
             }
 
             // long castling
-            if ((player == Player.White ? board.LeftWhiteCastling : board.LeftBlackCastling) &&
+            if ((board.Castling & (player == Player.White ? Board.LEFT_WHITE_CASTLING_MASK : Board.LEFT_BLACK_CASTLING_MASK)) != 0 &&
                 (occupancy & 0xeUL) == 0UL &&
                 !board.InCheck(player, Square.At(here.Row, here.Col - 1)))
             {
@@ -63,7 +63,7 @@ namespace Chessington.GameEngine.Pieces
             // no need to move king before computing if would move into check
 
             // short castling
-            if ((player == Player.White ? board.RightWhiteCastling : board.RightBlackCastling) &&
+            if ((board.Castling & (player == Player.White ? Board.RIGHT_WHITE_CASTLING_MASK : Board.RIGHT_BLACK_CASTLING_MASK)) != 0 &&
                 (occupancy & 0x60UL) == 0UL &&
                 !board.InCheck(player, (byte)(hereIdx + 1)))
             {
@@ -72,7 +72,7 @@ namespace Chessington.GameEngine.Pieces
             }
 
             // long castling
-            if ((player == Player.White ? board.LeftWhiteCastling : board.LeftBlackCastling) &&
+            if ((board.Castling & (player == Player.White ? Board.LEFT_WHITE_CASTLING_MASK : Board.LEFT_BLACK_CASTLING_MASK)) != 0 &&
                 (occupancy & 0xeUL) == 0UL &&
                 !board.InCheck(player, (byte)(hereIdx - 1)))
             {
@@ -100,8 +100,7 @@ namespace Chessington.GameEngine.Pieces
             {
                 if (fromIdx == 4)
                 {
-                    board.RightWhiteCastling = false;
-                    board.LeftWhiteCastling = false;
+                    board.Castling &= Board.NOT_WHITE_CASTLING_MASK;
                     // short castling
                     if (toIdx == 6)
                     {
@@ -117,8 +116,7 @@ namespace Chessington.GameEngine.Pieces
             {
                 if (fromIdx == 60)
                 {
-                    board.RightBlackCastling = false;
-                    board.LeftBlackCastling = false;
+                    board.Castling &= Board.NOT_BLACK_CASTLING_MASK;
                     // short castling
                     if (toIdx == 62)
                     {

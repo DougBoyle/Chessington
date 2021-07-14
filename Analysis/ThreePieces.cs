@@ -51,10 +51,7 @@ namespace Analysis
                         if (QueenSquare == KingSquare || QueenSquare == BlackKingSquare) continue; // not actually 3 pieces
 
                         Board b = new Board();
-                        b.LeftWhiteCastling = false;
-                        b.LeftBlackCastling = false;
-                        b.RightBlackCastling = false;
-                        b.RightWhiteCastling = false;
+                        b.Castling = 0;
                         b.AddPiece(KingSquare, new King(Player.White));
                         b.AddPiece(BlackKingSquare, new King(Player.Black));
                         b.AddPiece(QueenSquare, new Queen(Player.White));
@@ -303,10 +300,7 @@ namespace Analysis
                         if (RookSquare == KingSquare || RookSquare == BlackKingSquare) continue; // not actually 3 pieces
 
                         Board b = new Board();
-                        b.LeftWhiteCastling = false;
-                        b.LeftBlackCastling = false;
-                        b.RightBlackCastling = false;
-                        b.RightWhiteCastling = false;
+                        b.Castling = 0;
                         b.AddPiece(KingSquare, new King(Player.White));
                         b.AddPiece(BlackKingSquare, new King(Player.Black));
                         b.AddPiece(RookSquare, new Rook(Player.White));

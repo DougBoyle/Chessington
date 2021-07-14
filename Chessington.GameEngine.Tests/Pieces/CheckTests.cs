@@ -22,8 +22,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         public void CantPutSelfInCheck() {
             var board = new Board();
             // need to indicate that king cannot castle (due to how castling checked for)
-            board.LeftWhiteCastling = false;
-            board.RightWhiteCastling = false;
+            board.Castling = 0;
             var queen = new Queen(Player.Black);
             var king = new King(Player.White);
             board.AddPiece(Square.At(1,0), queen);

@@ -8,11 +8,8 @@ namespace Chessington.GameEngine.AI
 {
     public struct GameExtraInfo
     {
-        public bool LeftWhiteCastling;
-        public bool RightWhiteCastling;
-        public bool LeftBlackCastling;
-        public bool RightBlackCastling;
-        public Square? EnPassantSquare { get; set; }
+        public byte Castling;
+        public byte EnPassantIndex;
 
         // Not actually necessary, but easier for now
         public Player CurrentPlayer { get; set; }
@@ -21,21 +18,15 @@ namespace Chessington.GameEngine.AI
 
         public GameExtraInfo(Board b)
         {
-            LeftWhiteCastling = b.LeftWhiteCastling;
-            RightWhiteCastling = b.RightWhiteCastling;
-            LeftBlackCastling = b.LeftBlackCastling;
-            RightBlackCastling = b.RightBlackCastling;
-            EnPassantSquare = b.EnPassantSquare;
+            Castling = b.Castling;
+            EnPassantIndex = b.EnPassantIndex;
             CurrentPlayer = b.CurrentPlayer;
         }
 
         public void RestoreInfo(Board b)
         {
-            b.LeftWhiteCastling = LeftWhiteCastling;
-            b.RightWhiteCastling = RightWhiteCastling;
-            b.LeftBlackCastling = LeftBlackCastling;
-            b.RightBlackCastling = RightBlackCastling;
-            b.EnPassantSquare = EnPassantSquare;
+            b.Castling = Castling;
+            b.EnPassantIndex = EnPassantIndex;
             b.CurrentPlayer = CurrentPlayer;
         }
     }

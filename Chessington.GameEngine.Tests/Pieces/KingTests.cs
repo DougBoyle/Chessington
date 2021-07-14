@@ -14,8 +14,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         {
             var board = new Board();
             // need to indicate that king cannot castle (due to how castling checked for)
-            board.LeftWhiteCastling = false;
-            board.RightWhiteCastling = false;
+            board.Castling = 0;
 
             var king = new King(Player.White);
             board.AddPiece(Square.At(4, 4), king);
@@ -43,8 +42,7 @@ namespace Chessington.GameEngine.Tests.Pieces
         {
             var board = new Board();
             // need to indicate that king cannot castle (due to how castling checked for)
-            board.LeftWhiteCastling = false;
-            board.RightWhiteCastling = false;
+            board.Castling = 0;
 
             var king = new King(Player.White);
             board.AddPiece(Square.At(0, 0), king);

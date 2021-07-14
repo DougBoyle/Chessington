@@ -64,10 +64,7 @@ namespace Analysis
                         if (PawnSquare == KingSquare || PawnSquare == BlackKingSquare) continue; // not actually 3 pieces
 
                         Board b = new Board();
-                        b.LeftWhiteCastling = false;
-                        b.LeftBlackCastling = false;
-                        b.RightBlackCastling = false;
-                        b.RightWhiteCastling = false;
+                        b.Castling = 0;
                         b.AddPiece(KingSquare, new King(Player.White));
                         b.AddPiece(BlackKingSquare, new King(Player.Black));
                         b.AddPiece(PawnSquare, new Pawn(Player.White));

@@ -147,15 +147,18 @@ namespace Chessington.GameEngine.AI
             }
 
             // castling
-            if (board.RightWhiteCastling) result ^= Rand64[RandomCastle];
-            if (board.LeftWhiteCastling) result ^= Rand64[RandomCastle + 1];
-            if (board.RightBlackCastling) result ^= Rand64[RandomCastle + 2];
-            if (board.LeftBlackCastling) result ^= Rand64[RandomCastle + 3];
+            if ((board.Castling & Board.RIGHT_WHITE_CASTLING_MASK) != 0) result ^= Rand64[RandomCastle];
+            if ((board.Castling & Board.LEFT_WHITE_CASTLING_MASK) != 0) result ^= Rand64[RandomCastle + 1];
+            if ((board.Castling & Board.RIGHT_BLACK_CASTLING_MASK) != 0) result ^= Rand64[RandomCastle + 2];
+            if ((board.Castling & Board.LEFT_BLACK_CASTLING_MASK) != 0) result ^= Rand64[RandomCastle + 3];
 
             // en passant
             // Note: Only applies if also an adjacent pawn to make the en-passant move
             //       (but no check if legal or not i.e. could put self in check)
-            if (board.EnPassantSquare is Square square) {
+            // only done once per computer turn, so calling GetPiece etc. not too expensive
+            if (board.EnPassantIndex != Board.NO_SQUARE)
+            {
+                Square square = BitUtils.IndexToSquare(board.EnPassantIndex);
                 int pawnRow = square.Row + (board.CurrentPlayer == Player.White ? 1 : -1);
                 if (square.Col != 0 && board.GetPiece(pawnRow, square.Col - 1) is Pawn ||
                     square.Col != 7 && board.GetPiece(pawnRow, square.Col + 1) is Pawn)

@@ -66,9 +66,9 @@ namespace Chessington.GameEngine.Pieces {
 
             /****************************** En passant ***********************************/
             // can't be a promotion, can't capture anything
-            if (board.EnPassantSquare is Square square)
+            if (board.EnPassantIndex != Board.NO_SQUARE)
             {
-                byte epIndex = SquareToIndex(square);
+                byte epIndex = board.EnPassantIndex;
                 ulong epBoard = 1UL << epIndex; // TODO: Could do all of the shifts here
                 ulong epAttacks = (player == Player.White ? ((epBoard & Not_A_File) >> 9) | ((epBoard & Not_H_File) >> 7)
                     : ((epBoard & Not_A_File) << 7) | ((epBoard & Not_H_File) << 9)) & pawnBoard;
@@ -146,8 +146,7 @@ namespace Chessington.GameEngine.Pieces {
             int toIdx = move.ToIdx;
             ulong bitTo = 1UL << toIdx;
 
-
-            if (board.EnPassantSquare is Square square && toIdx == SquareToIndex(square))
+            if (board.EnPassantIndex == toIdx)
             {
                 // TODO: Change OnPieceCaptured to not use Piece class
                 // square is just bitTo shifted left/right 8
@@ -161,7 +160,7 @@ namespace Chessington.GameEngine.Pieces {
             // set up en-passant
             if (fromIdx - toIdx == 16 || toIdx - fromIdx == 16)
             {
-                board.EnPassantSquare = IndexToSquare((toIdx + fromIdx) / 2);
+                board.EnPassantIndex = (byte)((toIdx + fromIdx) / 2);
             }
 
             if (move.PromotionPiece != NO_PIECE)
